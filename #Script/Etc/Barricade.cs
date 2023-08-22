@@ -42,7 +42,11 @@ public class Barricade : MonoBehaviour
         _from = t.position + t.rotation*center;
         _to = _from + t.forward*2;
     }
-    [Button]
+
+    public bool IsOpened()
+    {
+        return opened;
+    }
     public void Open()
     {
         if (opened) return;
@@ -87,6 +91,7 @@ public class Barricade : MonoBehaviour
     public void Impact_Norm()
     {
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smooth,true,false,true);
+        //if(!opened) Manager_Main.instance.Spawner_AreaStart();
     }
 
     public bool Passed()

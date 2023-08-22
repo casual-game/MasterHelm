@@ -122,6 +122,7 @@ public class Prefab_Prop : MonoBehaviour
         sparkables.Clear();
         if (isPlayer)
         {
+            /*
             foreach (var sparkable in Sparkable.Sparkables)
             {
                 sparkables.Add(sparkable);
@@ -131,6 +132,7 @@ public class Prefab_Prop : MonoBehaviour
                 }
                     
             }
+            */
         }
         //
         if (isPlayer)
@@ -211,7 +213,7 @@ public class Prefab_Prop : MonoBehaviour
                 Capsule3 enemyCapsule = enemy.Get_Capsule3();
                 if (Intersection.TestBox3Capsule3(ref box3, ref enemyCapsule)) DetectEnemy(enemy);
             }
-
+            /*
             int jlength = DestructibleObject.destructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
@@ -219,6 +221,7 @@ public class Prefab_Prop : MonoBehaviour
                 Box3 destructibleBox = destructible.box;
                 if (Intersection.TestBox3Box3(ref box3, ref destructibleBox)) destructible.Explode(Player.instance.transform.position);
             }
+            */
             //spark 효과
             Vector3 size = box3.Axis1 * box3.Extents.y, lossyscale = transform.lossyScale;
             Vector3 begin = box3.Center - size;

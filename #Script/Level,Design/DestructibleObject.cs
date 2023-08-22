@@ -8,7 +8,6 @@ using Random = UnityEngine.Random;
 
 public class DestructibleObject : MonoBehaviour
 {
-    public static List<DestructibleObject> destructibleObjects = new List<DestructibleObject>();
     public float radius;
     public float force = 0.3f,torque = 360;
     public Data_Audio breakSound;
@@ -19,10 +18,9 @@ public class DestructibleObject : MonoBehaviour
     private Rigidbody[] rigids;
     private ParticleSystem[] particles;
     [HideInInspector]public Box3 box;
-    public void Setting2 () 
+    public void Setting () 
     {
         SoundManager.instance.Add(breakSound);
-        destructibleObjects.Add(this);
         before = transform.Find("Before");
         after = transform.Find("After");
         core = transform.Find("Core");
@@ -45,7 +43,6 @@ public class DestructibleObject : MonoBehaviour
     public void Explode(Vector3 explodePos,bool effect = true)
     {
         if (exploded) return;
-        destructibleObjects.Remove(this);
         before.gameObject.SetActive(false);
         after.gameObject.SetActive(true);
         exploded = true;

@@ -39,7 +39,7 @@ public partial class Enemy : MonoBehaviour
     
     #endregion
     #region private 컴포넌트
-    private EnemyRoot root;
+    [HideInInspector] public EnemyRoot root;
     [HideInInspector] public Prefab_Prop prefab_Weapon_L, prefab_Weapon_R, prefab_Shield;
     [HideInInspector] public float camDistanceRatio = 1.0f;
     [HideInInspector] public bool death = false,isGuardBreak = false;
@@ -346,16 +346,11 @@ public partial class Enemy : MonoBehaviour
     }
     public void Executed()
     {
-        if (enemies.Count == 1 && enemies[0] == this)
-        {
-            Player.instance.executedTarget = this;
-        }
-        
         gameObject.layer = LayerMask.NameToLayer("Ragdoll");
         shadow.SetActive(false);
         highlight.highlighted = false; 
         Cancel();
-        if (enemies.Contains(this)) enemies.Remove(this);
+        
         if (Player.instance != null && Player.instance.target == this) Player.instance.SetClosestTarget();
         if (prefab_Shield != null) prefab_Shield.Drop_Enemy();
         if (prefab_Weapon_L != null) prefab_Weapon_L.Drop_Enemy();
@@ -388,6 +383,7 @@ public partial class Enemy : MonoBehaviour
         float physicsTime = Time.time;
         while (Time.time-physicsTime<3.0f)
         {
+            /*
             int jlength = DestructibleObject.destructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
@@ -400,7 +396,7 @@ public partial class Enemy : MonoBehaviour
                     destructible.Explode(transform.position,false);
                 }
             }
-
+            */
             yield return null;
         }
     }

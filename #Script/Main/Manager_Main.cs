@@ -34,15 +34,12 @@ public partial class Manager_Main : MonoBehaviour
     [HideInInspector] public Manager_Blood manager_Blood = null;
     [HideInInspector] public Manager_Pooler manager_Pooler = null;
     [HideInInspector] public Manager_Enemy manager_Enemy = null;
-    private UniversalAdditionalLightData lightData;
     //See Trough
     private Transform dissolve_start,dissolve_end;
     private AdvancedDissolveGeometricCutoutController dissolveController;
     
     void Awake()
     {
-        EnemyStart.starts.Clear();
-        DestructibleObject.destructibleObjects.Clear();
         Enemy.enemies.Clear();
         StopAllCoroutines();
         StartCoroutine("C_Setting");
@@ -53,9 +50,6 @@ public partial class Manager_Main : MonoBehaviour
         GraphicsSettings.useScriptableRenderPipelineBatching = true;
         Application.targetFrameRate = 60;
         instance = this;
-        
-        //라이트 쿠키 설정
-        lightData = GetComponentInChildren<UniversalAdditionalLightData>();
         //각종 Manager 생성
         manager_Pooler = gameObject.AddComponent<Manager_Pooler>();
         manager_Pooler.Setting();
@@ -230,7 +224,7 @@ public partial class Manager_Main : MonoBehaviour
     }
     public void Text_Info_Fin()
     {
-        damageinfo.FadeOut();
+        if(damageinfo!=null) damageinfo.FadeOut();
         damageAnimator.CrossFade(s_damageinfo_fin, 0,0,0);
         damageinfo = null;
     }
@@ -279,7 +273,12 @@ public partial class Manager_Main : MonoBehaviour
     }
 
     #endregion
-
+    public enum SpawnerState
+    {
+        Enter=0,Fight=1,Exit=2
+    }
+    [ReadOnly][EnumToggleButtons][TitleGroup("에디터 툴")][HideLabel]
+    public SpawnerState spawnerState = SpawnerState.Enter;
     
     #if UNITY_EDITOR
     private void OnDrawGizmos()

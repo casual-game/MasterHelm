@@ -91,6 +91,7 @@ public class Arrow : MonoBehaviour
 	    float ratio = 0;
 	    yield return null;
 	    Vector3 currentPos = transform.position;
+	    /*
 	    foreach (var sparkable in Sparkable.Sparkables)
 	    {
 		    if (Vector3.SqrMagnitude(currentPos - sparkable.transform.position) < 400)
@@ -98,12 +99,14 @@ public class Arrow : MonoBehaviour
 			    boxes.Add(sparkable.box);
 		    }
 	    }
+	    */
 	    //목표까지 날아가기
 	    while (ratio<1)
 	    {
 		    yield return null;
 		    ratio = (Time.time - startTime)/duration;
 		    transform.position = Vector3.Lerp(startPos,targetPos,ratio);
+		    /*
 		    //destructible
 		    int jlength = DestructibleObject.destructibleObjects.Count;
 		    for (int j = jlength-1; j >= 0; j--)
@@ -128,6 +131,7 @@ public class Arrow : MonoBehaviour
 				    yield break;
 			    }
 		    }
+		    */
 	    }
 		
 	    transform.position = targetPos;

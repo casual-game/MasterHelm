@@ -7,14 +7,12 @@ using UnityEngine;
 
 public class Sparkable : MonoBehaviour
 {
-    public static List<Sparkable> Sparkables = null;
     [ShowInInspector]
     public Box3 box;
 
-    public void Setting2()
+    public void Setting()
     {
         box = CreateBox3(transform);
-        Sparkables.Add(this);
     }
     #if UNITY_EDITOR
     private Box3 gizmoBox;

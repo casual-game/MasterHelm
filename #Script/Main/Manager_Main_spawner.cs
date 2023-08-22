@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Unity.Collections;
 //using Beautify.Universal;
 using UnityEditor;
 using UnityEngine;
@@ -20,18 +21,222 @@ public partial class Manager_Main : MonoBehaviour
 	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
 	[LabelText("타일 크기")] public Vector2Int tileSize = new Vector2Int(2, 2);
 	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
+	
+	
+
+	
 	[LabelText("레벨")][Space(32)][OnCollectionChanged("UpdateData")]
 	public List<Area> areas = new List<Area>();
 	//메인 코드
-	[ReadOnly] public int areaIndex = 0;
+	[Sirenix.OdinInspector.ReadOnly] public int areaIndex = 0;
 	public void Setting_Spawner()
 	{
 		areaIndex = 0;
-	}
-	public void Spawner_UpdateData()//적이 죽을때,바리케이드 상태변경 등의 이벤트마다 호출되어 현 상태를 업데이트한다.
-	{
+		Dictionary<EnemyRoot, int> enemiesCount = new Dictionary<EnemyRoot, int>();
+		Dictionary<Prefab_Prop, int> propsCount = new Dictionary<Prefab_Prop, int>();
+		//준비할 개수 구하기
+		for (int i = 0; i < areas.Count-1; i++)
+		{
+			foreach (var spawn in areas[i].spawns)
+			{
+				for (int j = 0; j < spawn.singleSpwawns.Count-1; j++)
+				{
+					Dictionary<EnemyRoot, int> _enemiesCount = new Dictionary<EnemyRoot, int>();
+					Dictionary<Prefab_Prop, int> _propsCount = new Dictionary<Prefab_Prop, int>();
+					
+					SingleSpawn ss1 = spawn.singleSpwawns[j],ss2 = spawn.singleSpwawns[j+1];
+					EnemyRoot er1 = ss1.spawnPreset.root, er2 = ss2.spawnPreset.root;
+					Prefab_Prop pp1 = ss1.spawnPreset.weaponL,
+								pp2 = ss1.spawnPreset.weaponR,
+								pp3 = ss1.spawnPreset.shield,
+								pp4 = ss2.spawnPreset.weaponL,
+								pp5 = ss2.spawnPreset.weaponR,
+								pp6 = ss2.spawnPreset.shield;
+					
+					AddEnemy(er1); AddEnemy(er2);
+					AddProp(pp1); AddProp(pp2); AddProp(pp3); AddProp(pp4); AddProp(pp5); AddProp(pp6);
+					void AddEnemy(EnemyRoot er)
+					{
+						if (_enemiesCount.ContainsKey(er)) _enemiesCount[er] = _enemiesCount[er] + 1;
+						else _enemiesCount[er] = 1;
+					}
+					void AddProp(Prefab_Prop pp)
+					{
+						if (pp != null)
+						{
+							if (_propsCount.ContainsKey(pp)) _propsCount[pp] = _propsCount[pp] + 1;
+							else _propsCount[pp] = 1;
+						}
+					}
+
+					foreach (var key in _enemiesCount.Keys)
+					{
+						if (enemiesCount.ContainsKey(key))
+							enemiesCount[key] = Mathf.Max(enemiesCount[key], _enemiesCount[key]);
+						else enemiesCount.Add(key,_enemiesCount[key]);
+					}
+					foreach (var key in _propsCount.Keys)
+					{
+						if (propsCount.ContainsKey(key))
+							propsCount[key] = Mathf.Max(propsCount[key], _propsCount[key]);
+						else propsCount.Add(key,_propsCount[key]);
+					}
+				}
+			}
+		}
+		//pool에 등록
+		foreach (var enemyPair in enemiesCount)
+		{
+			for (int i = 0; i < enemyPair.Value; i++)
+			{
+				manager_Enemy.AddEnemy(enemyPair.Key);
+			}
+			//print(enemyPair.Key.gameObject.name+": "+enemyPair.Value);
+		}
+		foreach (var propPair in propsCount)
+		{
+			for (int i = 0; i < propPair.Value; i++)
+			{
+				manager_Enemy.AddProp(propPair.Key);
+			}
+			//print(propPair.Key.gameObject.name+": "+propPair.Value);
+		}
 		
 	}
+	
+	
+	#region 흐름 설정(외부 호출은 전부 여기서)
+
+	private bool lastSpawner = false;
+	private List<EnemyRoot> spawnedEnemyRoots = new List<EnemyRoot>();
+	public void Spawner_GameStart()
+	{
+		CamArm.instance.StartFOV();
+		CamArm.instance.Cutscene(2.5f,0.2f,1.75f,startBarricade.pointT,startBarricade);
+		Canvas_Player.instance.audio_EnterFin.Play();
+		SoundManager.instance.Ingame_Main();
+		Player.instance.audio_Ready.Play();
+		Spawner_AreaStart();
+	}
+	public void Spawner_AreaStart()//바리케이드 닫히면 호출. 바리케이드 없을 경우 그냥 호출
+	{
+		if(c_spawner_areastart!=null) StopCoroutine(c_spawner_areastart);
+		c_spawner_areastart = StartCoroutine(C_Spawner_AreaStart());
+	}
+
+	private Coroutine c_spawner_areastart = null;
+	private IEnumerator C_Spawner_AreaStart()
+	{
+		Area currentArea = areas[areaIndex];
+		while (true)
+		{
+			Transform playerT = Player.instance.transform;
+			float playerX = playerT.position.x;
+			float playerY = playerT.position.z;
+			
+			bool check = false;
+			foreach (var c in currentArea.cells)
+			{
+				bool insideX = (startTile.x+c.x) * 6 <= playerX && playerX < (1 + startTile.x+ c.x) * 6;
+				bool insideY = (startTile.y+c.y) * 6 <= playerY && playerY < (1 + startTile.y+c.y) * 6;
+
+				if (insideX && insideY)
+				{
+					check = true;
+					break;
+				}
+			}
+
+			if (check) break;
+			//print("Waiting for Player...");
+			yield return null;
+		}
+		//print("Player founded!");
+		for (int i = 0; i < currentArea.spawns.Count; i++)
+		{
+			Spawn spawn = currentArea.spawns[i];
+			yield return new WaitForSeconds(spawn.delay);
+			foreach (var singleSpawn in spawn.singleSpwawns)
+			{
+				Spawner_Spawn(spawn,singleSpawn);
+			}
+			lastSpawner = currentArea.spawns.Count - 1 <= i;
+			while (spawnedEnemyRoots.Count > 0) yield return null;
+			lastSpawner = false;
+		}
+		print("ALL SPAWNED!");
+	}
+
+	private void Spawner_Spawn(Spawn spawn,SingleSpawn singleSpawn)
+	{
+		EnemyRoot root = manager_Enemy.GetEnemy(singleSpawn.spawnPreset.root);
+		float x = startTile.x*6+spawn.center.x + singleSpawn.x;
+		float y = startTile.y*6+spawn.center.y + singleSpawn.y;
+
+		Vector3 pos = new Vector3(x, singleSpawn.spawnHeight, y);
+		Transform rootT = root.transform;
+		rootT.SetPositionAndRotation(pos,Quaternion.identity);
+		Prefab_Prop weaponL = singleSpawn.spawnPreset.weaponL == null?null: manager_Enemy.GetProp(singleSpawn.spawnPreset.weaponL);
+		Prefab_Prop weaponR = singleSpawn.spawnPreset.weaponR == null?null: manager_Enemy.GetProp(singleSpawn.spawnPreset.weaponR);
+		Prefab_Prop shield = singleSpawn.spawnPreset.shield == null?null: manager_Enemy.GetProp(singleSpawn.spawnPreset.shield);
+		
+		root.Enable(weaponL,weaponR,shield,singleSpawn.delay,singleSpawn.spawnPreset.root);
+		spawnedEnemyRoots.Add(root);
+	}
+	[Button]
+	public void Spawner_MoveNext(bool isBoss)
+	{
+		if (areas.Count - 1 < areaIndex) return;
+		else if (areas.Count - 1 == areaIndex)
+		{
+			if(isBoss) Clear_Begin1(true);
+			else Clear_Begin1(false);
+			CamArm.instance.SpeedLine_Play(transform.position, true);
+			areaIndex += 1;
+			return;
+		}
+		else
+		{
+			if (areas[areaIndex].exitBarricade != null)
+			{
+				CamArm.instance.Cutscene(2.5f,0.2f,1.75f,
+					areas[areaIndex].exitBarricade.pointT,areas[areaIndex].exitBarricade);
+				CamArm.instance.SpeedLine_Play(transform.position, false);
+				CamArm.instance.Impact(mainData.impact_Clear_Area);
+				CamArm.instance.Production_Begin(1.0f);
+			}
+			areaIndex += 1;
+			Spawner_AreaStart();
+		}
+		
+
+	}
+	public void Spawner_EnemyKill(bool isBoss,Enemy enemy)
+	{
+		if (spawnedEnemyRoots.Contains(enemy.root)) spawnedEnemyRoots.Remove(enemy.root);
+		//구역 클리어, 올클리어 
+		if (Enemy.enemies.Count == 0 && lastSpawner)
+		{
+			Text_Info("CLEAR");
+			Spawner_MoveNext(isBoss);
+		}
+		//그냥 처치
+		else
+		{
+			Text_Damage_Main();
+			Text_Damage_Specific("execute");
+			
+			CamArm.instance.SpeedLine_Play(transform.position, false);
+			CamArm.instance.Impact(mainData.impact_SpecialHit);
+		}
+		UpdateData();
+	}
+	private bool IsLastArea()
+	{
+		return areas.Count - 1 <= areaIndex;
+	}
+	#endregion
+	
 	#region Clear
 	private Coroutine c_clear = null;
 	public void Clear_Begin1(bool isBoss)
@@ -91,10 +296,6 @@ public partial class Manager_Main : MonoBehaviour
 		yield break;
 	}
 	
-	public bool IsLastArea()
-	{
-		return false;
-	}
 	#endregion
 	#region Gizmos,Editor
 	public void OnDrawGizmos_Spawner()
@@ -264,11 +465,22 @@ public class Area
 	}
 	[TitleGroup("$title","$subtitle")][ColorPalette(PaletteName = "Country")][HideLabel][HorizontalGroup("$title/maindata")]
 	public Color color;
+	[LabelText("나가는 문")] public Barricade exitBarricade;
 	//셀 리스트
 	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
 	[LabelText("셀 리스트",SdfIconType.StickyFill,IconColor = "blue")][Space(16)][GUIColor(0.8f,0.8f,1.0f)]
 	public List<Cell> cells = new List<Cell>();
 	
+	
+	//스폰 리스트
+	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
+	[LabelText("스폰 리스트",SdfIconType.PersonFill,IconColor = "yellow")][GUIColor(1.0f,1.0f,0.8f)]
+	public List<Spawn> spawns = new List<Spawn>();
+	//씬 리스트
+	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
+	[LabelText("씬 리스트",SdfIconType.MapFill,IconColor = "red")][GUIColor(1.0f,0.8f,0.8f)]
+	public List<SceneAsset> scenes = new List<SceneAsset>();
+
 	public void UpdateData()
 	{
 		foreach (var cell in cells)
@@ -280,16 +492,6 @@ public class Area
 			spawn.UpdateData(cells);
 		}
 	}
-	//스폰 리스트
-	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
-	[LabelText("스폰 리스트",SdfIconType.PersonFill,IconColor = "yellow")][GUIColor(1.0f,1.0f,0.8f)]
-	public List<Spawn> spawns = new List<Spawn>();
-	//씬 리스트
-	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)]
-	[LabelText("씬 리스트",SdfIconType.MapFill,IconColor = "red")][GUIColor(1.0f,0.8f,0.8f)]
-	public List<SceneAsset> scenes = new List<SceneAsset>();
-
-	
 }
 [System.Serializable]
 public class Cell
@@ -306,7 +508,6 @@ public class Cell
 		maxY = main.tileSize.y-1;
 	}
 }
-
 [System.Serializable]
 public class Spawn
 {
@@ -356,7 +557,7 @@ public class SingleSpawn
 	[LabelText("생성 X 좌표")][PropertyRange("minX","maxX")][OnValueChanged("RecalculateAll")] public float x;
 	[LabelText("생성 Y 좌표")][PropertyRange("minY","maxY")][OnValueChanged("RecalculateAll")] public float y;
 	[LabelText("딜레이")] public float delay;
-	[ReadOnly][ShowInInspector][LabelText("스폰 높이")] public float spawnHeight;
+	[Sirenix.OdinInspector.ReadOnly][ShowInInspector][LabelText("스폰 높이")] public float spawnHeight;
 	
 	public void UpdateData(float minX,float minY ,float maxX, float maxY)
 	{
@@ -379,3 +580,4 @@ public class SingleSpawn
 		main.UpdateData();
 	}
 }
+

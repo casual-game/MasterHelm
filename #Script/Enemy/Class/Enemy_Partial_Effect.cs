@@ -197,6 +197,8 @@ public partial class Enemy : MonoBehaviour
 
     public void Effect_Death(bool isBoss = false)
     {
+        if (enemies.Contains(this)) enemies.Remove(this);
+        if (enemies.Count == 0) Player.instance.executedTarget = this;
         //sfx
         audio_death.Play();
         Player.instance.audio_Hit_Finish.Play();
@@ -204,28 +206,7 @@ public partial class Enemy : MonoBehaviour
         Player.instance.audio_Hit_Impact.Play();
         //vfx
         CamArm.instance.speedline_loop.Stop();
-        if (enemies.Count == 1 && enemies[0] == this)
-        {
-            if (Manager_Main.instance.IsLastArea())
-            {
-                if(isBoss) Manager_Main.instance.Clear_Begin1(true);
-                else Manager_Main.instance.Clear_Begin1(false);
-                CamArm.instance.SpeedLine_Play(transform.position, true);
-            }
-            else
-            {
-                CamArm.instance.SpeedLine_Play(transform.position, false);
-                if(isBoss) CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Boss_Clear_Area);
-                else CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Clear_Area);
-                CamArm.instance.Production_Begin(1.0f);
-            }
-
-        }
-        else
-        {
-            CamArm.instance.SpeedLine_Play(transform.position, false);
-            CamArm.instance.Impact(Manager_Main.instance.mainData.impact_SpecialHit);
-        }
+        Manager_Main.instance.Spawner_EnemyKill(isBoss,this);
 
 
         particle_parrying.Play();
@@ -235,16 +216,7 @@ public partial class Enemy : MonoBehaviour
 
         Manager_Pooler.instance.Shockwave(transform.position);
         Player.instance.Particle_JustParrying();
-        //Text
-        if (enemies.Count == 1 && enemies[0] == this)
-        {
-            Manager_Main.instance.Text_Info("CLEAR");
-        }
-        else
-        {
-            Manager_Main.instance.Text_Damage_Main();
-            Manager_Main.instance.Text_Damage_Specific("execute");
-        }
+        
 
         Particle_Text_Damage(Random.Range(100, 200));
         Vector3 numPos = transform.position - Player.instance.transform.position;

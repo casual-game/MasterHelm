@@ -310,6 +310,7 @@ public partial class Player : MonoBehaviour
         float physicsTime = Time.time;
         while (Time.time-physicsTime<0.2f)
         {
+            /*
             int jlength = DestructibleObject.destructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
@@ -322,13 +323,14 @@ public partial class Player : MonoBehaviour
                     destructible.Explode(transform.position,false);
                 }
             }
-
+            */
             yield return null;
         }
         puppetMaster.mode = PuppetMaster.Mode.Active;
         physicsTime = Time.time;
         while (Time.time-physicsTime<1.0f)
         {
+            /*
             int jlength = DestructibleObject.destructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
@@ -341,9 +343,10 @@ public partial class Player : MonoBehaviour
                     destructible.Explode(transform.position,false);
                 }
             }
-
+            */
             yield return null;
         }
+        
     }
 
 
