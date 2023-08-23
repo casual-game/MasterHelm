@@ -232,7 +232,7 @@ public partial class Player : MonoBehaviour
         audio_Hit_Impact.Play();
         //vfx
         Particle_Blood_Smash();
-        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smash);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smashed);
         highlight.HitFX(Manager_Main.instance.mainData.blink_Damage,0.5f,1.5f);
         
         //파티클 위치 설정
@@ -251,7 +251,7 @@ public partial class Player : MonoBehaviour
         audio_Hit_Notice.Play();
         //vfx
         Particle_Blood_Smash();
-        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smash);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smashed);
         highlight.HitFX(Manager_Main.instance.mainData.blink_Damage,1.0f,1.5f);
         
         //파티클

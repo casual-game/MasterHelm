@@ -47,12 +47,13 @@ public partial class Enemy : MonoBehaviour
     [HideInInspector] public Animator animator;
     [HideInInspector] public HighlightEffect highlight;
     [HideInInspector] public PuppetMaster puppetMaster;
-    protected List<Animator> animators;
+    public List<Animator> animators;
     private bool isFirstSetting = true;
     private bool disabled = false;
     private GameObject shadow;
     [HideInInspector] public SkinnedMeshRenderer[] skinnedMeshRenderers;
     [HideInInspector] public MeshRenderer[] meshRenderers;
+    [HideInInspector] public CustomEffect customEffect;
     #endregion
     //노멀한 함수들//=====================================================================================================
     #region 근본 함수
@@ -88,6 +89,8 @@ public partial class Enemy : MonoBehaviour
             seeker = GetComponent<Seeker>();
             highlight = GetComponent<HighlightEffect>();
             puppetMaster = transform.parent.GetComponentInChildren<PuppetMaster>();
+            customEffect = GetComponentInChildren<CustomEffect>();
+            customEffect.Setting(Manager_Main.instance._folder_);
             
             transform.parent.GetComponentInChildren<Canvas>(true).gameObject.SetActive(true);
             transform.parent.GetComponentInChildren<Canvas>(true).worldCamera = CamArm.instance.uiCam;
@@ -95,6 +98,7 @@ public partial class Enemy : MonoBehaviour
             shadow = transform.Find("Shadow").gameObject;
             Setting_Sound();
             FirstSetting_UI();
+            FirstSetting_Effect();
         }
 
         gameObject.layer = LayerMask.NameToLayer("Enemy");
@@ -107,18 +111,21 @@ public partial class Enemy : MonoBehaviour
         {
             prefab_Weapon_L = weapon_L;
             prefab_Weapon_L.Setting_Enemy(slot_L,this);
+            prefab_Weapon_L.On(false,slot_L,true);
             prefab_Weapon_L.On(true,slot_L);
         }
         if (weapon_R != null)
         {
             prefab_Weapon_R = weapon_R;
             prefab_Weapon_R.Setting_Enemy(slot_R,this);
+            prefab_Weapon_R.On(false,slot_L,true);
             prefab_Weapon_R.On(true,slot_R);
         }
         if (shield != null)
         {
             prefab_Shield = shield;
             prefab_Shield.Setting_Enemy(slot_Shield,this);
+            prefab_Shield.On(false,slot_L,true);
             prefab_Shield.On(true,slot_Shield);
         }
         
@@ -129,22 +136,19 @@ public partial class Enemy : MonoBehaviour
         StopCoroutine("C_Death");
         foreach (var anim in animators)
         {
-            anim.speed = 0.5f;
-            anim.Play("Dissolve",0,0);
-            anim.enabled = false;
+            anim.enabled = true;
+            anim.speed = 0.0f;
         }
         death = false;
         canvas.gameObject.SetActive(true);
         currentHP = hp;
         health_Bar.fillAmount = 1;
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        
         //Partical 
         PF_Setting();
         State_Setting();
         Setting_UI();
         Pattern_Setting();
-        Setting_Effect();
         //렌더러 설정
         skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
@@ -211,9 +215,11 @@ public partial class Enemy : MonoBehaviour
         Move(transform.position,Quaternion.LookRotation(rotateVec));
         //가드
         float damage = Player.instance.isStrong ? 20 : 10;
+        
+        bool isRevenge = Player.instance.IsRevengeSkill();
         if (guard_use)
         {
-            bool isRevenge = Player.instance.IsRevengeSkill();
+            
             if (guard_full)
             {
                 UI_SetGuardGauge(currentGuard + damage);
@@ -222,6 +228,31 @@ public partial class Enemy : MonoBehaviour
                 Player.instance.Particle_FireRing(transform.position + Vector3.up);
                 animator.SetInteger("Num", 6);
                 State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
+            }
+            else if (Player.instance.isStrong)
+            {
+                UI_SetGuardGauge(currentGuard + damage);
+                Cancel();
+                if (Player.instance.isSkill)
+                {
+                    State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
+                    animator.SetInteger("Num",(int)Player.instance.skillData.hitType);
+                }
+                else
+                {
+                    hitType = hitType== null ? (int) Player.instance.motionData.hitType : hitType;
+                    if (hitType == 5 && Vector3.Dot(transform.forward, 
+                            Player.instance.transform.position - transform.position) > 0)
+                    {
+                        hitType = 6;
+                    }
+                    State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
+                    animator.SetInteger("Num",hitType.Value);
+                }
+                
+                if (Player.instance.IsRevengeSkill()) Effect_Hit_Revenge();
+                else if (isCounter) Effect_Hit_Counter();
+                else if (Player.instance.isStrong) Effect_Hit_Strong();
             }
             else if (animator.GetInteger("State") == 4)
             {
@@ -238,38 +269,17 @@ public partial class Enemy : MonoBehaviour
                         Effect_Hit_Strong();
                     }
                 }
-                else if (Player.instance.isStrong)
-                {
-                    animator.SetInteger("Num", 7);
-                    State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
-                    Effect_Guard();
-                }
                 else
                 {
-                    animator.SetTrigger("Hit");
-                    Effect_Guard();
+                    Effect_Hit_Normal();
                 }
             }
             else
             {
                 
                 UI_SetGuardGauge(currentGuard + damage);
-                if (guard_full || isRevenge)
-                {
-                    UI_SetGuardGauge(Mathf.Infinity);
-                    animator.SetInteger("Num", 5);
-                    if(isRevenge) Effect_Hit_Revenge();
-                    else
-                    {
-                        Player.instance.audio_Hit_Notice.Play();
-                        Effect_Hit_Strong();
-                    }
-                }
-                else
-                {
                     animator.SetInteger("Num", 7);
                     Effect_Guard();
-                }
                 State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
             }
             
@@ -372,7 +382,11 @@ public partial class Enemy : MonoBehaviour
         if(Player.instance.executedTarget == this) Player.instance.executedTarget = null;
         yield return new WaitForSeconds(1.0f);
         CreateOrb(Vector3.zero);
-        foreach (var anim in animators) anim.enabled = true;
+        foreach (var anim in animators)
+        {
+            anim.speed = 1.0f;
+            anim.Play("Dissolve_Death",0,0);
+        }
         yield return new WaitForSeconds(6.0f);
         puppetMaster.mode = PuppetMaster.Mode.Disabled;
         
@@ -422,15 +436,20 @@ public partial class Enemy : MonoBehaviour
     
     //기타//====================================================================================================
 
-    public void Effect_FirstRoar()
+    public void Effect_Roar()
     {
-        
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Enemy_Spawn);
+        particle_smoke.Play();
     }
     public void Effect_Showup()
     {
-        //CamArm.instance.Shake(Manager_Main.instance.mainData.impact_Smooth);
         particle_smoke.Play();
-        
+    }
+    public void Play(string tag)
+    {
+        customEffect.PlayParticle(tag);
+        customEffect.PlaySound(tag);
+        customEffect.Detect(tag,transform.position,currentSingleAttackData);
     }
     //기즈모 그리기//====================================================================================================
     public Capsule3 Get_Capsule3()

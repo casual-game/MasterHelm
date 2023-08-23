@@ -16,6 +16,8 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 		{
 			enemy.RoarVoice();
 			Canvas_Player_World.instance.Skull();
+			enemy.particle_charge.Play();
+			enemy.audio_create.Play();
 		}
 		else
 		{
@@ -36,7 +38,12 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 			{
 				currentAttackData = data;
 				enemy.currentSingleAttackData = currentAttackData;
-				if(currentAttackData.isGuardBreak) Canvas_Player_World.instance.Skull();
+				if (currentAttackData.isGuardBreak)
+				{
+					Canvas_Player_World.instance.Skull();
+					enemy.particle_charge.Play();
+					enemy.audio_create.Play();
+				}
 			}
 		}
 		

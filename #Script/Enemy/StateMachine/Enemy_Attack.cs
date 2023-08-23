@@ -18,6 +18,8 @@ public class Enemy_Attack : Enemy_State_Base
 		if (!dontSkull && motionData.attackData.Count > 0 && motionData.attackData[0].isGuardBreak)
 		{
 			Canvas_Player_World.instance.Skull();
+			enemy.particle_charge.Play();
+			enemy.audio_create.Play();
 			enemy.isGuardBreak = true;
 		}
 		else
@@ -46,6 +48,8 @@ public class Enemy_Attack : Enemy_State_Base
 				{
 					skulled = true;
 					Canvas_Player_World.instance.Skull();
+					enemy.particle_charge.Play();
+					enemy.audio_create.Play();
 				}
 				if (enemy.currentSingleAttackData != data)
 				{

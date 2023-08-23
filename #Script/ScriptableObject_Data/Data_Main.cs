@@ -112,9 +112,9 @@ public class Data_Main : ScriptableObject
 	
 	//Impact
 	[TitleGroup("Impact")] [FoldoutGroup("Impact/list")]
-	public Data_Impact impact_Hit, impact_Smash,impact_PreSpecial ,impact_SpecialHit , impact_Guard 
+	public Data_Impact impact_Hit, impact_Smash,impact_Smashed,impact_PreSpecial ,impact_SpecialHit , impact_Guard 
 		, impact_Smooth,impact_SpecialSmooth,impact_Death,impact_Clear_Area,impact_Clear_Stage
-		,impact_Boss_SpecialHit,impact_Boss_Clear_Area;
+		,impact_Boss_SpecialHit,impact_Boss_Clear_Area,impact_Enemy_Spawn;
 	//Audio
 	[TitleGroup("Audio")] [FoldoutGroup("Audio/list")]
 	public Data_Audio Orb_Create, Orb_Remove, audio_Effecting_Impact,audio_Effecting_ImpactSection;

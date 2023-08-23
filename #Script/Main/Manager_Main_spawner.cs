@@ -204,6 +204,13 @@ public partial class Manager_Main : MonoBehaviour
 				CamArm.instance.SpeedLine_Play(transform.position, false);
 				CamArm.instance.Impact(mainData.impact_Clear_Area);
 				CamArm.instance.Production_Begin(1.0f);
+				print("clear");
+			}
+			else
+			{
+				CamArm.instance.SpeedLine_Play(transform.position, false);
+				CamArm.instance.Impact(mainData.impact_SpecialHit);
+				print("next!");
 			}
 			areaIndex += 1;
 			Spawner_AreaStart();
@@ -225,9 +232,9 @@ public partial class Manager_Main : MonoBehaviour
 		{
 			Text_Damage_Main();
 			Text_Damage_Specific("execute");
-			
 			CamArm.instance.SpeedLine_Play(transform.position, false);
 			CamArm.instance.Impact(mainData.impact_SpecialHit);
+			print("normal");
 		}
 		UpdateData();
 	}

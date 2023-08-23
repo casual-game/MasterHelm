@@ -7,14 +7,15 @@ using UnityEngine.UI;
 
 public partial class Enemy : MonoBehaviour
 {
-    protected ParticleSystem particle_guard, particle_parrying,particle_smoke;
+    [HideInInspector] public ParticleSystem particle_guard, particle_parrying,particle_smoke,particle_charge;
     
-    protected virtual void Setting_Effect()
+    protected virtual void FirstSetting_Effect()
     {
         Transform t = transform.Find("Particle");
         particle_guard = t.Find("Guard").GetComponent<ParticleSystem>();
         particle_parrying = t.Find("Parrying").GetComponent<ParticleSystem>();
         particle_smoke = t.Find("Smoke").GetComponent<ParticleSystem>();
+        particle_charge = t.Find("Charge").GetComponent<ParticleSystem>();
     }
     //정말 파티클만. 아래 Effect와 중복사용 가능
     public void Particle_Hit_Base()
@@ -194,7 +195,6 @@ public partial class Enemy : MonoBehaviour
         Manager_Main.instance.Text_Damage_Main();
         Manager_Main.instance.Text_Damage_Specific("guard break");
     }
-
     public void Effect_Death(bool isBoss = false)
     {
         if (enemies.Contains(this)) enemies.Remove(this);

@@ -21,7 +21,7 @@ public class Undead_1Hand : Enemy
         while (showingup) yield return null;
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f)));
             yield return State_Set(StartCoroutine(CState_Attack(0)));
             if (ATTACKED())
             {
@@ -36,7 +36,7 @@ public class Undead_1Hand : Enemy
                     else
                     {
                         yield return State_Set(StartCoroutine(CState_Attack(1)));
-                        yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f,1)));
+                        yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f,1)));
                         yield return State_Set(StartCoroutine(CState_Attack(2)));
                     }
                 }
@@ -48,7 +48,7 @@ public class Undead_1Hand : Enemy
             {
                 yield return State_Set(StartCoroutine(CState_Backstep()));
                 yield return State_Set(StartCoroutine(CState_Attack(1)));
-                yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f,1)));
+                yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f,1)));
                 yield return State_Set(StartCoroutine(CState_Attack(2)));
             }
         }
@@ -58,28 +58,29 @@ public class Undead_1Hand : Enemy
         while (showingup) yield return null;
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(2.25f)));
             yield return State_Set(StartCoroutine(CState_Attack(0)));
+            yield return State_Set(StartCoroutine(CState_Attack(1)));
             if (ATTACKED() && PERCENT(70))
             {
                 yield return State_Set(StartCoroutine(CState_Attack(1)));
-                
-                
                 yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f)));
                 if (PERCENT(50)) yield return State_Set(StartCoroutine(CState_Attack(1)));
             }
             
-            if (PERCENT(80)) yield return State_Set(StartCoroutine(CState_Backstep()));
+            if (PERCENT(50)) yield return State_Set(StartCoroutine(CState_Backstep()));
+            else yield return State_Set(StartCoroutine(CState_Attack(1)));
             
             if (PERCENT(50))
             {
                 
                 yield return State_Set(StartCoroutine(CState_Attack(0)));
-                yield return State_Set(StartCoroutine(CState_Chase_Fast(1.5f)));
+                yield return State_Set(StartCoroutine(CState_Chase_Fast(2.25f)));
                 yield return State_Set(StartCoroutine(CState_Attack(1)));
             }
             else
             {
+                yield return State_Set(StartCoroutine(CState_Attack(1)));
                 yield return State_Set(StartCoroutine(CState_Wait(2.0f)));
             }
         }
@@ -92,7 +93,7 @@ public class Undead_1Hand : Enemy
     public void Guard_Stamp()
     {
         particle_smoke.Play();
-        
-        Player.instance.DoHit(transform.position,currentSingleAttackData);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_SpecialSmooth);
+        //Player.instance.DoHit(transform.position,currentSingleAttackData);
     }
 }

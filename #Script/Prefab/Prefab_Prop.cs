@@ -307,6 +307,11 @@ public class Prefab_Prop : MonoBehaviour
             if(!immediately) animator.Play("On",0,1-currentRatio);
             else animator.Play("On", 0,1);
         }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Disabled"))
+        {
+            if(on) animator.Play("On", 0);
+            else animator.Play("Off", 0);
+        }
     }
 
     public void SP_Slash()

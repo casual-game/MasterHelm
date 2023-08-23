@@ -8,6 +8,7 @@ using DG.Tweening;
 public class Canvas_Player_World : MonoBehaviour
 {
     public static Canvas_Player_World instance;
+    public Data_Audio audio_skull;
     private string s_skull = "Skull";
     public void Setting()
     {
@@ -16,6 +17,7 @@ public class Canvas_Player_World : MonoBehaviour
         Canvas_Player.instance.OnLateUpdate.AddListener(Update_UnitFrame);
         Data_Default();
         ManaStone_Append(3);
+        SoundManager.instance.Add(audio_skull);
     }
     #region 변수_UI
     //public
@@ -191,6 +193,7 @@ public class Canvas_Player_World : MonoBehaviour
     
     public void Skull()
     {
+        audio_skull.Play();
         anim.SetTrigger(s_skull);
     }
     

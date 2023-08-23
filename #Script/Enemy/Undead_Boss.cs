@@ -18,7 +18,7 @@ public class Undead_Boss : Enemy
     
     private string s_startboss = "StartBoss",s_activate = "Activate",s_deactivate = "Deactivate";
     private bool isStun = false;
-    private CustomEffect customEffect;
+    
     
 
     private IEnumerator CPattern_UndeadBoss_Main()
@@ -125,8 +125,7 @@ public class Undead_Boss : Enemy
     protected override void Pattern_Setting()
     {
         camDistanceRatio = 1.55f;
-        customEffect = GetComponentInChildren<CustomEffect>();
-        customEffect.Setting(Manager_Main.instance._folder_);
+        
         base.Pattern_Setting();
         StartBoss();
         
@@ -147,9 +146,9 @@ public class Undead_Boss : Enemy
         canvas.transform.parent = Manager_Main.instance._folder_;
         canvasAnimator = canvas.GetComponent<Animator>();
     }
-    protected override void Setting_Effect()
+    protected override void FirstSetting_Effect()
     {
-        base.Setting_Effect();
+        base.FirstSetting_Effect();
         Transform t = transform.Find("Particle");
         particle_Footstep = t.Find("Footstep").GetComponent<ParticleSystem>();
         particle_Shockwave = t.Find("Shockwave").GetComponent<ParticleSystem>();
@@ -411,10 +410,5 @@ public class Undead_Boss : Enemy
         particle_Groggy.Play();
         audio_groggy.Play();
     }
-    public void Play(string tag)
-    {
-        customEffect.PlayParticle(tag);
-        customEffect.PlaySound(tag);
-        customEffect.Detect(tag,transform.position,currentSingleAttackData);
-    }
+    
 }
