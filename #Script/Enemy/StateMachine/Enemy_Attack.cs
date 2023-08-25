@@ -20,6 +20,7 @@ public class Enemy_Attack : Enemy_State_Base
 			Canvas_Player_World.instance.Skull();
 			enemy.particle_charge.Play();
 			enemy.audio_create.Play();
+			enemy.SuperArmor(true);
 			enemy.isGuardBreak = true;
 		}
 		else
@@ -29,6 +30,7 @@ public class Enemy_Attack : Enemy_State_Base
 		}
 		enemy.AttackVoice();
 		enemy.currentSingleAttackData = motionData.attackData[0];
+		enemy.wasGuardBreak = motionData.attackData[0].isGuardBreak;
 	}
 
 	public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -50,6 +52,7 @@ public class Enemy_Attack : Enemy_State_Base
 					Canvas_Player_World.instance.Skull();
 					enemy.particle_charge.Play();
 					enemy.audio_create.Play();
+					enemy.SuperArmor(true);
 				}
 				if (enemy.currentSingleAttackData != data)
 				{

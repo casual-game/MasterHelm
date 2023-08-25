@@ -14,6 +14,7 @@ public class Player_State_BowShoot : Player_State_Base
         player.Shoot();
         player.prefab_bow.SetHold(false);
         player.prefab_bow.SetPulling(false);
+        player.audio_Bow_Shoot.Play();
         Canvas_Player.RB_PressedTime = -100;
     }
 

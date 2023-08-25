@@ -190,7 +190,7 @@ public class Undead_Boss : Enemy
             else
             {
                 
-                if (Player.instance.IsRevengeSkill())
+                if (Player.instance.CanRevenge())
                 {
                     Effect_Hit_Strong();
                     HitFX();

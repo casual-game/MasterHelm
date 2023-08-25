@@ -36,7 +36,7 @@ public class Undead_1Hand : Enemy
                     else
                     {
                         yield return State_Set(StartCoroutine(CState_Attack(1)));
-                        yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f,1)));
+                        yield return State_Set(StartCoroutine(CState_Chase_Fast(2.75f,1)));
                         yield return State_Set(StartCoroutine(CState_Attack(2)));
                     }
                 }
@@ -48,7 +48,7 @@ public class Undead_1Hand : Enemy
             {
                 yield return State_Set(StartCoroutine(CState_Backstep()));
                 yield return State_Set(StartCoroutine(CState_Attack(1)));
-                yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f,1)));
+                yield return State_Set(StartCoroutine(CState_Chase_Fast(2.75f,1)));
                 yield return State_Set(StartCoroutine(CState_Attack(2)));
             }
         }
@@ -94,6 +94,5 @@ public class Undead_1Hand : Enemy
     {
         particle_smoke.Play();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_SpecialSmooth);
-        //Player.instance.DoHit(transform.position,currentSingleAttackData);
     }
 }

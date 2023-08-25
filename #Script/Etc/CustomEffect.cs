@@ -146,9 +146,10 @@ public class CustomEffect : MonoBehaviour
     public void Detect(string tag,Vector3 point,Data_EnemyMotion.SingleAttackData attackData)
     {
         Effect e = effectDic[tag];
+       // if (e.raySensor.DetectionMode == DetectionModes.RigidBodies) return;
         e.raySensor.Pulse();
         bool detectPlayer = Player.instance.gameObject == e.raySensor.GetNearestDetection();
         if(detectPlayer) Player.instance.DoHit(point,attackData);
-        else print("PD");
+        //else print("PD");
     }
 }

@@ -5,12 +5,14 @@ using UnityEngine;
 public class Player_State_BowStart : Player_State_Base
 {
 	private float turnVel;
+	private bool audio_played = false;
 	public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		base.OnStateEnter(animator, stateInfo, layerIndex);
 		player.ChangeWeaponData(Player.CurrentWeaponData.Bow);
-
+		audio_played = false;
 		animator.speed = 1;
+		player.audio_mat_fabric_smooth.Play();
 		if (player.prefab_shield != null) player.prefab_shield.Trail_Off();
 		if (player.prefab_weaponL != null) player.prefab_weaponL.Trail_Off();
 		if (player.prefab_weaponR != null) player.prefab_weaponR.Trail_Off();
@@ -30,6 +32,7 @@ public class Player_State_BowStart : Player_State_Base
 		
 		if (stateInfo.normalizedTime>0.5f)
 		{
+			if(!audio_played) player.audio_Bow_Ready.Play();
 			player.prefab_bow.SetHold(true);
 			player.prefab_bow.SetPulling(true);
 			finished = true;

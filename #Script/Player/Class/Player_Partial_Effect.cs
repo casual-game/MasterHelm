@@ -118,7 +118,7 @@ public partial class Player : MonoBehaviour
     {
         Particle_Smoke();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smash);
-        CamArm.instance.SpeedLine_Play(transform.position + transform.forward,false);
+        CamArm.instance.SpeedLine_Play(false);
     }
     public void Particle_Roll()
     {
@@ -266,17 +266,19 @@ public partial class Player : MonoBehaviour
     public void Particle_GuardBreakRevenge()
     {
         audio_action_timing.Play();
-        audio_attack_timing.Play();
+        Particle_FireRing(transform.position + Vector3.up*0.5f);
         Manager_Main.instance.Text_Highlight(transform.position + Vector3.up,"REVENGE");
-        CamArm.instance.speedline_loop.Play();
-        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_PreSpecial);
+        CamArm.instance.SpeedLine_Play(false,target.transform);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Revenge);
         Manager_Main.instance.Text_Damage_Specific("evade");
     }
     public void Particle_GuardBreakEvade()
     {
         audio_action_timing.Play();
         audio_attack_timing.Play();
-        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Hit);
+        Particle_FireRing(T_Head.position);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Revenge);
+        CamArm.instance.SpeedLine_Play(false,rollVec);
         Manager_Main.instance.Text_Big(transform.position + Vector3.up,"EVADE");
         Manager_Main.instance.Text_Damage_Specific("evade");
     }

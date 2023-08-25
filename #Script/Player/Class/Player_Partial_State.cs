@@ -20,14 +20,13 @@ public partial class Player : MonoBehaviour
 
     [HideInInspector] public int state=0;
     [HideInInspector] public Vector3 rollVec;
-    [HideInInspector] public bool roll_Special = false;
     [HideInInspector] public List<Enemy> attackedTarget = new List<Enemy>();
     [HideInInspector] public bool guard = false;
     [HideInInspector] public Vector3 guardPoint;
     [HideInInspector] public bool guarded = false;
     [HideInInspector] public bool death = false, clear = false;
-    [HideInInspector] public float deathTime;
-    [HideInInspector] public bool isRevengeSkill = false,isRevengeSkillActivated = false;
+    [HideInInspector] public float skillBeginTime = -100,rollBeginTime = -100;
+    [HideInInspector] public bool isRevengeSkill = false;
     
     public bool CanRoll()
     {
@@ -182,17 +181,14 @@ public partial class Player : MonoBehaviour
         //가드 브레이크
         else
         {
-
-
             //구르기로 패턴 회피
-            if (state == 3)
+            if (CanEvade())
             {
                 Particle_GuardBreakEvade();
             }
             //스킬로 Revenge
-            else if (isSkill)
+            else if (CanRevenge())
             {
-                isRevengeSkill = true;
                 Particle_GuardBreakRevenge();
             }
             //피격
@@ -291,10 +287,20 @@ public partial class Player : MonoBehaviour
     {
         return isSuperArmor;
     }
-
-    public bool IsRevengeSkill()
+    //적 특수공격 회피 가능 여부
+    public bool CanRevenge()
     {
-        return isSkill && isRevengeSkill && isRevengeSkillActivated;
+        bool value = Time.unscaledTime < skillBeginTime + revengeDelay && isSkill;
+        if (value)
+        {
+            skillBeginTime = -100;
+            isRevengeSkill = true;
+        }
+        return value;
+    }
+    public bool CanEvade()
+    {
+        return state==3 && Time.unscaledTime < rollBeginTime + revengeDelay;
     }
 
     private bool isSuperArmor = false;
@@ -360,7 +366,6 @@ public partial class Player : MonoBehaviour
         
         particle_target.Activate(false);
         death = true;
-        deathTime = Time.unscaledTime;
         Time.timeScale = 1;
         target = null;
         Deactivate_Pointer();

@@ -191,7 +191,7 @@ public partial class Manager_Main : MonoBehaviour
 		{
 			if(isBoss) Clear_Begin1(true);
 			else Clear_Begin1(false);
-			CamArm.instance.SpeedLine_Play(transform.position, true);
+			CamArm.instance.SpeedLine_Play(true);
 			areaIndex += 1;
 			return;
 		}
@@ -199,18 +199,19 @@ public partial class Manager_Main : MonoBehaviour
 		{
 			if (areas[areaIndex].exitBarricade != null)
 			{
-				CamArm.instance.Cutscene(2.5f,0.2f,1.75f,
+				CamArm.instance.Cutscene(2.75f,0.2f,1.75f,
 					areas[areaIndex].exitBarricade.pointT,areas[areaIndex].exitBarricade);
-				CamArm.instance.SpeedLine_Play(transform.position, false);
+				CamArm.instance.SpeedLine_Play(false);
 				CamArm.instance.Impact(mainData.impact_Clear_Area);
 				CamArm.instance.Production_Begin(1.0f);
-				print("clear");
+				Player.instance.audio_AreaClear.Play();
+				//print("clear");
 			}
 			else
 			{
-				CamArm.instance.SpeedLine_Play(transform.position, false);
+				CamArm.instance.SpeedLine_Play(false);
 				CamArm.instance.Impact(mainData.impact_SpecialHit);
-				print("next!");
+				//print("next!");
 			}
 			areaIndex += 1;
 			Spawner_AreaStart();
@@ -224,7 +225,7 @@ public partial class Manager_Main : MonoBehaviour
 		//구역 클리어, 올클리어 
 		if (Enemy.enemies.Count == 0 && lastSpawner)
 		{
-			Text_Info("CLEAR");
+			if(IsLastArea())Text_Info("CLEAR");
 			Spawner_MoveNext(isBoss);
 		}
 		//그냥 처치
@@ -232,7 +233,7 @@ public partial class Manager_Main : MonoBehaviour
 		{
 			Text_Damage_Main();
 			Text_Damage_Specific("execute");
-			CamArm.instance.SpeedLine_Play(transform.position, false);
+			CamArm.instance.SpeedLine_Play(false);
 			CamArm.instance.Impact(mainData.impact_SpecialHit);
 			print("normal");
 		}

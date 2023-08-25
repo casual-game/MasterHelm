@@ -7,13 +7,13 @@ using UnityEngine.UI;
 
 public partial class Enemy : MonoBehaviour
 {
-    [FoldoutGroup("UnitFrame")] public Transform T_UI_XZ, T_UI_Y;
     [FoldoutGroup("UnitFrame")] public Vector3 unitGrameVec;
     [FoldoutGroup("UnitFrame")] public AnimationCurve uiCurve;
-    [FoldoutGroup("UnitFrame")] public Canvas canvas;
-    [FoldoutGroup("UnitFrame")] public Image health_Lerp, health_Bar, guard_Bar;
-    [FoldoutGroup("UnitFrame")] public List<Image> guard_Family = new List<Image>();
-    [FoldoutGroup("UnitFrame")] public ParticleSystem guard_particle;
+    protected Transform T_UI_XZ, T_UI_Y;
+    protected Canvas canvas;
+    protected Image health_Lerp, health_Bar, guard_Bar;
+    protected List<Image> guard_Family = new List<Image>();
+    protected ParticleSystem guard_particle;
 
     protected Animator canvasAnimator;
     protected float currentGuard = 0,guardSpeed = 8.0f;
@@ -26,9 +26,21 @@ public partial class Enemy : MonoBehaviour
         guard_color_full = new Color(113.0f / 255.0f, 219.0f / 255.0f, 0, 1);
     protected virtual void FirstSetting_UI()
     {
+        canvas = GetComponentInChildren<Canvas>();
         canvas.transform.parent = Manager_Main.instance._folder_;
         canvas.transform.rotation = Quaternion.Euler(60,45,0);
         canvasAnimator = canvas.GetComponent<Animator>();
+        T_UI_XZ = deco_Back.parent;
+        T_UI_Y = deco_Head.parent;
+        health_Lerp = canvas.transform.Find("UnitFrame").Find("Lerp").GetComponent<Image>();
+        health_Bar = canvas.transform.Find("UnitFrame").Find("Bar").GetComponent<Image>();
+        guard_Bar = canvas.transform.Find("GuardFrame").Find("Fill").GetComponent<Image>();
+        guard_Family = new List<Image>();
+        guard_Family.Add(guard_Bar = canvas.transform.Find("GuardFrame").GetComponent<Image>());
+        guard_Family.Add(guard_Family[0].transform.GetChild(0).GetComponent<Image>());
+        guard_Family.Add(guard_Family[0].transform.GetChild(1).GetComponent<Image>());
+        guard_Family.Add(guard_Family[0].transform.GetChild(2).GetComponent<Image>());
+        guard_particle = guard_Family[0].transform.GetChild(3).GetComponent<ParticleSystem>();
     }
     protected void Setting_UI()
     {

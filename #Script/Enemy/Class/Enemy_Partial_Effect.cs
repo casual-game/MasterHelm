@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public partial class Enemy : MonoBehaviour
 {
-    [HideInInspector] public ParticleSystem particle_guard, particle_parrying,particle_smoke,particle_charge;
+    [HideInInspector] public ParticleSystem particle_guard, particle_parrying,particle_smoke,particle_charge,particle_fire;
     
     protected virtual void FirstSetting_Effect()
     {
@@ -16,6 +16,30 @@ public partial class Enemy : MonoBehaviour
         particle_parrying = t.Find("Parrying").GetComponent<ParticleSystem>();
         particle_smoke = t.Find("Smoke").GetComponent<ParticleSystem>();
         particle_charge = t.Find("Charge").GetComponent<ParticleSystem>();
+        particle_fire = t.Find("Fire").GetComponent<ParticleSystem>();
+    }
+
+    protected virtual void Effect_Setting()
+    {
+        ParticleSystem p = particle_fire.transform.GetChild(0).GetComponent<ParticleSystem>();
+        var s = p.shape;
+        s.skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+        p.gameObject.SetActive(true);
+        
+        SetPropFire(prefab_Shield,1);
+        SetPropFire(prefab_Weapon_L,2);
+        SetPropFire(prefab_Weapon_R,3);
+        void SetPropFire(Prefab_Prop prop,int childIndex)
+        {
+            if (prop != null)
+            {
+                ParticleSystem p = particle_fire.transform.GetChild(childIndex).GetComponent<ParticleSystem>();
+                var s = p.shape;
+                s.meshRenderer = prop.GetComponentInChildren<MeshRenderer>();
+                p.gameObject.SetActive(true);
+            }
+            else particle_fire.transform.GetChild(childIndex).gameObject.SetActive(false);
+        }
     }
     //정말 파티클만. 아래 Effect와 중복사용 가능
     public void Particle_Hit_Base()
@@ -93,6 +117,7 @@ public partial class Enemy : MonoBehaviour
     }
     public void Effect_Hit_Strong()
     {
+        SuperArmor(false);
         //sfx
         HitVoice();
         Player.instance.audio_Hit_Gore.Play();
@@ -128,6 +153,7 @@ public partial class Enemy : MonoBehaviour
     }
     public void Effect_Hit_Counter()
     {
+        SuperArmor(false);
         //sfx
         HitVoice();
         Player.instance.audio_Hit_Notice.Play();
@@ -148,6 +174,7 @@ public partial class Enemy : MonoBehaviour
     }
     public void Effect_Hit_Revenge()
     {
+        SuperArmor(false);
         //sfx
         HitVoice();
         Player.instance.audio_Hit_Special.Play();
@@ -172,6 +199,7 @@ public partial class Enemy : MonoBehaviour
     }
     public void Effect_Hit_GuardBreak(bool isBoss = false)
     {
+        SuperArmor(false);
         //sfx
         if(isBoss) audio_death.Play();
         else HitVoice();
@@ -199,6 +227,7 @@ public partial class Enemy : MonoBehaviour
     {
         if (enemies.Contains(this)) enemies.Remove(this);
         if (enemies.Count == 0) Player.instance.executedTarget = this;
+        SuperArmor(false);
         //sfx
         audio_death.Play();
         Player.instance.audio_Hit_Finish.Play();
@@ -223,5 +252,58 @@ public partial class Enemy : MonoBehaviour
         numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
         Manager_Main.instance.Text_Highlight(numPos, "EXECUTE");
 
+    }
+    //
+    [HideInInspector] public bool wasGuardBreak = false;
+    public bool superarmor = false;
+    public void SuperArmor(bool value)
+    {
+        if (value && !superarmor)
+        {
+            particle_smoke.Play();
+            particle_fire.Play();
+            if(c_superarmor!=null) StopCoroutine(c_superarmor);
+            StartCoroutine(C_SuperArmor_Activate(true));
+            superarmor = true;
+        }
+        else if(!value && superarmor)
+        {
+            particle_fire.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+            if(c_superarmor!=null) StopCoroutine(c_superarmor);
+            StartCoroutine(C_SuperArmor_Activate(false));
+            superarmor = false;
+        }
+        
+        
+    }
+
+    private Coroutine c_superarmor = null;
+    private IEnumerator C_SuperArmor_Activate(bool value)
+    {
+        float speed = 2.0f;
+        if (value)
+        {
+            float start = 0;
+            highlight.innerGlow = 0;
+            while (start < 0.99f)
+            {
+                start += Time.unscaledDeltaTime * speed;
+                highlight.innerGlow = start;
+                yield return null;
+            }
+            highlight.innerGlow = 1;
+        }
+        else
+        {
+            float start = 1;
+            highlight.innerGlow = 1;
+            while (start > 0.0f)
+            {
+                start -= Time.unscaledDeltaTime * speed;
+                highlight.innerGlow = start;
+                yield return null;
+            }
+            highlight.innerGlow = 0;
+        }
     }
 }

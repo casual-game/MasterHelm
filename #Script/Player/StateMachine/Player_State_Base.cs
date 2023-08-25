@@ -19,7 +19,6 @@ public class Player_State_Base : StateMachineBehaviour
         if (player.state != targetState) finished = true;
         else finished = false;
         player.SuperArmor(false);
-        player.isRevengeSkillActivated = false;
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

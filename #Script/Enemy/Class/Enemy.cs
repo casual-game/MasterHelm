@@ -149,6 +149,7 @@ public partial class Enemy : MonoBehaviour
         State_Setting();
         Setting_UI();
         Pattern_Setting();
+        Effect_Setting();
         //렌더러 설정
         skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
@@ -216,7 +217,7 @@ public partial class Enemy : MonoBehaviour
         //가드
         float damage = Player.instance.isStrong ? 20 : 10;
         
-        bool isRevenge = Player.instance.IsRevengeSkill();
+        bool isRevenge = Player.instance.CanRevenge();
         if (guard_use)
         {
             
@@ -250,7 +251,7 @@ public partial class Enemy : MonoBehaviour
                     animator.SetInteger("Num",hitType.Value);
                 }
                 
-                if (Player.instance.IsRevengeSkill()) Effect_Hit_Revenge();
+                if (Player.instance.CanRevenge()) Effect_Hit_Revenge();
                 else if (isCounter) Effect_Hit_Counter();
                 else if (Player.instance.isStrong) Effect_Hit_Strong();
             }
@@ -291,7 +292,7 @@ public partial class Enemy : MonoBehaviour
         {
             UI_SetHPGauge(currentHP - damage);
             if (death) Effect_Death();
-            else if (Player.instance.IsRevengeSkill()) Effect_Hit_Revenge();
+            else if (Player.instance.CanRevenge()) Effect_Hit_Revenge();
             else if (isCounter) Effect_Hit_Counter();
             else if (Player.instance.isStrong) Effect_Hit_Strong();
             else Effect_Hit_Normal();
@@ -311,7 +312,7 @@ public partial class Enemy : MonoBehaviour
         else
         {
             highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.25f);
-            bool cantRevenge = isGuardBreak && !Player.instance.IsRevengeSkill();
+            bool cantRevenge = isGuardBreak && !Player.instance.CanRevenge();
             if (!Player.instance.isStrong || cantRevenge)
             {
                 animator.SetTrigger("Hit");
@@ -435,11 +436,18 @@ public partial class Enemy : MonoBehaviour
     #endregion
     
     //기타//====================================================================================================
-
-    public void Effect_Roar()
+    private string s_roar = "Roar";
+    public void Effect_FirstRoar()
     {
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Enemy_Spawn);
         particle_smoke.Play();
+    }
+    public void Effect_Roar()
+    {
+        SuperArmor(true);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Enemy_Spawn);
+        particle_smoke.Play();
+        Play(s_roar);
     }
     public void Effect_Showup()
     {

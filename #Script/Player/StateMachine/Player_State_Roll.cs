@@ -9,15 +9,13 @@ public class Player_State_Roll : Player_State_Base
     private RollData data;
     private Quaternion beginRot,endRot;
     private float turnVel;
-    private float beginTime;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         endRot = Quaternion.LookRotation(player.rollVec);
         data = player.data_Weapon_Main.roll_Normal;
         beginRot = player.transform.rotation;
-        beginTime = Time.unscaledTime;
-        player.roll_Special = false;
+        player.rollBeginTime = Time.unscaledTime;
         player.particle_target.Enforce_StopEmmediately();
         player.audio_action_roll.Play();
     }

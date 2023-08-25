@@ -15,7 +15,6 @@ public class SkillData
 {
     [MinMaxSlider(0, 1, true)] public Vector2 canInput;
     public AnimationClip clip;
-    public bool canRevenge = true;
     public float animSpeed = 1.0f;
     public AnimationCurve speedCurve= AnimationCurve.Constant(0,1,1);
     public float moveSpeed = 0.6f;

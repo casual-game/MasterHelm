@@ -7,6 +7,8 @@ public class Enemy_State_Finish : Enemy_State_Base
 	public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		base.OnStateEnter(animator, stateInfo, layerIndex);
+		Debug.Log(enemy.currentSingleAttackData!=null);
+		if(enemy.isGuardBreak)enemy.SuperArmor(false);
 	}
 
 	public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -193,29 +193,37 @@ public class CamArm : MonoBehaviour
     }
     #endregion
     #region Particle
-    [Button]
-    public void SpeedLine_Play(Vector3 pos,bool loop = true)
+    public void SpeedLine_Play(bool loop , float deg)
     {
-        Vector3 lookvec = pos - Player.instance.transform.position;
-        lookvec.y = 0;
-
-        float deg = Mathf.Atan2(lookvec.z, lookvec.x) * Mathf.Rad2Deg;
-        while (deg < -180) deg += 360;
-        while (deg > 180) deg -= 360;
-        float particleDeg;
-        /*
-        if (-45 < deg && deg <= 45) particleDeg = 45;
-        else if (45 < deg && deg <= 135) particleDeg = 315;
-        else if (-135 < deg && deg <= -45) particleDeg = 135;
-        else particleDeg = 225;
-        */
-        particleDeg = -deg + 45;
-        
-        speedline_loop.transform.localRotation = Quaternion.Euler(0,particleDeg,0);
-        speedline_once.transform.localRotation = Quaternion.Euler(0,particleDeg,0);
-        
+        while (deg <= 0) deg += 360;
+        if (deg < 90) deg = 45;
+        else if (deg < 180) deg = 135;
+        else if (deg < 270) deg = 225;
+        else deg = 315;
+        speedline_loop.transform.localRotation = Quaternion.Euler(0,deg,0);
+        speedline_once.transform.localRotation = Quaternion.Euler(0,deg,0);
         if(loop) speedline_loop.Play();
         else speedline_once.Play();
+    }
+    public void SpeedLine_Play(bool loop)
+    {
+        float deg= Player.instance.transform.rotation.eulerAngles.y-45;
+        SpeedLine_Play(loop,deg);
+    }
+    public void SpeedLine_Play(bool loop,Transform targetT)
+    {
+        
+        float  deg;
+        Vector3 lookVec = targetT.position - Player.instance.transform.position;
+        lookVec.y = 0;
+        deg = Quaternion.LookRotation(lookVec).eulerAngles.y - 45;
+        SpeedLine_Play(loop,deg);
+    }
+    public void SpeedLine_Play(bool loop,Vector3 lookVec)
+    {
+        lookVec.y = 0;
+        float deg = Quaternion.LookRotation(lookVec).eulerAngles.y - 45;
+        SpeedLine_Play(loop,deg);
     }
     [Button]
     public void SpeedLine_Stop()
@@ -223,7 +231,7 @@ public class CamArm : MonoBehaviour
         speedline_loop.Stop(true,ParticleSystemStopBehavior.StopEmitting);
     }
 
-    public void SpeedLine_Special()
+    public void SpeedLine_Special()//게임 종료시 나오는 그 섬광 줄기이다.
     {
         speedline_special.Play();
     }

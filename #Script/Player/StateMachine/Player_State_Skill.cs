@@ -20,8 +20,7 @@ public class Player_State_Skill : Player_State_Base
         player.SetLeaning(false);
         dashed = false;
         weaponOff = false;
-        
-        
+
         switch (skillType)
         {
             case SkillType.Left:
@@ -44,7 +43,6 @@ public class Player_State_Skill : Player_State_Base
                 if(skillIndex==0) player.ChangeWeaponData(Player.CurrentWeaponData.Skill_R);
                 break;
         }
-        
         if (skillIndex == 0)
         {
             player.audio_attack_skill.Play();
@@ -52,6 +50,7 @@ public class Player_State_Skill : Player_State_Base
             player.audio_mat_fabric_compact.Play();
             player.audio_action_firering.Play();
             player.Particle_Smoke();
+            player.skillBeginTime = Time.unscaledTime;
         }
         
 
@@ -62,7 +61,6 @@ public class Player_State_Skill : Player_State_Base
         player.isSkill = true;
         player.isCharge = false;
         player.skillData = skill.motions[skillIndex];
-        player.isRevengeSkillActivated = skill.motions[skillIndex].canRevenge;
         Canvas_Player_World.instance.Update_Data();
         player.SuperArmor(true);
     }
@@ -85,9 +83,7 @@ public class Player_State_Skill : Player_State_Base
             if(prefab_weaponL!=null) prefab_weaponL.On(false,null);
             if(prefab_weaponR!=null) prefab_weaponR.On(false,null);
             if(prefab_shield!=null) prefab_shield.On(false,null);
-            player.SuperArmor(false);
-            player.isRevengeSkill = false;
-            player.isRevengeSkillActivated = false;
+            
         }
         //Trail
         animator.speed = skill.motions[skillIndex].speedCurve.Evaluate(stateInfo.normalizedTime)
@@ -232,7 +228,12 @@ public class Player_State_Skill : Player_State_Base
             if (trailData.shield) trail_S = true;
             break;
         }
-        
+
+        if (lastTrailData != null && !trail_L && !trail_R && !trail_S)
+        {
+            Debug.Log("TESTD");
+            player.SuperArmor(false);
+        }
         UpdateProp(weapon_L,trail_L);
         UpdateProp(weapon_R,trail_R);
         UpdateProp(shield,trail_S);

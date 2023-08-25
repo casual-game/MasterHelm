@@ -12,10 +12,12 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 		base.OnStateEnter(animator, stateInfo, layerIndex);
 		currentAttackData = motionData.attackData[0];
 		enemy.currentSingleAttackData = currentAttackData;
+		enemy.wasGuardBreak = currentAttackData.isGuardBreak;
 		if (motionData.attackData[0].isGuardBreak)
 		{
 			enemy.RoarVoice();
 			Canvas_Player_World.instance.Skull();
+			enemy.SuperArmor(true);
 			enemy.particle_charge.Play();
 			enemy.audio_create.Play();
 		}
@@ -41,6 +43,7 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 				if (currentAttackData.isGuardBreak)
 				{
 					Canvas_Player_World.instance.Skull();
+					enemy.SuperArmor(true);
 					enemy.particle_charge.Play();
 					enemy.audio_create.Play();
 				}

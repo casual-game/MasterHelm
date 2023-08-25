@@ -40,7 +40,7 @@ public partial class Player : MonoBehaviour
     [FoldoutGroup("Movement")] public AnimationCurve moveCurve = AnimationCurve.Linear(0,0,1,1);
     [FoldoutGroup("Movement")] public float accelerateDuration = 0.3f, decelerateDuration = 0.15f
         ,moveSpeed = 1.0f,strafeSpeed = 0.9f,turnDuration = 0.25f,hitDamage = 40;
-    [FoldoutGroup("AttackData")] public float preInput_Attack = 0.5f, preInput_Roll = 0.5f, rollInputDelay = 0.2f;
+    [FoldoutGroup("AttackData")] public float preInput_Attack = 0.5f, preInput_Roll = 0.5f, rollInputDelay = 0.2f,revengeDelay = 0.25f;
     [FoldoutGroup("AttackData")] public float attackStopDist = 0.5f;
     #endregion
 
