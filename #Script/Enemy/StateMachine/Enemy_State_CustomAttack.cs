@@ -12,7 +12,9 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 		base.OnStateEnter(animator, stateInfo, layerIndex);
 		currentAttackData = motionData.attackData[0];
 		enemy.currentSingleAttackData = currentAttackData;
-		enemy.wasGuardBreak = currentAttackData.isGuardBreak;
+		enemy.isGuardBreak = currentAttackData.isGuardBreak;
+		enemy.keepSuperArmor = currentAttackData.isGuardBreak && currentAttackData.keepSuperarmor;
+		
 		if (motionData.attackData[0].isGuardBreak)
 		{
 			enemy.RoarVoice();
@@ -46,6 +48,8 @@ public class Enemy_State_CustomAttack : Enemy_State_Normal
 					enemy.SuperArmor(true);
 					enemy.particle_charge.Play();
 					enemy.audio_create.Play();
+					enemy.isGuardBreak = currentAttackData.isGuardBreak;
+					enemy.keepSuperArmor = currentAttackData.isGuardBreak && currentAttackData.keepSuperarmor;
 				}
 			}
 		}

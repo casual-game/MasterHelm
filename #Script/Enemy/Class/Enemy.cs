@@ -42,7 +42,7 @@ public partial class Enemy : MonoBehaviour
     [HideInInspector] public EnemyRoot root;
     [HideInInspector] public Prefab_Prop prefab_Weapon_L, prefab_Weapon_R, prefab_Shield;
     [HideInInspector] public float camDistanceRatio = 1.0f;
-    [HideInInspector] public bool death = false,isGuardBreak = false;
+    [HideInInspector] public bool death = false,isGuardBreak = false,keepSuperArmor = false;
     [HideInInspector] public CharacterController cc;
     [HideInInspector] public Animator animator;
     [HideInInspector] public HighlightEffect highlight;
@@ -209,18 +209,25 @@ public partial class Enemy : MonoBehaviour
     {
         if (death || Player.instance == null) return;
         this.hitWeaponRot = Quaternion.LookRotation(hitWeaponRot).eulerAngles;
-        
+        if (superarmor && !Player.instance.isRevengeSkill)
+        {
+            if (guard_use) UI_SetGuardGauge(currentGuard);
+            if (Player.instance.isStrong) Effect_Hit_Normal();
+            else Effect_Guard();
+            
+            animator.SetTrigger("Hit");
+            highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
+            return;
+        }
         //회전
         Vector3 rotateVec = Player.instance.transform.position - transform.position; rotateVec.y = 0; 
         
         Move(transform.position,Quaternion.LookRotation(rotateVec));
         //가드
         float damage = Player.instance.isStrong ? 20 : 10;
-        
         bool isRevenge = Player.instance.CanRevenge();
         if (guard_use)
         {
-            
             if (guard_full)
             {
                 UI_SetGuardGauge(currentGuard + damage);
@@ -230,32 +237,7 @@ public partial class Enemy : MonoBehaviour
                 animator.SetInteger("Num", 6);
                 State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
             }
-            else if (Player.instance.isStrong)
-            {
-                UI_SetGuardGauge(currentGuard + damage);
-                Cancel();
-                if (Player.instance.isSkill)
-                {
-                    State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
-                    animator.SetInteger("Num",(int)Player.instance.skillData.hitType);
-                }
-                else
-                {
-                    hitType = hitType== null ? (int) Player.instance.motionData.hitType : hitType;
-                    if (hitType == 5 && Vector3.Dot(transform.forward, 
-                            Player.instance.transform.position - transform.position) > 0)
-                    {
-                        hitType = 6;
-                    }
-                    State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
-                    animator.SetInteger("Num",hitType.Value);
-                }
-                
-                if (Player.instance.CanRevenge()) Effect_Hit_Revenge();
-                else if (isCounter) Effect_Hit_Counter();
-                else if (Player.instance.isStrong) Effect_Hit_Strong();
-            }
-            else if (animator.GetInteger("State") == 4)
+            else if (animator.GetInteger("State") == 4 && !Player.instance.isStrong)
             {
                 UI_SetGuardGauge(currentGuard + damage);
                 if (guard_full || isRevenge)
@@ -277,14 +259,11 @@ public partial class Enemy : MonoBehaviour
             }
             else
             {
-                
                 UI_SetGuardGauge(currentGuard + damage);
-                    animator.SetInteger("Num", 7);
-                    Effect_Guard();
+                animator.SetInteger("Num", 7);
+                Effect_Guard();
                 State_Begin_Danger(DangerState.Hit, TransitionType.Immediately);
             }
-            
-            highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
             return;
         }
         //히트

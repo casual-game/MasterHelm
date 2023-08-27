@@ -36,7 +36,7 @@ public partial class Enemy : MonoBehaviour
         health_Bar = canvas.transform.Find("UnitFrame").Find("Bar").GetComponent<Image>();
         guard_Bar = canvas.transform.Find("GuardFrame").Find("Fill").GetComponent<Image>();
         guard_Family = new List<Image>();
-        guard_Family.Add(guard_Bar = canvas.transform.Find("GuardFrame").GetComponent<Image>());
+        guard_Family.Add(canvas.transform.Find("GuardFrame").GetComponent<Image>());
         guard_Family.Add(guard_Family[0].transform.GetChild(0).GetComponent<Image>());
         guard_Family.Add(guard_Family[0].transform.GetChild(1).GetComponent<Image>());
         guard_Family.Add(guard_Family[0].transform.GetChild(2).GetComponent<Image>());
@@ -48,6 +48,11 @@ public partial class Enemy : MonoBehaviour
         guard_use = guard > 0.1f && prefab_Shield!=null;
         if (guard_use)
         {
+            foreach (var gImage in guard_Family)
+            {
+                gImage.fillAmount = 1;
+            }
+            guard_full = false;
             currentGuard = 0;
             guard_Bar.fillAmount = 0;
             guard_Bar.color = guard_color_normal;

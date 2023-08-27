@@ -22,15 +22,15 @@ public class Enemy_Attack : Enemy_State_Base
 			enemy.audio_create.Play();
 			enemy.SuperArmor(true);
 			enemy.isGuardBreak = true;
+			enemy.keepSuperArmor = motionData.attackData[0].keepSuperarmor;
 		}
 		else
 		{
 			enemy.isGuardBreak = false;
-			
+			enemy.keepSuperArmor = false;
 		}
 		enemy.AttackVoice();
 		enemy.currentSingleAttackData = motionData.attackData[0];
-		enemy.wasGuardBreak = motionData.attackData[0].isGuardBreak;
 	}
 
 	public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -58,6 +58,7 @@ public class Enemy_Attack : Enemy_State_Base
 				{
 					enemy.currentSingleAttackData = data;
 					enemy.isGuardBreak = data.isGuardBreak;
+					enemy.keepSuperArmor = data.keepSuperarmor && data.isGuardBreak;
 				}
 				isTrail = true;
 				left = data.left;

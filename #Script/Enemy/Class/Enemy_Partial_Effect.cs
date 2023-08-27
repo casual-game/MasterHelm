@@ -142,14 +142,30 @@ public partial class Enemy : MonoBehaviour
         //vfx
         particle_guard.Play();
         Particle_Blood_Normal();
-        Particle_Hit_Base();
-        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Hit);
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Guard);
         //Text
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
         Manager_Main.instance.Text_Danger(numPos, "GUARD");
         Manager_Main.instance.Text_Damage_Main();
-        
+        //highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
+    }
+    public void Effect_GuardStrong()
+    {
+        //sfx
+        HitVoice();
+        Player.instance.audio_Hit_Impact.Play();
+        //vfx
+        particle_guard.Play();
+        Particle_Blood_Smash();
+        Particle_Hit_Base();
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Guard);
+        //Text
+        Vector3 numPos = transform.position - Player.instance.transform.position;
+        numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
+        Manager_Main.instance.Text_Danger(numPos, "GUARD");
+        Manager_Main.instance.Text_Damage_Main();
+        highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
     }
     public void Effect_Hit_Counter()
     {
@@ -254,7 +270,6 @@ public partial class Enemy : MonoBehaviour
 
     }
     //
-    [HideInInspector] public bool wasGuardBreak = false;
     public bool superarmor = false;
     public void SuperArmor(bool value)
     {

@@ -231,7 +231,6 @@ public class Player_State_Skill : Player_State_Base
 
         if (lastTrailData != null && !trail_L && !trail_R && !trail_S)
         {
-            Debug.Log("TESTD");
             player.SuperArmor(false);
         }
         UpdateProp(weapon_L,trail_L);

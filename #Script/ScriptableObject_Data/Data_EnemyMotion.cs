@@ -15,7 +15,7 @@ public class Data_EnemyMotion : ScriptableObject
 		
 
 		[TitleGroup("MainSetting")] public AttackType attackType;
-		[TitleGroup("MainSetting")]public bool isGuardBreak = false;
+		[TitleGroup("MainSetting")]public bool isGuardBreak = false,keepSuperarmor = false;
 		[TitleGroup("MainSetting")][MinMaxSlider(0,1,true)] public Vector2 turnRange;
 		
 		[TitleGroup("Trail")] public bool left, right, shield;
