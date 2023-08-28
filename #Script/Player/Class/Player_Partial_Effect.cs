@@ -190,9 +190,8 @@ public partial class Player : MonoBehaviour
         Vector3 newLocalPos = particle_guard.transform.localPosition;
         newLocalPos.y = -1.281f;
         particle_guard.transform.localPosition = newLocalPos;
-        Manager_Main.instance.Text_Damage_Specific("guard");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_guard);
     }
-
     public void Particle_SuperArmorHit()
     {
         //sfx
@@ -204,7 +203,7 @@ public partial class Player : MonoBehaviour
             Player.instance.transform.position + Vector3.up * 1.2f,Quaternion.identity);
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Hit);
         highlight.HitFX(Manager_Main.instance.mainData.blink_Damage,0.5f,1.5f);
-        Manager_Main.instance.Text_Damage_Specific("super armor");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_endure);
     }
     public void Particle_Hit_Normal()
     {
@@ -267,10 +266,9 @@ public partial class Player : MonoBehaviour
     {
         audio_action_timing.Play();
         Particle_FireRing(transform.position + Vector3.up*0.5f);
-        Manager_Main.instance.Text_Highlight(transform.position + Vector3.up,"REVENGE");
         CamArm.instance.SpeedLine_Play(false,target.transform);
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Revenge);
-        Manager_Main.instance.Text_Damage_Specific("evade");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_punish);
     }
     public void Particle_GuardBreakEvade()
     {
@@ -279,8 +277,7 @@ public partial class Player : MonoBehaviour
         Particle_FireRing(T_Head.position);
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Revenge);
         CamArm.instance.SpeedLine_Play(false,rollVec);
-        Manager_Main.instance.Text_Big(transform.position + Vector3.up,"EVADE");
-        Manager_Main.instance.Text_Damage_Specific("evade");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_evade);
     }
     
     private void Particle_Blood_Normal()

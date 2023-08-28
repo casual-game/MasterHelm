@@ -23,8 +23,8 @@ public partial class Manager_Main : MonoBehaviour
     public Transform _folder_;
     
     [TitleGroup("TextEffect")][FoldoutGroup("TextEffect/text effect",false)][SerializeField]
-    private DamageNumber damage_number,damage_text,damage_dangerText,damage_BIGText,
-        damage_Highlight,damage_Combo_Main,damage_Combo_Specific,damage_Combo_Info;
+    private DamageNumber damage_number_normal,damage_number_strong,damage_numbertext
+        ,damage_Combo_Main,damage_Combo_Specific,damage_Combo_Info;
     [TitleGroup("TextEffect")] [FoldoutGroup("TextEffect/text effect", false)] [SerializeField]
     private RectTransform T_DamageComboMain,T_DamageComboSpecific,T_DamagecomboInfo;
 
@@ -164,37 +164,45 @@ public partial class Manager_Main : MonoBehaviour
     }
     
     #region Effect_Text
+
+    private string s_superarmor = "무적!",s_guarded = "막힘!";
+    [HideInInspector] public string specific_counter = "카운터",
+        specific_stun = "적 스턴",
+        specific_stunstreak = "연속 스턴",
+        specific_evade = "완벽한 회피",
+        specific_punish = "완벽한 반격",
+        specific_kill = "몬스터 처치",
+        specific_guardbreak = "가드 브레이크",
+        specefic_cleararea = "구역 이동",
+        specific_allclear = "올 클리어",
+        specific_sniping = "스나이핑",
+        specific_endure = "버티기",
+        specific_guard = "방어";
     
-    
-    public void Text_Num(Vector3 pos,float num)
+    public void Damage_Normal(Vector3 pos,float num)
     {
-        damage_number.Spawn(pos, num);
+        damage_number_normal.Spawn(pos, num);
     }
-    public void Text_Normal(Vector3 pos,string txt)
+    public void Damage_Strong(Vector3 pos,float num)
     {
-        damage_text.Spawn(pos, txt);
+        damage_number_strong.Spawn(pos, num);
     }
-    public void Text_Danger(Vector3 pos,string txt)
+    public void Damage_Guarded(Vector3 pos)
     {
-        damage_dangerText.Spawn(pos, txt);
+        damage_numbertext.Spawn(pos, s_guarded);
     }
-    public void Text_Big(Vector3 pos,string txt)
+    public void Damage_Missed(Vector3 pos)
     {
-        damage_BIGText.Spawn(pos, txt);
+        damage_numbertext.Spawn(pos, s_superarmor);
     }
-    public void Text_Highlight(Vector3 pos,string txt)
-    {
-        damage_Highlight.Spawn(pos, txt);
-    }
-    
-    
-    private string s_damagespecific = "Damage_Specific", s_damagemain = "Damage_Main",
+    private string s_damagespecific = "Damage_Specific",s_damagespecific_fin = "Damage_Specific_Fin", s_damagemain = "Damage_Main",
         s_damageinfo = "Damage_Info", s_damageinfo_fin = "Damage_Info_Fin";
     private int combo = 0;
-    private float lastComboTime = -100, comboDelay = 2.5f;
-    private DamageNumber damageinfo = null;
+    private float lastComboTime = -100, comboDelay = 4.5f;
+    private DamageNumber damageinfo = null,damagespecefic = null;
     public void Text_Damage_Main()
     {
+        //Main
         if (Time.unscaledTime - lastComboTime < comboDelay) combo += 1;
         else combo = 1;
 
@@ -204,14 +212,16 @@ public partial class Manager_Main : MonoBehaviour
         damageNumber.SetAnchoredPosition(T_DamageComboMain, new Vector2(0, 0));
         damageAnimator.CrossFade(s_damagemain, 0,0,0);
     }
-    public void Text_Damage_Specific(string specific)
+    public void Text_Damage_Main(string specific)
     {
-        DamageNumber damageNumber2 =damage_Combo_Specific.Spawn(Vector3.zero, specific);
-        damageNumber2.SetAnchoredPosition(T_DamageComboSpecific, new Vector2(0, 0));
-        damageAnimator.CrossFade(s_damagespecific, 0,1,0);
+        Text_Damage_Main();
+        //Specific
+        Text_Damage_Specefic(specific);
     }
 
-    public void Text_Info(string info)
+    
+
+    public void Text_Info(string info,string specific)
     {
         if (damageinfo != null)
         {
@@ -221,12 +231,31 @@ public partial class Manager_Main : MonoBehaviour
         damageinfo =damage_Combo_Info.Spawn(Vector3.zero, info);
         damageinfo.SetAnchoredPosition(T_DamagecomboInfo, new Vector2(0, 0));
         damageAnimator.CrossFade(s_damageinfo, 0,0,0);
+
+        Text_Damage_Specefic(specific);
     }
     public void Text_Info_Fin()
     {
         if(damageinfo!=null) damageinfo.FadeOut();
         damageAnimator.CrossFade(s_damageinfo_fin, 0,0,0);
         damageinfo = null;
+    }
+    private void Text_Damage_Specefic(string specific)
+    {
+        if (damagespecefic != null)
+        {
+            damagespecefic.FadeOut();
+            damagespecefic = null;
+        }
+        damagespecefic =damage_Combo_Specific.Spawn(Vector3.zero, specific);
+        damagespecefic.SetAnchoredPosition(T_DamageComboSpecific, new Vector2(0, 0));
+        damageAnimator.CrossFade(s_damagespecific, 0,1,0);
+    }
+    public void Text_Specefic_Fin()
+    {
+        if(damagespecefic!=null) damagespecefic.FadeOut();
+        damageAnimator.CrossFade(s_damagespecific_fin, 0,1,0);
+        damagespecefic = null;
     }
     #endregion
     

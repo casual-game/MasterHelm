@@ -270,7 +270,6 @@ public partial class Player : MonoBehaviour
         {
             if (death || clear) return;
             Cancel();
-            Manager_Main.instance.Text_Danger(transform.position,"GuardBreak");
             ChangeState(8);
         }
         void _guard(Vector3 _point,bool strong)

@@ -68,12 +68,11 @@ public class Barricade : MonoBehaviour
     private IEnumerator C_Close()
     {
         Manager_Main.instance.Text_Info_Fin();
+        Manager_Main.instance.Text_Specefic_Fin();
         yield return new WaitForSecondsRealtime(closeDelay);
         p_heat.Play();
         audio_Impact.Play();
         anim.CrossFade(s_close,0.1f,0);
-        
-        //CamArm.instance.Production_Fin();
     }
     
     public void Impact_Med()
@@ -85,7 +84,7 @@ public class Barricade : MonoBehaviour
         {
             p_heat.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             boxC.isTrigger = true;
-            Manager_Main.instance.Text_Info("Move!");
+            Manager_Main.instance.Text_Info("Move!",Manager_Main.instance.specefic_cleararea);
         }
     }
     public void Impact_Norm()

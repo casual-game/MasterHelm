@@ -8,7 +8,8 @@ using UnityEngine.UI;
 public partial class Enemy : MonoBehaviour
 {
     [HideInInspector] public ParticleSystem particle_guard, particle_parrying,particle_smoke,particle_charge,particle_fire;
-    
+
+
     protected virtual void FirstSetting_Effect()
     {
         Transform t = transform.Find("Particle");
@@ -18,7 +19,6 @@ public partial class Enemy : MonoBehaviour
         particle_charge = t.Find("Charge").GetComponent<ParticleSystem>();
         particle_fire = t.Find("Fire").GetComponent<ParticleSystem>();
     }
-
     protected virtual void Effect_Setting()
     {
         ParticleSystem p = particle_fire.transform.GetChild(0).GetComponent<ParticleSystem>();
@@ -97,7 +97,10 @@ public partial class Enemy : MonoBehaviour
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos.y = 0;
         numPos = transform.position + numPos.normalized * 0.5f;
-        Manager_Main.instance.Text_Num(numPos, damage);
+        if(superarmor) Manager_Main.instance.Damage_Missed(numPos);
+        else if (guard_use) Manager_Main.instance.Damage_Guarded(numPos);
+        else if(Player.instance.isStrong) Manager_Main.instance.Damage_Strong(numPos, damage);
+        else Manager_Main.instance.Damage_Normal(numPos, damage);
     }
     //Effct_~~ 끼리는 중복사용할 수 없다.
     public void Effect_Hit_Normal()
@@ -130,9 +133,7 @@ public partial class Enemy : MonoBehaviour
         Particle_Text_Damage(Random.Range(50, 75));
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Big(numPos, "SMASH");
-        Manager_Main.instance.Text_Damage_Main();
-        Manager_Main.instance.Text_Damage_Specific("smash");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_stun);
     }
     public void Effect_Guard()
     {
@@ -144,11 +145,8 @@ public partial class Enemy : MonoBehaviour
         Particle_Blood_Normal();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Guard);
         //Text
-        Vector3 numPos = transform.position - Player.instance.transform.position;
-        numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Danger(numPos, "GUARD");
+        Particle_Text_Damage(0);
         Manager_Main.instance.Text_Damage_Main();
-        //highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
     }
     public void Effect_GuardStrong()
     {
@@ -161,10 +159,36 @@ public partial class Enemy : MonoBehaviour
         Particle_Hit_Base();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Guard);
         //Text
-        Vector3 numPos = transform.position - Player.instance.transform.position;
-        numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Danger(numPos, "GUARD");
+        Particle_Text_Damage(0);
         Manager_Main.instance.Text_Damage_Main();
+        highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
+    }
+    public void Effect_Hit_SuperArmor()
+    {
+        //sfx
+        HitVoice();
+        Player.instance.audio_Hit_Impact.Play();
+        //vfx
+        particle_guard.Play();
+        Particle_Blood_Normal();
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Guard);
+        //Text
+        Manager_Main.instance.Text_Damage_Main();
+        Particle_Text_Damage(0);
+    }
+    public void Effect_Hit_SuperArmorStrong()
+    {
+        //sfx
+        HitVoice();
+        Player.instance.audio_Hit_Impact.Play();
+        //vfx
+        particle_guard.Play();
+        Particle_Blood_Smash();
+        Particle_Hit_Base();
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Hit);
+        //Text
+        Manager_Main.instance.Text_Damage_Main();
+        Particle_Text_Damage(0);
         highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);
     }
     public void Effect_Hit_Counter()
@@ -181,12 +205,8 @@ public partial class Enemy : MonoBehaviour
         Particle_Hit_Revenge();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smash);
         //Text
-        Particle_Text_Damage(Random.Range(75, 100));
-        Vector3 numPos = transform.position - Player.instance.transform.position;
-        numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Big(numPos, "COUNTER");
-        Manager_Main.instance.Text_Damage_Main();
-        Manager_Main.instance.Text_Damage_Specific("counter");
+        Particle_Text_Damage(Random.Range(75, 100)); 
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_counter);
     }
     public void Effect_Hit_Revenge()
     {
@@ -209,9 +229,7 @@ public partial class Enemy : MonoBehaviour
         Particle_Text_Damage(Random.Range(100, 200));
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Highlight(numPos, "PUNISH");
-        Manager_Main.instance.Text_Damage_Main();
-        Manager_Main.instance.Text_Damage_Specific("punish");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_stun);
     }
     public void Effect_Hit_GuardBreak(bool isBoss = false)
     {
@@ -235,9 +253,7 @@ public partial class Enemy : MonoBehaviour
         Particle_Text_Damage(Random.Range(100, 200));
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Highlight(numPos, "GUARD BREAK");
-        Manager_Main.instance.Text_Damage_Main();
-        Manager_Main.instance.Text_Damage_Specific("guard break");
+        Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_guardbreak);
     }
     public void Effect_Death(bool isBoss = false)
     {
@@ -264,10 +280,6 @@ public partial class Enemy : MonoBehaviour
         
 
         Particle_Text_Damage(Random.Range(100, 200));
-        Vector3 numPos = transform.position - Player.instance.transform.position;
-        numPos = transform.position + numPos.normalized * 0.5f + Vector3.up;
-        Manager_Main.instance.Text_Highlight(numPos, "EXECUTE");
-
     }
     //
     public bool superarmor = false;

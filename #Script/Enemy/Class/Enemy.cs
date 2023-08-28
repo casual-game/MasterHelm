@@ -208,12 +208,13 @@ public partial class Enemy : MonoBehaviour
     public virtual void Hit(bool isCounter,Vector3 hitWeaponRot, int? hitType = null, bool isArrow = false) 
     {
         if (death || Player.instance == null) return;
+        if(isArrow) Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_sniping);
         this.hitWeaponRot = Quaternion.LookRotation(hitWeaponRot).eulerAngles;
         if (superarmor && !Player.instance.isRevengeSkill)
         {
             if (guard_use) UI_SetGuardGauge(currentGuard);
-            if (Player.instance.isStrong) Effect_Hit_Normal();
-            else Effect_Guard();
+            if (Player.instance.isStrong) Effect_Hit_SuperArmorStrong();
+            else Effect_Hit_SuperArmor();
             
             animator.SetTrigger("Hit");
             highlight.HitFX(Manager_Main.instance.mainData.enemy_HitColor,0.5f);

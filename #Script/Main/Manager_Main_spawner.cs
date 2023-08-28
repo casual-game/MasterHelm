@@ -225,17 +225,17 @@ public partial class Manager_Main : MonoBehaviour
 		//구역 클리어, 올클리어 
 		if (Enemy.enemies.Count == 0 && lastSpawner)
 		{
-			if(IsLastArea())Text_Info("CLEAR");
+			if (IsLastArea()) Text_Info("CLEAR",specific_allclear);
+			else Text_Damage_Main(specific_kill);
 			Spawner_MoveNext(isBoss);
 		}
 		//그냥 처치
 		else
 		{
-			Text_Damage_Main();
-			Text_Damage_Specific("execute");
+			Text_Damage_Main(specific_kill);
 			CamArm.instance.SpeedLine_Play(false);
 			CamArm.instance.Impact(mainData.impact_SpecialHit);
-			print("normal");
+			Text_Damage_Main(specific_kill);
 		}
 		UpdateData();
 	}

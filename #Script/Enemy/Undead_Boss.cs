@@ -294,7 +294,6 @@ public class Undead_Boss : Enemy
         Vector3 numPos = transform.position - Player.instance.transform.position;
         numPos.y = 0;
         numPos = transform.position + numPos.normalized * 0.5f;
-        Manager_Main.instance.Text_Big(numPos, "UNGARD");
         //
         Canvas_Player.instance.OnLateUpdate.RemoveListener(UI_Update_Guard);
         
