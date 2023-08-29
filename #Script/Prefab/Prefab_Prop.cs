@@ -122,17 +122,16 @@ public class Prefab_Prop : MonoBehaviour
         sparkables.Clear();
         if (isPlayer)
         {
-            /*
             foreach (var sparkable in Sparkable.Sparkables)
             {
                 sparkables.Add(sparkable);
                 if (Vector3.SqrMagnitude(sparkable.transform.position - currentPos) < (limit * limit))
                 {
-                    //sparkables.Add(sparkable);
+                    sparkables.Add(sparkable);
                 }
                     
             }
-            */
+            
         }
         //
         if (isPlayer)
@@ -213,15 +212,14 @@ public class Prefab_Prop : MonoBehaviour
                 Capsule3 enemyCapsule = enemy.Get_Capsule3();
                 if (Intersection.TestBox3Capsule3(ref box3, ref enemyCapsule)) DetectEnemy(enemy);
             }
-            /*
-            int jlength = DestructibleObject.destructibleObjects.Count;
+            
+            int jlength = DestructibleObject.DestructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
-                DestructibleObject destructible = DestructibleObject.destructibleObjects[j];
+                DestructibleObject destructible = DestructibleObject.DestructibleObjects[j];
                 Box3 destructibleBox = destructible.box;
                 if (Intersection.TestBox3Box3(ref box3, ref destructibleBox)) destructible.Explode(Player.instance.transform.position);
             }
-            */
             //spark 효과
             Vector3 size = box3.Axis1 * box3.Extents.y, lossyscale = transform.lossyScale;
             Vector3 begin = box3.Center - size;
@@ -231,7 +229,6 @@ public class Prefab_Prop : MonoBehaviour
                 bool detected = Intersection.TestBox3Box3(ref box3, ref sparkables[j].box);
                 if (detected)
                 {
-                    //CamArm.instance.Shake(Manager_Main.instance.mainData.impact_Hit);
                     Player.instance.audio_Hit_Spark.Play();
                     Manager_Pooler.instance.GetParticle("Spark", begin + size, Quaternion.identity);
                     Manager_Main.instance.Vibrate(0.1f,0.25f);
@@ -335,9 +332,6 @@ public class Prefab_Prop : MonoBehaviour
     }
     #endregion
     #region Box
-
-    
-
     #if UNITY_EDITOR
     public List<Box3> gizmoBox = new List<Box3>();
     private void OnDrawGizmos()

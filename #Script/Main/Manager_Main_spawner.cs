@@ -5,6 +5,7 @@ using Sirenix.OdinInspector;
 using Unity.Collections;
 //using Beautify.Universal;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,12 +21,36 @@ public partial class Manager_Main : MonoBehaviour
 	[LabelText("시작 타일")] public Vector2Int startTile = new Vector2Int(0, 0);
 	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
 	[LabelText("타일 크기")] public Vector2Int tileSize = new Vector2Int(2, 2);
-	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
+	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")]
+	[LabelText("시작 로딩 범위")][MinMaxSlider(1,"@scenes.Count",true)] public Vector2Int startLoadingRange = Vector2Int.one;
 	
 	
+	//씬 리스트
+	[TabGroup("에디터 툴/tools", "레벨 설정", SdfIconType.MapFill, TextColor = "green")][LabelText("높이 조절 잠금",SdfIconType.LockFill)]
+	public bool lockHeight;
+	[Button][TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][HorizontalGroup("에디터 툴/tools/레벨 설정/button")]
+	public void LoadAll()
+	{
+		foreach (var scene in scenes)
+		{
+			if(!SceneManager.GetSceneByName(scene.name).isLoaded) EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(scene),OpenSceneMode.Additive);
+		}
+	}
+	[Button][TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][HorizontalGroup("에디터 툴/tools/레벨 설정/button")]
+	public void UnloadAll()
+	{
+		foreach (var scene in scenes)
+		{
+			if(SceneManager.GetSceneByName(scene.name).isLoaded) EditorSceneManager.CloseScene(SceneManager.GetSceneByName(scene.name),true);
+		}
+	}
+	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")]
+	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
+	[LabelText("씬 리스트",SdfIconType.MapFill,IconColor = "red")][GUIColor(1.0f,0.8f,0.8f)][PropertySpace(32)]
+	public List<SceneAsset> scenes = new List<SceneAsset>();
 
-	
-	[LabelText("레벨")][Space(32)][OnCollectionChanged("UpdateData")]
+	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
+	[LabelText("레벨")][OnCollectionChanged("UpdateData")]
 	public List<Area> areas = new List<Area>();
 	//메인 코드
 	[Sirenix.OdinInspector.ReadOnly] public int areaIndex = 0;
@@ -120,6 +145,7 @@ public partial class Manager_Main : MonoBehaviour
 	}
 	public void Spawner_AreaStart()//바리케이드 닫히면 호출. 바리케이드 없을 경우 그냥 호출
 	{
+		StartCoroutine(LoadCurrentScenes());
 		if(c_spawner_areastart!=null) StopCoroutine(c_spawner_areastart);
 		c_spawner_areastart = StartCoroutine(C_Spawner_AreaStart());
 	}
@@ -244,7 +270,6 @@ public partial class Manager_Main : MonoBehaviour
 		return areas.Count - 1 <= areaIndex;
 	}
 	#endregion
-	
 	#region Clear
 	private Coroutine c_clear = null;
 	public void Clear_Begin1(bool isBoss)
@@ -360,7 +385,7 @@ public partial class Manager_Main : MonoBehaviour
 				{
 					float x = startTile.x*6+spawn.center.x + singleSpawner.x;
 					float y = startTile.y*6+spawn.center.y + singleSpawner.y;
-					singleSpawner.UpdateHeight(new Vector3(x,10,y),enemyCreateDetectLayer);
+					if(!lockHeight) singleSpawner.UpdateHeight(new Vector3(x,10,y),enemyCreateDetectLayer);
 				}
 			}
 		}
@@ -452,14 +477,58 @@ public partial class Manager_Main : MonoBehaviour
 	}
 	#endregion
 	#region Scene
-
-	private IEnumerator LoadScene(string sceneName)
+	public IEnumerator LoadCurrentScenes()
 	{
-		var mAsyncOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-		yield return mAsyncOperation;
-	}
-	
+		
+		int loadingMin = areas[areaIndex].loadingRange.x-1, loadingMax = areas[areaIndex].loadingRange.y-1;
+		int lastMin = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.x-1;
+		int lastMax = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.y - 1;
 
+		for(int i=0; i<scenes.Count; i++)
+		{
+			SceneAsset scene = scenes[i];
+			
+			
+			bool contain = loadingMin <= i && i <= loadingMax;
+			bool mustWait = !((lastMin <= i && i < loadingMin) || (lastMax < i && i <= loadingMax));
+			var _scene = SceneManager.GetSceneByName(scene.name);
+			if (contain && !_scene.isLoaded)
+			{
+				var mAsyncOperation = SceneManager.LoadSceneAsync(scene.name, LoadSceneMode.Additive);
+				if (mustWait)
+				{
+					//print("Waitman");
+					yield return mAsyncOperation;
+				} 
+			}
+		}
+	}
+	public IEnumerator UnloadCurrentScenes()
+	{
+		
+		int loadingMin = areas[areaIndex].loadingRange.x-1, loadingMax = areas[areaIndex].loadingRange.y-1;
+		int lastMin = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.x-1;
+		int lastMax = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.y - 1;
+
+		for(int i=0; i<scenes.Count; i++)
+		{
+			SceneAsset scene = scenes[i];
+			
+			
+			bool contain = loadingMin <= i && i <= loadingMax;
+			bool mustWait = !((lastMin <= i && i < loadingMin) || (lastMax < i && i <= loadingMax));
+			var _scene = SceneManager.GetSceneByName(scene.name);
+			if (!contain && _scene.isLoaded)
+			{
+				var mAsyncOperation = SceneManager.UnloadSceneAsync(scene.name);
+				if (mustWait)
+				{
+					print("Waitman");
+					yield return mAsyncOperation;
+				} 
+			}
+		}
+	}
 	#endregion
 }
 [System.Serializable]
@@ -474,6 +543,10 @@ public class Area
 	[TitleGroup("$title","$subtitle")][ColorPalette(PaletteName = "Country")][HideLabel][HorizontalGroup("$title/maindata")]
 	public Color color;
 	[LabelText("나가는 문")] public Barricade exitBarricade;
+
+	[LabelText("로딩 범위")] [MinMaxSlider(1, "loadingMax",true)]
+	public Vector2Int loadingRange = new Vector2Int(1,1);
+	[HideInInspector] public int loadingMax;
 	//셀 리스트
 	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
 	[LabelText("셀 리스트",SdfIconType.StickyFill,IconColor = "blue")][Space(16)][GUIColor(0.8f,0.8f,1.0f)]
@@ -484,13 +557,12 @@ public class Area
 	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
 	[LabelText("스폰 리스트",SdfIconType.PersonFill,IconColor = "yellow")][GUIColor(1.0f,1.0f,0.8f)]
 	public List<Spawn> spawns = new List<Spawn>();
-	//씬 리스트
-	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
-	[LabelText("씬 리스트",SdfIconType.MapFill,IconColor = "red")][GUIColor(1.0f,0.8f,0.8f)]
-	public List<SceneAsset> scenes = new List<SceneAsset>();
+	
 
 	public void UpdateData()
 	{
+		Manager_Main m = GameObject.FindObjectOfType<Manager_Main>();
+		if (m != null) loadingMax = m.scenes.Count;
 		foreach (var cell in cells)
 		{
 			cell.UpdateData();
@@ -500,6 +572,7 @@ public class Area
 			spawn.UpdateData(cells);
 		}
 	}
+	
 }
 [System.Serializable]
 public class Cell

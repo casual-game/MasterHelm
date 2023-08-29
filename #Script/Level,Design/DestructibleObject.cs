@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dest.Math;
@@ -8,17 +9,18 @@ using Random = UnityEngine.Random;
 
 public class DestructibleObject : MonoBehaviour
 {
+    public static List<DestructibleObject> DestructibleObjects = new List<DestructibleObject>();
+
     public float radius;
     public float force = 0.3f,torque = 360;
     public Data_Audio breakSound;
 
     private bool exploded = false;
     private Transform before,after,core,particle;
-
     private Rigidbody[] rigids;
     private ParticleSystem[] particles;
     [HideInInspector]public Box3 box;
-    public void Setting () 
+    public void OnEnable () 
     {
         SoundManager.instance.Add(breakSound);
         before = transform.Find("Before");
@@ -36,13 +38,19 @@ public class DestructibleObject : MonoBehaviour
         after.gameObject.SetActive(false);
         core.gameObject.SetActive(true);
         particle.gameObject.SetActive(true);
-
-        
+        DestructibleObjects.Add(this);
     }
+
+    public void OnDisable()
+    {
+        DestructibleObjects.Remove(this);
+    }
+
     [Button]
     public void Explode(Vector3 explodePos,bool effect = true)
     {
         if (exploded) return;
+        LayerMask layerMask = LayerMask.NameToLayer("Destructible");
         before.gameObject.SetActive(false);
         after.gameObject.SetActive(true);
         exploded = true;
@@ -56,6 +64,7 @@ public class DestructibleObject : MonoBehaviour
                           +(rb.transform.position - Player.instance.transform.position)).normalized;
             rb.AddForce(vec*force,ForceMode.Impulse);
             rb.AddTorque(Quaternion.Euler(90,0,0)*vec*torque,ForceMode.Impulse);
+            rb.gameObject.layer = layerMask;
         }
         //카메라 효과
         if (effect)

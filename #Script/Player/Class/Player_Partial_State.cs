@@ -335,11 +335,10 @@ public partial class Player : MonoBehaviour
         physicsTime = Time.time;
         while (Time.time-physicsTime<1.0f)
         {
-            /*
-            int jlength = DestructibleObject.destructibleObjects.Count;
+            int jlength = DestructibleObject.DestructibleObjects.Count;
             for (int j = jlength-1; j >= 0; j--)
             {
-                DestructibleObject destructible = DestructibleObject.destructibleObjects[j];
+                DestructibleObject destructible = DestructibleObject.DestructibleObjects[j];
                 Vector3 distVec = transform.position-destructible.transform.GetChild(0).position;
                 distVec.y = 0;
                 if (Vector3.Magnitude(distVec) < cc.radius + 0.1f+destructible.radius)
@@ -348,7 +347,6 @@ public partial class Player : MonoBehaviour
                     destructible.Explode(transform.position,false);
                 }
             }
-            */
             yield return null;
         }
         

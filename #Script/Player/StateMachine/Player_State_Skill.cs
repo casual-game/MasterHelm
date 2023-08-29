@@ -45,6 +45,7 @@ public class Player_State_Skill : Player_State_Base
         }
         if (skillIndex == 0)
         {
+            Manager_Main.instance.mainData.audio_Effecting_Impact.Play();
             player.audio_attack_skill.Play();
             player.audio_mat_armor.Play();
             player.audio_mat_fabric_compact.Play();

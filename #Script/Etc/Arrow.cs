@@ -91,7 +91,7 @@ public class Arrow : MonoBehaviour
 	    float ratio = 0;
 	    yield return null;
 	    Vector3 currentPos = transform.position;
-	    /*
+	    
 	    foreach (var sparkable in Sparkable.Sparkables)
 	    {
 		    if (Vector3.SqrMagnitude(currentPos - sparkable.transform.position) < 400)
@@ -99,19 +99,19 @@ public class Arrow : MonoBehaviour
 			    boxes.Add(sparkable.box);
 		    }
 	    }
-	    */
+	    
 	    //목표까지 날아가기
 	    while (ratio<1)
 	    {
 		    yield return null;
 		    ratio = (Time.time - startTime)/duration;
 		    transform.position = Vector3.Lerp(startPos,targetPos,ratio);
-		    /*
+		    
 		    //destructible
-		    int jlength = DestructibleObject.destructibleObjects.Count;
+		    int jlength = DestructibleObject.DestructibleObjects.Count;
 		    for (int j = jlength-1; j >= 0; j--)
 		    {
-			    DestructibleObject destructible = DestructibleObject.destructibleObjects[j];
+			    DestructibleObject destructible = DestructibleObject.DestructibleObjects[j];
 			    Vector3 distVec = transform.position-destructible.transform.GetChild(0).position;
 			    distVec.y = 0;
 			    if (Vector3.Magnitude(distVec) < 0.1f+destructible.radius)
@@ -131,7 +131,6 @@ public class Arrow : MonoBehaviour
 				    yield break;
 			    }
 		    }
-		    */
 	    }
 		
 	    transform.position = targetPos;
@@ -143,11 +142,8 @@ public class Arrow : MonoBehaviour
 		    Canvas_Player.instance.skillGauge_R.SetValue(Canvas_Player.instance.skillGauge_R.current + skillPoint);
 		    Vector3 hitPos = target.transform.position+(Player.instance.transform.position-target.transform.position).normalized*0.5f;
 		    hitPos.y = transform.position.y;
-		    
-		    //CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Hit);
 		    Player.instance.isStrong = false;
 		    target.Hit(false,Player.instance.transform.rotation.eulerAngles,null,true);
-		    
 		    DestroyArrow(hitPos);
 	    }
 	    else

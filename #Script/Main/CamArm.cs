@@ -15,6 +15,8 @@ public class CamArm : MonoBehaviour
 {
     
     [TitleGroup("Main Setting")][BoxGroup("Main Setting/Base")] public static CamArm instance;
+
+    [TitleGroup("Main Setting")] [BoxGroup("Main Setting/Base")] public float baseTime = 1.2f;
     [TitleGroup("Main Setting")][BoxGroup("Main Setting/Base")] public Transform target;
     [TitleGroup("Main Setting")][BoxGroup("Main Setting/Base")] public float moveDamp = 5.0f,maxDistance = 2.0f;
     [TitleGroup("Main Setting")] [BoxGroup("Main Setting/Base")] public AudioMixerGroup mixerGroup;
@@ -141,7 +143,7 @@ public class CamArm : MonoBehaviour
         yield return new WaitForSecondsRealtime(duration);
         if (duration2 < 0.01f)
         {
-            Time.timeScale = 1;
+            Time.timeScale = baseTime;
             Time.fixedDeltaTime = Time.timeScale*startFixedDeltaTime;
             Time.maximumDeltaTime = Time.timeScale*startMaxDeltaTime;
             yield break;
@@ -152,7 +154,7 @@ public class CamArm : MonoBehaviour
         Time.fixedDeltaTime = Time.timeScale*startFixedDeltaTime;
         Time.maximumDeltaTime = Time.timeScale*startMaxDeltaTime;
         yield return new WaitForSecondsRealtime(duration2);
-        Time.timeScale = 1;
+        Time.timeScale = baseTime;
         Time.fixedDeltaTime = Time.timeScale*startFixedDeltaTime;
         Time.maximumDeltaTime = Time.timeScale*startMaxDeltaTime;
     }
@@ -514,6 +516,7 @@ public class CamArm : MonoBehaviour
     }
     public void Setting()
     {
+        Time.timeScale = baseTime;
         startFixedDeltaTime = Time.fixedDeltaTime;
         startMaxDeltaTime = Time.maximumDeltaTime;
         productionT = transform.GetComponentInChildren<Camera>().transform.parent;

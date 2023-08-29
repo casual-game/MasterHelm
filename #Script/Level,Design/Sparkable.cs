@@ -7,10 +7,10 @@ using UnityEngine;
 
 public class Sparkable : MonoBehaviour
 {
+    public static List<Sparkable> Sparkables = new List<Sparkable>();
     [ShowInInspector]
     public Box3 box;
-
-    public void Setting()
+    private void Setting()
     {
         box = CreateBox3(transform);
     }
@@ -42,5 +42,15 @@ public class Sparkable : MonoBehaviour
     private Box3 CreateBox3(Transform box)
     {
         return new Box3(box.position, box.right, box.up, box.forward, box.lossyScale);
+    }
+
+    private void OnEnable()
+    {
+        Setting();
+        Sparkables.Add(this);
+    }
+    private void OnDisable()
+    {
+        Sparkables.Remove(this);
     }
 }

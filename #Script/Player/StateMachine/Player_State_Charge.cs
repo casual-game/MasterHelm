@@ -37,6 +37,7 @@ public class Player_State_Charge : Player_State_Base
             player.audio_mat_armor.Play();
             player.audio_mat_fabric_compact.Play();
             player.audio_action_firering.Play();
+            Manager_Main.instance.mainData.audio_Effecting_Impact.Play();
             createdEffect = true;
             player.Particle_Smoke();
             if (player.prefab_shield != null) player.prefab_shield.charge_Effect.Play();

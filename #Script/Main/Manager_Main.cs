@@ -89,6 +89,11 @@ public partial class Manager_Main : MonoBehaviour
             yield return null;
             if (check) break;
         }
+        //맵 로딩
+        for (int i = startLoadingRange.x-1; i < startLoadingRange.y; i++)
+        {
+            yield return SceneManager.LoadSceneAsync(scenes[i].name, LoadSceneMode.Additive);
+        }
         //Player 생성
         PlayerStart playerStart = FindObjectOfType<PlayerStart>(false);
         if (playerStart == null) Debug.LogError("PlayerStart가 없습니다.");
@@ -121,14 +126,7 @@ public partial class Manager_Main : MonoBehaviour
         dissolveController.target1EndPointTransform = dissolve_end;
         dissolve_start.transform.localPosition = Vector3.zero;
         dissolve_end.transform.localPosition = Vector3.zero;
-        //Sparkable
-        /*
-        Sparkable.Sparkables = new List<Sparkable>();
-        foreach (var sparkable in FindObjectsOfType<Sparkable>())
-        {
-            sparkable.Setting();
-        }
-        */
+        
         //GetItem
         UI_GetItem getItem = FindObjectOfType<UI_GetItem>(true);
         getItem.Setting();
@@ -143,13 +141,6 @@ public partial class Manager_Main : MonoBehaviour
             tutorial.Setting();
         }
         LoadHP();
-        //Breakable
-        /*
-        foreach (var breakable in FindObjectsOfType<DestructibleObject>())
-        {
-            breakable.Setting();
-        }
-        */
         //Barricade
         foreach (var barricede in FindObjectsOfType<Barricade>())
         {

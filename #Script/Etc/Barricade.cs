@@ -90,7 +90,7 @@ public class Barricade : MonoBehaviour
     public void Impact_Norm()
     {
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smooth,true,false,true);
-        //if(!opened) Manager_Main.instance.Spawner_AreaStart();
+        if(!opened) Manager_Main.instance.StartCoroutine(Manager_Main.instance.UnloadCurrentScenes());
     }
 
     public bool Passed()
