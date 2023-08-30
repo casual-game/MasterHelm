@@ -20,7 +20,7 @@ public partial class Player : MonoBehaviour
         audio_attack_normal,audio_attack_strong,audio_attack_skill,audio_attack_additional,audio_attack_timing,
         audio_attack_damaged_normal,audio_attack_damaged_strong,
         audio_mat_armor,audio_mat_fabric_smooth,audio_mat_fabric_compact,
-        audio_Hit_Gore,audio_Hit_Impact,audio_Hit_Notice,audio_Hit_Special,audio_Hit_Finish,audio_Hit_Spark,
+        audio_Hit_Gore,audio_Hit_Impact,audio_Hit_Smashed,audio_Hit_Special,audio_Hit_Finish,audio_Hit_Spark,audio_Hit_Guard,
         audio_Start,audio_StageClear,audio_AreaClear,audio_Ready,audio_BossFin,audio_Bow_Ready,audio_Bow_Shoot;
     private float voiceDelay = 1.5f,lastVoiceTime=0;
     private int footstepIndex = 0;
@@ -44,6 +44,7 @@ public partial class Player : MonoBehaviour
         SoundManager.instance.Add(audio_Hit_Gore);
         SoundManager.instance.Add(audio_Hit_Impact);
         SoundManager.instance.Add(audio_Hit_Spark);
+        SoundManager.instance.Add(audio_Hit_Guard);
         
         SoundManager.instance.Add(audio_Start);
         SoundManager.instance.Add(audio_StageClear);

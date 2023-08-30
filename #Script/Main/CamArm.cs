@@ -132,7 +132,6 @@ public class CamArm : MonoBehaviour
         if(c_stop!=null) StopCoroutine(c_stop);
         c_stop = StartCoroutine(C_Stop(duration, scale, duration2, scale2));
     }
-
     private IEnumerator C_Stop(float duration,float scale,float duration2,float scale2)
     {
         stopEndTime = Time.unscaledTime + duration+duration2;

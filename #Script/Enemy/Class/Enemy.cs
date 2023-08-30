@@ -249,7 +249,6 @@ public partial class Enemy : MonoBehaviour
                     if(isRevenge) Effect_Hit_Revenge();
                     else
                     {
-                        Player.instance.audio_Hit_Notice.Play();
                         Effect_Hit_Strong();
                     }
                 }
@@ -434,7 +433,6 @@ public partial class Enemy : MonoBehaviour
     public void Play(string tag)
     {
         customEffect.PlayParticle(tag);
-        customEffect.PlaySound(tag);
         customEffect.Detect(tag,transform.position,currentSingleAttackData);
     }
     //기즈모 그리기//====================================================================================================

@@ -429,7 +429,6 @@ public partial class Player : MonoBehaviour
     {
         animator.speed = 1;
         animator.SetBool("Strafe",false);
-        CamArm.instance.SpeedLine_Stop();
         
         Canvas_Player.AB_PressedTime = -100;
         Canvas_Player.RB_PressedTime = -100;

@@ -35,6 +35,7 @@ public class Undead_1Hand : Enemy
                     }
                     else
                     {
+                        audio_create.Play();
                         yield return State_Set(StartCoroutine(CState_Attack(1)));
                         audio_roar.Play();
                         yield return State_Set(StartCoroutine(CState_Chase_Fast(2.75f,1)));
@@ -46,6 +47,7 @@ public class Undead_1Hand : Enemy
             yield return State_Set(StartCoroutine(CState_Wait(2.0f)));
 
             yield return State_Set(StartCoroutine(CState_Backstep()));
+            audio_create.Play();
             yield return State_Set(StartCoroutine(CState_Attack(1)));
             audio_roar.Play();
             yield return State_Set(StartCoroutine(CState_Chase_Fast(2.75f,1)));

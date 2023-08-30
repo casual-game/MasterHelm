@@ -56,6 +56,7 @@ public partial class Enemy : MonoBehaviour
     }
     public void Particle_Hit_Revenge()
     {
+        Player.instance.audio_Hit_Special.Play();
         GameObject effect_hit = Manager_Pooler.instance.Get("Weapon_RevengeHit_Effect");
         Vector3 particleVec = Player.instance.transform.position - transform.position;
         particleVec.y = 0; particleVec.Normalize(); particleVec *= 0.5f;
@@ -196,7 +197,7 @@ public partial class Enemy : MonoBehaviour
         SuperArmor(false);
         //sfx
         HitVoice();
-        Player.instance.audio_Hit_Notice.Play();
+        
         Player.instance.audio_Hit_Gore.Play();
         Player.instance.audio_Hit_Impact.Play();
         //vfx
@@ -213,11 +214,9 @@ public partial class Enemy : MonoBehaviour
         SuperArmor(false);
         //sfx
         HitVoice();
-        Player.instance.audio_Hit_Special.Play();
         Player.instance.audio_Hit_Gore.Play();
         Player.instance.audio_Hit_Impact.Play();
         //vfx
-        CamArm.instance.speedline_loop.Stop();
         particle_parrying.Play();
         Particle_Hit_Revenge();
         Particle_Blood_Smash();
@@ -237,7 +236,6 @@ public partial class Enemy : MonoBehaviour
         //sfx
         if(isBoss) audio_death.Play();
         else HitVoice();
-        Player.instance.audio_Hit_Special.Play();
         Player.instance.audio_Hit_Gore.Play();
         Player.instance.audio_Hit_Impact.Play();
         //vfx
@@ -300,8 +298,6 @@ public partial class Enemy : MonoBehaviour
             StartCoroutine(C_SuperArmor_Activate(false));
             superarmor = false;
         }
-        
-        
     }
 
     private Coroutine c_superarmor = null;

@@ -17,7 +17,7 @@ public class CustomEffect : MonoBehaviour
     public class Effect
     {
         [FoldoutGroup("$TitleName")] public string tag;
-        [FoldoutGroup("$TitleName")] public Data_Audio audio;
+        [FoldoutGroup("$TitleName")] public Data_Audio audio_hit,audio_miss,audio_start;
         [FoldoutGroup("$TitleName")] public ParticleSystem particle;
         [ReadOnly]
         [FoldoutGroup("$TitleName")] public Transform createRoot;
@@ -120,7 +120,9 @@ public class CustomEffect : MonoBehaviour
         transform.SetParent(folderT);
         foreach (var effect in effects)
         {
-            if(effect.audio!=null) SoundManager.instance.Add(effect.audio);
+            if(effect.audio_hit!=null) SoundManager.instance.Add(effect.audio_hit);
+            if(effect.audio_miss!=null) SoundManager.instance.Add(effect.audio_miss);
+            if(effect.audio_start!=null) SoundManager.instance.Add(effect.audio_start);
         }
     }
     public void PlayParticle(string tag)
@@ -137,11 +139,7 @@ public class CustomEffect : MonoBehaviour
         t.localScale = Vector3.one;
         
         p.Play();
-    }
-    public void PlaySound(string tag)
-    {
-        Effect e = effectDic[tag];
-        if(e.audio!=null) SoundManager.instance.Play(e.audio,1);
+        if(e.audio_start!=null) e.audio_start.Play();
     }
     public void Detect(string tag,Vector3 point,Data_EnemyMotion.SingleAttackData attackData)
     {
@@ -149,7 +147,11 @@ public class CustomEffect : MonoBehaviour
        // if (e.raySensor.DetectionMode == DetectionModes.RigidBodies) return;
         e.raySensor.Pulse();
         bool detectPlayer = Player.instance.gameObject == e.raySensor.GetNearestDetection();
-        if(detectPlayer) Player.instance.DoHit(point,attackData);
-        //else print("PD");
+        if (detectPlayer)
+        {
+            Player.instance.DoHit(point,attackData);
+            if(e.audio_hit != null) SoundManager.instance.Play(e.audio_hit,1);
+        }
+        else if(e.audio_miss != null) SoundManager.instance.Play(e.audio_miss,1);
     }
 }

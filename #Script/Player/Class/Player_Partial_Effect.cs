@@ -178,6 +178,7 @@ public partial class Player : MonoBehaviour
         //sfx
         HitSound(false);
         audio_Hit_Impact.Play();
+        audio_Hit_Guard.Play();
         //vfx
         Vector3 numPos = transform.position - enemyPos;
         numPos = transform.position + numPos.normalized * 0.5f;
@@ -229,6 +230,7 @@ public partial class Player : MonoBehaviour
         HitSound(true);
         audio_Hit_Gore.Play();
         audio_Hit_Impact.Play();
+        audio_Hit_Smashed.Play();
         //vfx
         Particle_Blood_Smash();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smashed);
@@ -247,7 +249,7 @@ public partial class Player : MonoBehaviour
         HitSound(true);
         audio_Hit_Gore.Play();
         audio_Hit_Impact.Play();
-        audio_Hit_Notice.Play();
+        audio_Hit_Smashed.Play();
         //vfx
         Particle_Blood_Smash();
         CamArm.instance.Impact(Manager_Main.instance.mainData.impact_Smashed);

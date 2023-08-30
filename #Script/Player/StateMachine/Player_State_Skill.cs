@@ -110,7 +110,6 @@ public class Player_State_Skill : Player_State_Base
         //Roll
         if (canInput && skill.motions.Count <= skillIndex + 1 && player.CanRoll())
         {
-            CamArm.instance.SpeedLine_Stop();
             player.Roll();
             player.ChangeWeaponData(Player.CurrentWeaponData.Main);
             finished = true;
@@ -146,7 +145,6 @@ public class Player_State_Skill : Player_State_Base
 
             if (CanCombo)
             {
-                CamArm.instance.SpeedLine_Stop();
                 player.ChangeState(1);
                 finished = true;
                 return;
@@ -162,7 +160,6 @@ public class Player_State_Skill : Player_State_Base
             }
             else
             {
-                CamArm.instance.SpeedLine_Stop();
                 player.ChangeState(0);
                 player.ChangeWeaponData(Player.CurrentWeaponData.Main);
                 if(player.motionData.endMotionType != MotionData_Attack.MotionType.RIGHT) 

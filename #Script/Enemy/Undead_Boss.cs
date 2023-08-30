@@ -3,18 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Micosmo.SensorToolkit;
 using RootMotion.Dynamics;
 using Sirenix.OdinInspector;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class Undead_Boss : Enemy
 {
     public Data_Impact impact_footstep, impact_groggy;
     public float stunDuration=3.0f;
-    public Data_Audio audio_footstep, audio_groggy;
+    public Data_Audio audio_footstep, audio_groggy,audio_revive,audio_start;
     public Color color_Guard_Default, color_Guard_DefaultHit, color_Guard_Full, 
         color_Guard_FullHit, color_Guard_Stun,color_Health_Default,color_Health_Hit;
     private ParticleSystem particle_Footstep,particle_Fire,particle_Shockwave,particle_Groggy;
+    private RaySensor startSensor;
     
     private string s_startboss = "StartBoss",s_activate = "Activate",s_deactivate = "Deactivate";
     private bool isStun = false;
@@ -94,6 +97,8 @@ public class Undead_Boss : Enemy
                 isStun = false;
                 guard_full = false;
                 guard_use = true;
+                particle_charge.Play();
+                audio_create.Play();
                 UI_SetGuardGauge(0);
                 guard_particle.Play();
                 Canvas_Player.instance.OnLateUpdate.AddListener(UI_Update_Guard);
@@ -124,11 +129,10 @@ public class Undead_Boss : Enemy
     
     protected override void Pattern_Setting()
     {
-        camDistanceRatio = 1.55f;
-        
+        camDistanceRatio = 1.2f;
+
         base.Pattern_Setting();
-        StartBoss();
-        
+
         if(guard_use) Pattern_Set(StartCoroutine(CPattern_UndeadBoss_Main()));
         else Pattern_Set(StartCoroutine(CPattern_UndeadBoss_Stunned()));
     }
@@ -138,10 +142,19 @@ public class Undead_Boss : Enemy
         base.Setting_Sound();
         SoundManager.instance.Add(audio_footstep);
         SoundManager.instance.Add(audio_groggy);
+        SoundManager.instance.Add(audio_revive);
+        SoundManager.instance.Add(audio_start);
     }
 
     protected override void FirstSetting_UI()
     {
+        startSensor = transform.Find("StartSensor").GetComponent<RaySensor>();
+        canvas = transform.GetComponentInChildren<Canvas>();
+        Transform gaugeT = canvas.transform.Find("Boss").Find("Gauge");
+        health_Bar = gaugeT.Find("HP").Find("Fill").GetComponent<Image>();
+        health_Lerp = gaugeT.Find("HP").Find("Lerp").GetComponent<Image>();
+        guard_Bar = gaugeT.Find("Guard").Find("Fill").GetComponent<Image>();
+        guard_particle = canvas.GetComponentInChildren<ParticleSystem>();
         canvas.worldCamera = CamArm.instance.uiCam;
         canvas.transform.parent = Manager_Main.instance._folder_;
         canvasAnimator = canvas.GetComponent<Animator>();
@@ -154,6 +167,14 @@ public class Undead_Boss : Enemy
         particle_Shockwave = t.Find("Shockwave").GetComponent<ParticleSystem>();
         particle_Fire = t.Find("Fire").GetComponent<ParticleSystem>();
         particle_Groggy = t.Find("Groggy").GetComponent<ParticleSystem>();
+    }
+
+    protected override void Effect_Setting()
+    {
+        ParticleSystem p = particle_fire.transform.GetChild(0).GetComponent<ParticleSystem>();
+        var s = p.shape;
+        s.skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+        p.gameObject.SetActive(true);
     }
 
 
@@ -173,7 +194,7 @@ public class Undead_Boss : Enemy
                 Player.instance.Particle_JustParrying();
                 Effect_Hit_GuardBreak(true);
                 HitFX();
-                CamArm.instance.speedline_once.Play();
+                CamArm.instance.SpeedLine_Play(false,transform);
                 Particle_Blood_Smash();
                 Particle_Hit_Revenge();
                 
@@ -194,7 +215,6 @@ public class Undead_Boss : Enemy
                 {
                     Effect_Hit_Strong();
                     HitFX();
-                    Player.instance.audio_Hit_Notice.Play();
                     Particle_Blood_Smash();
                     particle_smoke.Play();
                     
@@ -233,15 +253,16 @@ public class Undead_Boss : Enemy
         {
             UI_SetHPGauge(currentHP - damage);
             if (death) Effect_Death(true);
-            else if (isCounter)
+            else if (Player.instance.isSkill)
             {
-                Effect_Hit_Counter();
+                CamArm.instance.SpeedLine_Play(false,transform);
+                Effect_Hit_Revenge();
                 HitFX();
             }
             else if (Player.instance.isStrong)
             {
                 particle_smoke.Play();
-                Effect_Hit_Strong();
+                Effect_Hit_Counter();
                 HitFX();
             }
             else
@@ -356,6 +377,13 @@ public class Undead_Boss : Enemy
     {
         animator.SetTrigger(s_startboss);
         canvasAnimator.Play(s_activate,0,0);
+        
+        audio_create.Play();
+        audio_start.Play();
+        CamArm.instance.Impact(Manager_Main.instance.mainData.impact_SpecialSmooth);
+        particle_charge.Play();
+        highlight.HitFX(Color.white,2.0f,2);
+        startSensor.gameObject.SetActive(false);
     }
 
     private void HitFX()
