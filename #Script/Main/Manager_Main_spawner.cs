@@ -277,6 +277,8 @@ public partial class Manager_Main : MonoBehaviour
 		if(c_clear!=null) StopCoroutine(c_clear);
 		if(isBoss) c_clear = StartCoroutine(C_Boss_Clear_Begin1());
 		else c_clear = StartCoroutine(C_Clear_Begin1());
+
+		Update_Contest();
 	}
 	public void Clear_Begin2()
 	{
@@ -293,6 +295,7 @@ public partial class Manager_Main : MonoBehaviour
 		yield return new WaitForSecondsRealtime(3.75f);
 		CamArm.instance.SpeedLine_Stop();
 		CamArm.instance.Production_Fin(1.5f);
+		Player.instance.executedTarget = null;
 		yield return new WaitForSecondsRealtime(1.0f);
 		Player.instance.audio_BossFin.Play();
 		yield return new WaitForSecondsRealtime(3.25f);
@@ -311,6 +314,7 @@ public partial class Manager_Main : MonoBehaviour
 		yield return new WaitForSecondsRealtime(2.0f);
 		CamArm.instance.SpeedLine_Stop();
 		CamArm.instance.Production_Fin(1.5f);
+		Player.instance.executedTarget = null;
 		yield return new WaitForSecondsRealtime(3.25f);
 		Player.instance.animator.CrossFade("Exit_Begin",0.5f,0);
 		Canvas_Player.instance.anim.CrossFade("Menu_None",0,0);

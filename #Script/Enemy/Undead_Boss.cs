@@ -31,7 +31,7 @@ public class Undead_Boss : Enemy
         
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(3.0f)));
             
             //플레이어 보는 방향에 따라 앞,뒤 기본 공격, i번 반복
             for (int i = 0; i < Random.Range(1,3); i++)
@@ -58,7 +58,7 @@ public class Undead_Boss : Enemy
         particle_Fire.Play();
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(3.0f)));
             
             //회전 2연격 + 기본공격
             if (IsLookingPlayer())  yield return State_Set(StartCoroutine(CState_Attack(5)));
@@ -73,8 +73,9 @@ public class Undead_Boss : Enemy
                 if (Distance() < 2.5f) yield return State_Set(StartCoroutine(CState_Attack(8)));
                 else yield return State_Set(StartCoroutine(CState_Attack(9)));
                 yield return State_Set(StartCoroutine(CState_Wait(2.0f)));
+                yield return State_Set(StartCoroutine(CState_Chase_Fast(3.0f)));
             }
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(2.0f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(4.0f)));
             //박수 콤보, 정지
             for (int i = 0; i < Random.Range(1, 3); i++)
             {
@@ -185,6 +186,7 @@ public class Undead_Boss : Enemy
         Data_Impact impact;
         //가드
         float damage = Player.instance.isStrong ? 20 : 10;
+        Manager_Main.instance.AddDamage(damage);
         if (guard_use)
         {
             UI_SetGuardGauge(currentGuard + damage);
@@ -211,7 +213,7 @@ public class Undead_Boss : Enemy
             else
             {
                 
-                if (Player.instance.CanRevenge())
+                if (Player.instance.IsRevengeSkill())
                 {
                     Effect_Hit_Strong();
                     HitFX();
@@ -237,15 +239,6 @@ public class Undead_Boss : Enemy
                 }
                 
             }
-
-            //가드-카메라
-            /*
-            CamArm.instance.Shake(impact);
-            CamArm.instance.Stop(impact.stopDuration, 0.05f);
-            CamArm.instance.Chromatic(impact.chromaticStrength, 
-                0.1f, impact.stopDuration + 0.35f);
-            highlight.HitFX(Manager_Main.instance.enemy_HitColor,0.5f);
-            */
             return;
         }
         //히트

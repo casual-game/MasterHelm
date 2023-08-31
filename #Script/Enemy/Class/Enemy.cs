@@ -210,7 +210,7 @@ public partial class Enemy : MonoBehaviour
         if (death || Player.instance == null) return;
         if(isArrow) Manager_Main.instance.Text_Damage_Main(Manager_Main.instance.specific_sniping);
         this.hitWeaponRot = Quaternion.LookRotation(hitWeaponRot).eulerAngles;
-        if (superarmor && !Player.instance.isRevengeSkill)
+        if (superarmor && !Player.instance.IsRevengeSkill())
         {
             if (guard_use) UI_SetGuardGauge(currentGuard);
             if (Player.instance.isStrong) Effect_Hit_SuperArmorStrong();
@@ -226,6 +226,7 @@ public partial class Enemy : MonoBehaviour
         Move(transform.position,Quaternion.LookRotation(rotateVec));
         //가드
         float damage = Player.instance.isStrong ? 20 : 10;
+        Manager_Main.instance.AddDamage(damage);
         bool isRevenge = Player.instance.CanRevenge();
         if (guard_use)
         {

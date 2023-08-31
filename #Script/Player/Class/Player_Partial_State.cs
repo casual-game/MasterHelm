@@ -122,6 +122,7 @@ public partial class Player : MonoBehaviour
     public void DoHit(Vector3 _point,Data_EnemyMotion.SingleAttackData enemyAttack)
     {
         if (death || clear) return;
+        isRevengeSkill = false;
         //가드브레이크 아닐때
         if (!enemyAttack.isGuardBreak && state!=5)
         {
@@ -198,7 +199,7 @@ public partial class Player : MonoBehaviour
                 Vector3 lookVec = _point - transform.position;
                 lookVec.y = 0;
                 Move(transform.position, Quaternion.LookRotation(lookVec));
-                
+                Damage();
                 Hit_Strong();
                 Particle_GuardBreak();
             }
@@ -296,6 +297,11 @@ public partial class Player : MonoBehaviour
             isRevengeSkill = true;
         }
         return value;
+    }
+
+    public bool IsRevengeSkill()
+    {
+        return isRevengeSkill && isSkill;
     }
     public bool CanEvade()
     {

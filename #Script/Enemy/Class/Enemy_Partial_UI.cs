@@ -16,10 +16,10 @@ public partial class Enemy : MonoBehaviour
     protected ParticleSystem guard_particle;
 
     protected Animator canvasAnimator;
-    protected float currentGuard = 0,guardSpeed = 8.0f;
+    protected float currentGuard = 0,guardSpeed = 5.0f;
     protected bool guard_full = false;
     protected bool guard_use = false;
-    protected float guardTime = -100,guardDelay = 1.75f;
+    protected float guardTime = -100,guardDelay = 2.25f;
     protected string s_guard = "Guard";
 
     protected Color guard_color_normal = new Color(1, 80.0f / 255.0f, 0, 1),

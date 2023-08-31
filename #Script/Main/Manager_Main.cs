@@ -196,7 +196,7 @@ public partial class Manager_Main : MonoBehaviour
         //Main
         if (Time.unscaledTime - lastComboTime < comboDelay) combo += 1;
         else combo = 1;
-
+        CalculateAction(combo);
         lastComboTime = Time.unscaledTime;
         
         DamageNumber damageNumber =damage_Combo_Main.Spawn(Vector3.zero, combo);

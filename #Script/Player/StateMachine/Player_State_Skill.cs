@@ -61,6 +61,7 @@ public class Player_State_Skill : Player_State_Base
         player.isStrong = true;
         player.isSkill = true;
         player.isCharge = false;
+        player.isRevengeSkill = false;
         player.skillData = skill.motions[skillIndex];
         Canvas_Player_World.instance.Update_Data();
         player.SuperArmor(true);
