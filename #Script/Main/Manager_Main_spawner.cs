@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Unity.Collections;
 //using Beautify.Universal;
-using UnityEditor;
+
+#if UNITY_EDITOR
 using UnityEditor.SceneManagement;
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -28,26 +31,33 @@ public partial class Manager_Main : MonoBehaviour
 	//씬 리스트
 	[TabGroup("에디터 툴/tools", "레벨 설정", SdfIconType.MapFill, TextColor = "green")][LabelText("높이 조절 잠금",SdfIconType.LockFill)]
 	public bool lockHeight;
+	#if UNITY_EDITOR
 	[Button][TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][HorizontalGroup("에디터 툴/tools/레벨 설정/button")]
 	public void LoadAll()
 	{
-		foreach (var scene in scenes)
+		for(int i=0; i<scenenames.Count; i++)
 		{
-			if(!SceneManager.GetSceneByName(scene.name).isLoaded) EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(scene),OpenSceneMode.Additive);
+			if (!SceneManager.GetSceneByName(scenenames[i]).isLoaded)
+			{
+				EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(scenes[i]),OpenSceneMode.Additive);
+			}
 		}
 	}
 	[Button][TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][HorizontalGroup("에디터 툴/tools/레벨 설정/button")]
 	public void UnloadAll()
 	{
-		foreach (var scene in scenes)
+		for(int i=0; i<scenenames.Count; i++)
 		{
-			if(SceneManager.GetSceneByName(scene.name).isLoaded) EditorSceneManager.CloseScene(SceneManager.GetSceneByName(scene.name),true);
+			if(SceneManager.GetSceneByName(scenenames[i]).isLoaded) EditorSceneManager.CloseScene(SceneManager.GetSceneByName(scenenames[i]),true);
 		}
 	}
+	
 	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")]
 	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)][OnValueChanged("UpdateData")][OnCollectionChanged("UpdateData")]
 	[LabelText("씬 리스트",SdfIconType.MapFill,IconColor = "red")][GUIColor(1.0f,0.8f,0.8f)][PropertySpace(32)]
 	public List<SceneAsset> scenes = new List<SceneAsset>();
+	#endif
+	[HideInInspector] public List<string> scenenames = new List<string>();
 
 	[TabGroup("에디터 툴/tools", "레벨 설정",SdfIconType.MapFill,TextColor = "green")][OnValueChanged("UpdateData")] 
 	[LabelText("레벨")][OnCollectionChanged("UpdateData")]
@@ -263,7 +273,6 @@ public partial class Manager_Main : MonoBehaviour
 			CamArm.instance.Impact(mainData.impact_SpecialHit);
 			Text_Damage_Main(specific_kill);
 		}
-		UpdateData();
 	}
 	private bool IsLastArea()
 	{
@@ -335,6 +344,7 @@ public partial class Manager_Main : MonoBehaviour
 	
 	#endregion
 	#region Gizmos,Editor
+	#if UNITY_EDITOR
 	public void OnDrawGizmos_Spawner()
 	{
 		Quaternion currentRot = SceneView.lastActiveSceneView.camera.transform.rotation;
@@ -378,8 +388,14 @@ public partial class Manager_Main : MonoBehaviour
 			}
 		}
 	}
+	
 	public void UpdateData()
 	{
+		scenenames = new List<string>();
+		foreach (var s in scenenames)
+		{
+			scenenames.Add(s);
+		}
 		foreach (var area in areas)
 		{
 			area.UpdateData();
@@ -479,6 +495,7 @@ public partial class Manager_Main : MonoBehaviour
 		Handles.DrawLine(lowerLeft,lowerRight,thickness);
 		Handles.DrawLine(lowerRight,upperRight,thickness);
 	}
+	#endif
 	#endregion
 	#region Scene
 	public IEnumerator LoadCurrentScenes()
@@ -488,17 +505,16 @@ public partial class Manager_Main : MonoBehaviour
 		int lastMin = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.x-1;
 		int lastMax = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.y - 1;
 
-		for(int i=0; i<scenes.Count; i++)
+		for(int i=0; i<scenenames.Count; i++)
 		{
-			SceneAsset scene = scenes[i];
 			
 			
 			bool contain = loadingMin <= i && i <= loadingMax;
 			bool mustWait = !((lastMin <= i && i < loadingMin) || (lastMax < i && i <= loadingMax));
-			var _scene = SceneManager.GetSceneByName(scene.name);
+			var _scene = SceneManager.GetSceneByName(scenenames[i]);
 			if (contain && !_scene.isLoaded)
 			{
-				var mAsyncOperation = SceneManager.LoadSceneAsync(scene.name, LoadSceneMode.Additive);
+				var mAsyncOperation = SceneManager.LoadSceneAsync(scenenames[i], LoadSceneMode.Additive);
 				if (mustWait)
 				{
 					//print("Waitman");
@@ -514,17 +530,16 @@ public partial class Manager_Main : MonoBehaviour
 		int lastMin = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.x-1;
 		int lastMax = areas[Mathf.Max(0, areaIndex - 1)].loadingRange.y - 1;
 
-		for(int i=0; i<scenes.Count; i++)
+		for(int i=0; i<scenenames.Count; i++)
 		{
-			SceneAsset scene = scenes[i];
 			
 			
 			bool contain = loadingMin <= i && i <= loadingMax;
 			bool mustWait = !((lastMin <= i && i < loadingMin) || (lastMax < i && i <= loadingMax));
-			var _scene = SceneManager.GetSceneByName(scene.name);
+			var _scene = SceneManager.GetSceneByName(scenenames[i]);
 			if (!contain && _scene.isLoaded)
 			{
-				var mAsyncOperation = SceneManager.UnloadSceneAsync(scene.name);
+				var mAsyncOperation = SceneManager.UnloadSceneAsync(scenenames[i]);
 				if (mustWait)
 				{
 					print("Waitman");
@@ -562,11 +577,11 @@ public class Area
 	[LabelText("스폰 리스트",SdfIconType.PersonFill,IconColor = "yellow")][GUIColor(1.0f,1.0f,0.8f)]
 	public List<Spawn> spawns = new List<Spawn>();
 	
-
+	#if UNITY_EDITOR
 	public void UpdateData()
 	{
 		Manager_Main m = GameObject.FindObjectOfType<Manager_Main>();
-		if (m != null) loadingMax = m.scenes.Count;
+		if (m != null) loadingMax = m.scenenames.Count;
 		foreach (var cell in cells)
 		{
 			cell.UpdateData();
@@ -576,7 +591,7 @@ public class Area
 			spawn.UpdateData(cells);
 		}
 	}
-	
+	#endif
 }
 [System.Serializable]
 public class Cell
@@ -604,7 +619,7 @@ public class Spawn
 	[ListDrawerSettings(AddCopiesLastElement =  true,Expanded = false)]
 	[LabelText("개별 스폰")][GUIColor(1.0f,1.0f,1.0f)][OnValueChanged("UpdateData2")][OnCollectionChanged("UpdateData2")]
 	public List<SingleSpawn> singleSpwawns = new List<SingleSpawn>();
-
+	#if UNITY_EDITOR
 	public void UpdateData(List<Cell> cells)
 	{
 		this.cells = cells;
@@ -630,6 +645,7 @@ public class Spawn
 			spawner.UpdateData(minX-center.x, minY-center.y, maxX-center.x, maxY-center.y);
 		}
 	}
+	#endif
 }
 [System.Serializable]
 public class SingleSpawn
@@ -643,7 +659,7 @@ public class SingleSpawn
 	[LabelText("생성 Y 좌표")][PropertyRange("minY","maxY")][OnValueChanged("RecalculateAll")] public float y;
 	[LabelText("딜레이")] public float delay;
 	[Sirenix.OdinInspector.ReadOnly][ShowInInspector][LabelText("스폰 높이")] public float spawnHeight;
-	
+	#if UNITY_EDITOR
 	public void UpdateData(float minX,float minY ,float maxX, float maxY)
 	{
 		this.minX = minX;
@@ -664,5 +680,6 @@ public class SingleSpawn
 		if (main == null) return;
 		main.UpdateData();
 	}
+	#endif
 }
 

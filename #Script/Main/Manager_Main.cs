@@ -46,6 +46,9 @@ public partial class Manager_Main : MonoBehaviour
     }
     private IEnumerator C_Setting()
     {
+        float wratio = 1600.0f/Screen.width;
+        print(Mathf.RoundToInt(Screen.height * wratio));
+        Screen.SetResolution(1280,Mathf.RoundToInt(Screen.height*wratio),true);
         Time.timeScale = 1;
         GraphicsSettings.useScriptableRenderPipelineBatching = true;
         Application.targetFrameRate = 60;
@@ -92,7 +95,7 @@ public partial class Manager_Main : MonoBehaviour
         //맵 로딩
         for (int i = startLoadingRange.x-1; i < startLoadingRange.y; i++)
         {
-            yield return SceneManager.LoadSceneAsync(scenes[i].name, LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync(scenenames[i], LoadSceneMode.Additive);
         }
         //Player 생성
         PlayerStart playerStart = FindObjectOfType<PlayerStart>(false);
@@ -304,8 +307,6 @@ public partial class Manager_Main : MonoBehaviour
     private void OnDrawGizmos()
     {
         OnDrawGizmos_Spawner();
-        //if(gizmoTab == 0) OnDrawGizmos_Spawner();
-        //else if (gizmoTab == 1) OnDrawGizmos_Room();
     }
     #endif
     [HideInInspector] public int gizmoTab = 0;
