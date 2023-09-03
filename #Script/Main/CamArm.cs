@@ -388,8 +388,8 @@ public class CamArm : MonoBehaviour
     private Coroutine c_fov;
     public AnimationCurve startFOVCurve;
     private float startFOV_begin = 7, startFOV_fin = 4,
-        startFOVFog_begin = 1.0f,startFOVFog_fin=0.2f,
-        startScaleFog_begin = 0.06f,startScaleFog_fin=0.05f;
+        startFOVFog_begin = 1.0f,startFOVFog_fin=0.25f,
+        startScaleFog_begin = 0.06f,startScaleFog_fin=0.2f;
 
     public void StartFOVNow()
     {

@@ -31,7 +31,7 @@ public class Undead_Boss : Enemy
         
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(3.0f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(4.0f)));
             
             //플레이어 보는 방향에 따라 앞,뒤 기본 공격, i번 반복
             for (int i = 0; i < Random.Range(1,3); i++)
@@ -58,7 +58,7 @@ public class Undead_Boss : Enemy
         particle_Fire.Play();
         while (true)
         {
-            yield return State_Set(StartCoroutine(CState_Chase_Fast(3.0f)));
+            yield return State_Set(StartCoroutine(CState_Chase_Fast(4.0f)));
             
             //회전 2연격 + 기본공격
             if (IsLookingPlayer())  yield return State_Set(StartCoroutine(CState_Attack(5)));

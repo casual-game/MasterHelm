@@ -46,9 +46,10 @@ public partial class Manager_Main : MonoBehaviour
     }
     private IEnumerator C_Setting()
     {
-        float wratio = 1600.0f/Screen.width;
-        print(Mathf.RoundToInt(Screen.height * wratio));
-        Screen.SetResolution(1280,Mathf.RoundToInt(Screen.height*wratio),true);
+        int targetWidth = 1600;
+        float ratio = (float)Screen.height/(float)Screen.width;
+        print(Mathf.RoundToInt(targetWidth*ratio));
+        Screen.SetResolution(targetWidth,Mathf.RoundToInt(targetWidth*ratio),true);
         Time.timeScale = 1;
         GraphicsSettings.useScriptableRenderPipelineBatching = true;
         Application.targetFrameRate = 60;
