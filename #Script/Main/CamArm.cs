@@ -34,7 +34,7 @@ public class CamArm : MonoBehaviour
     private float startFixedDeltaTime,startMaxDeltaTime;
     #region Chromatic
 
-    private float chromatic_Default = 0.003f,chromatic_Intensity;
+    private float chromatic_Default = 0.001f,chromatic_Intensity;
     private float chromatic_Increase_BeginTime,chromatic_Increase_FinTime, chromatic_Decrease_FinTime;
     private void Chromatic(float intensity,float increase_Duration,float decrease_Duration)
     {
@@ -239,7 +239,7 @@ public class CamArm : MonoBehaviour
     #endregion
     #region Production
     
-    private float pd_frame_begin = 0, pd_frame_fin = 0.08f, pd_blur_begin = 0.15f, pd_blur_fin = 0.75f
+    private float pd_frame_begin = 0, pd_frame_fin = 0.08f//, pd_blur_begin = 0.15f, pd_blur_fin = 0.75f
         ,pd_temp_begin = 0.425f,pd_temp_fin = 1.0f;
     private Vector3 pd_pos_begin = Vector3.zero, pd_pos_fin = new Vector3(0,-4.94f,1.73f);
     private Vector3 pd_rot_begin = Vector3.zero, pd_rot_fin = new Vector3(-20, 0, 0);
@@ -262,14 +262,14 @@ public class CamArm : MonoBehaviour
     public void Production_FinNow()
     {
         BeautifySettings.settings.frameBandVerticalSize.value = pd_frame_begin;
-        BeautifySettings.settings.blurIntensity.value = pd_blur_begin;
+        //BeautifySettings.settings.blurIntensity.value = pd_blur_begin;
         productionT.localPosition =pd_pos_begin;
         productionT.localRotation = Quaternion.Euler(pd_rot_begin);
     }
     public void Production_BeginNow()
     {
         BeautifySettings.settings.frameBandVerticalSize.value = pd_frame_fin;
-        BeautifySettings.settings.blurIntensity.value = pd_blur_fin;
+        //BeautifySettings.settings.blurIntensity.value = pd_blur_fin;
         productionT.localPosition =pd_pos_fin;
         productionT.localRotation = Quaternion.Euler(pd_rot_fin);
     }
@@ -283,13 +283,13 @@ public class CamArm : MonoBehaviour
             if (ratio > 0.99f) break;
             float evaluatedRatio = pd_curve.Evaluate(ratio);
             float frame = pd_frame_begin*(1-evaluatedRatio) + pd_frame_fin*evaluatedRatio;
-            float blur = pd_blur_begin*(1-evaluatedRatio) + pd_blur_fin*evaluatedRatio;
+            //float blur = pd_blur_begin*(1-evaluatedRatio) + pd_blur_fin*evaluatedRatio;
             float temp = pd_temp_begin*(1-evaluatedRatio) + pd_temp_fin*evaluatedRatio;
             Vector3 pos = pd_pos_begin*(1-evaluatedRatio) + pd_pos_fin*evaluatedRatio;
             Quaternion rot = Quaternion.Lerp(rot_begin,rot_fin,evaluatedRatio);
 
             BeautifySettings.settings.frameBandVerticalSize.value = frame;
-            BeautifySettings.settings.blurIntensity.value = blur;
+            //BeautifySettings.settings.blurIntensity.value = blur;
             BeautifySettings.settings.colorTempBlend.value = temp;
             productionT.localPosition =pos;
             productionT.localRotation = rot;
@@ -297,7 +297,7 @@ public class CamArm : MonoBehaviour
         }
         
         BeautifySettings.settings.frameBandVerticalSize.value = pd_frame_fin;
-        BeautifySettings.settings.blurIntensity.value = pd_blur_fin;
+        //BeautifySettings.settings.blurIntensity.value = pd_blur_fin;
         BeautifySettings.settings.colorTempBlend.value = pd_temp_fin;
         productionT.localPosition =pd_pos_fin;
         productionT.localRotation = rot_fin;
@@ -313,13 +313,13 @@ public class CamArm : MonoBehaviour
             if (ratio > 0.99f) break;
             float evaluatedRatio = pd_curve.Evaluate(ratio);
             float frame = pd_frame_fin*(1-evaluatedRatio) + pd_frame_begin*evaluatedRatio;
-            float blur = pd_blur_fin*(1-evaluatedRatio) + pd_blur_begin*evaluatedRatio;
+            //float blur = pd_blur_fin*(1-evaluatedRatio) + pd_blur_begin*evaluatedRatio;
             float temp = pd_temp_fin*(1-evaluatedRatio) + pd_temp_begin*evaluatedRatio;
             Vector3 pos = pd_pos_fin*(1-evaluatedRatio) + pd_pos_begin*evaluatedRatio;
             Quaternion rot = Quaternion.Lerp(rot_fin,rot_begin,evaluatedRatio);
 
             BeautifySettings.settings.frameBandVerticalSize.value = frame;
-            BeautifySettings.settings.blurIntensity.value = blur;
+            //BeautifySettings.settings.blurIntensity.value = blur;
             BeautifySettings.settings.colorTempBlend.value = temp;
             productionT.localPosition =pos;
             productionT.localRotation = rot;
@@ -328,7 +328,7 @@ public class CamArm : MonoBehaviour
         }
         
         BeautifySettings.settings.frameBandVerticalSize.value = pd_frame_begin;
-        BeautifySettings.settings.blurIntensity.value = pd_blur_begin;
+        //BeautifySettings.settings.blurIntensity.value = pd_blur_begin;
         BeautifySettings.settings.colorTempBlend.value = pd_temp_begin;
         productionT.localPosition =pd_pos_begin;
         productionT.localRotation = rot_begin;
@@ -388,7 +388,7 @@ public class CamArm : MonoBehaviour
     private Coroutine c_fov;
     public AnimationCurve startFOVCurve;
     private float startFOV_begin = 7, startFOV_fin = 4,
-        startFOVFog_begin = 1.0f,startFOVFog_fin=0.25f,
+        startFOVFog_begin = 1.0f,startFOVFog_fin=0.15f,
         startScaleFog_begin = 0.06f,startScaleFog_fin=0.2f;
 
     public void StartFOVNow()

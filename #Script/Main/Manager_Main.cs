@@ -46,7 +46,7 @@ public partial class Manager_Main : MonoBehaviour
     }
     private IEnumerator C_Setting()
     {
-        int targetWidth = 1600;
+        int targetWidth = 1280;
         float ratio = (float)Screen.height/(float)Screen.width;
         print(Mathf.RoundToInt(targetWidth*ratio));
         Screen.SetResolution(targetWidth,Mathf.RoundToInt(targetWidth*ratio),true);
@@ -260,8 +260,8 @@ public partial class Manager_Main : MonoBehaviour
 
     public void Vibrate(float sec,float power01)
     {
-        MMNVAndroid.AndroidVibrate((long)(sec*1000),Mathf.RoundToInt(power01*255));
-        MMNVRumble.Rumble(power01,power01,sec,this);
+        //MMNVAndroid.AndroidVibrate((long)(sec*1000),Mathf.RoundToInt(power01*255));
+        //MMNVRumble.Rumble(power01,power01,sec,this);
     }
     
 

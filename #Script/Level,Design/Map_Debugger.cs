@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using UnityEditor;
 
 public class Map_Debugger : MonoBehaviour
 {
+#if UNITY_EDITOR
     //빌드 관리
     [TabGroup("tools", "빌드 관리", SdfIconType.HouseFill, TextColor = "blue")][LabelText("실시간 로딩(o),상호작용(o)")]
     [TitleGroup("tools/빌드 관리/폴더 설정")]
@@ -367,7 +369,9 @@ public class Map_Debugger : MonoBehaviour
 		Handles.DrawLine(lowerLeft,lowerRight,thickness);
 		Handles.DrawLine(lowerRight,upperRight,thickness);
 	}
+#endif
 }
+#if UNITY_EDITOR
 [System.Serializable]
 public class DebugArea
 {
@@ -408,3 +412,4 @@ public class DebugArea
         return debugger.tile_begin.y + debugger.tile_size.y;
     }
 }
+#endif
