@@ -34,7 +34,7 @@ public class CamArm : MonoBehaviour
     private float startFixedDeltaTime,startMaxDeltaTime;
     #region Chromatic
 
-    private float chromatic_Default = 0.001f,chromatic_Intensity;
+    private float chromatic_Default = 0.0003f,chromatic_Intensity;
     private float chromatic_Increase_BeginTime,chromatic_Increase_FinTime, chromatic_Decrease_FinTime;
     private void Chromatic(float intensity,float increase_Duration,float decrease_Duration)
     {
