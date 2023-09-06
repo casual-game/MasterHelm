@@ -312,8 +312,6 @@ public partial class Player : MonoBehaviour
     public void SuperArmor(bool value)
     {
         isSuperArmor = value;
-        highlight.outlineColor = value ? Manager_Main.instance.mainData.outline_superarmor 
-            : Manager_Main.instance.mainData.outline_normal;
     }
     
     private IEnumerator C_Smash()
@@ -411,7 +409,6 @@ public partial class Player : MonoBehaviour
         if(prefab_weaponR_SkillR!=null) prefab_weaponR_SkillR.On(false,null);
         if(prefab_shield_SkillR!=null) prefab_shield_SkillR.On(false,null);
         Cancel();
-        highlight.highlighted = false;
         highlight.HitFX(Color.red,2.0f,2.0f);
         //Particles
         Manager_Pooler.instance.GetParticle("Shockwave", transform.position + Vector3.up, Quaternion.identity,1);

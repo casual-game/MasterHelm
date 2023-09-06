@@ -59,8 +59,6 @@ public partial class Player : MonoBehaviour
         Setting_Particle();
         Setting_Sound();
         ChangeWeaponData(CurrentWeaponData.Main);
-        
-        highlight.outlineWidth = 1.0f;
     }
     public void ChangeState(int _state,bool immediately = false,bool slow = false)
     {

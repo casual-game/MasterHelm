@@ -92,7 +92,6 @@ public partial class Player : MonoBehaviour
                 highlight.SetTargets(transform,renderer_Bow);
                 break;
         }
-        highlight.highlighted = true;
     }
 
     public void Particle_Smoke()

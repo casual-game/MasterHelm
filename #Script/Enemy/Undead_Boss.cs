@@ -270,7 +270,6 @@ public class Undead_Boss : Enemy
             //impact = Manager_Main.instance.mainData.impact_Smash;
             gameObject.layer = LayerMask.NameToLayer("Ragdoll");
             highlight.HitFX(Manager_Main.instance.mainData.enemy_ExecutedColor,1.5f);
-            highlight.outline = 0;
             
             Particle_Blood_Smash();
             Particle_Blood_Normal();

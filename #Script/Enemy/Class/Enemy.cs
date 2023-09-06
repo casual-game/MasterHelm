@@ -158,7 +158,6 @@ public partial class Enemy : MonoBehaviour
         foreach (var mr in meshRenderers) if(mr.transform.parent != transform) rs.Add(mr);
         rs.AddRange(skinnedMeshRenderers);
         highlight.SetTargets(transform,rs.ToArray());
-        highlight.highlighted = true;
     }
     public void Disable()
     {
@@ -283,7 +282,6 @@ public partial class Enemy : MonoBehaviour
             //impact = Manager_Main.instance.mainData.impact_Smash;
             gameObject.layer = LayerMask.NameToLayer("Ragdoll");
             highlight.HitFX(Manager_Main.instance.mainData.enemy_ExecutedColor,1.5f);
-            highlight.outline = 0; 
             canvas.gameObject.SetActive(false);
             Particle_Blood_Smash();
             Particle_Blood_Normal();
@@ -339,7 +337,6 @@ public partial class Enemy : MonoBehaviour
     {
         gameObject.layer = LayerMask.NameToLayer("Ragdoll");
         shadow.SetActive(false);
-        highlight.highlighted = false; 
         Cancel();
         
         if (Player.instance != null && Player.instance.target == this) Player.instance.SetClosestTarget();

@@ -387,9 +387,9 @@ public class CamArm : MonoBehaviour
     //startFOV
     private Coroutine c_fov;
     public AnimationCurve startFOVCurve;
-    private float startFOV_begin = 7, startFOV_fin = 4,
-        startFOVFog_begin = 1.0f,startFOVFog_fin=0.15f,
-        startScaleFog_begin = 0.06f,startScaleFog_fin=0.2f;
+    private float startFOV_begin = 7, startFOV_fin = 3.5f,
+        startFOVFog_begin = 0.6f,startFOVFog_fin=0.1f,
+        startScaleFog_begin = 0.1f,startScaleFog_fin=0.2f;
 
     public void StartFOVNow()
     {
@@ -496,7 +496,7 @@ public class CamArm : MonoBehaviour
             fog.profile.noiseColorBlend = density;
             fog.profile.scale = scale;
             fog.UpdateMaterialProperties();
-            BeautifySettings.settings.purkinjeLuminanceThreshold.value = Mathf.Clamp01(ratio*2);
+            //BeautifySettings.settings.purkinjeLuminanceThreshold.value = Mathf.Clamp01(ratio*2);
             yield return null;
         }
         
@@ -504,7 +504,7 @@ public class CamArm : MonoBehaviour
         uiCam.orthographicSize = deathFOV_fin;
         fog.profile.noiseColorBlend = deathFOVFog_fin;
         fog.profile.scale = deathScaleFog_fin;
-        BeautifySettings.settings.purkinjeLuminanceThreshold.value = 1;
+        //BeautifySettings.settings.purkinjeLuminanceThreshold.value = 1;
         fog.UpdateMaterialProperties();
     }
     #endregion

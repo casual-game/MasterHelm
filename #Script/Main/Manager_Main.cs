@@ -46,13 +46,13 @@ public partial class Manager_Main : MonoBehaviour
     }
     private IEnumerator C_Setting()
     {
-        int targetWidth = 1280;
+        int targetWidth = 1600;
         float ratio = (float)Screen.height/(float)Screen.width;
         print(Mathf.RoundToInt(targetWidth*ratio));
         Screen.SetResolution(targetWidth,Mathf.RoundToInt(targetWidth*ratio),true);
         Time.timeScale = 1;
         GraphicsSettings.useScriptableRenderPipelineBatching = true;
-        Application.targetFrameRate = 48;
+        Application.targetFrameRate = 60;
         instance = this;
         //각종 Manager 생성
         manager_Pooler = gameObject.AddComponent<Manager_Pooler>();
