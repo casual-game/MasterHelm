@@ -19,6 +19,12 @@ public partial class Hero : MonoBehaviour
     [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float turnDuration_crouch = 0.25f;
     [TitleGroup("움직임")] [FoldoutGroup("움직임/구르기")] public float moveMotionSpeed_roll = 0.5f; 
     [TitleGroup("움직임")] [FoldoutGroup("움직임/구르기")] public float turnDuration_roll = 0.75f; 
+    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")] public float lookDisplayDuration = 0.125f;
+    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")] public float lookTargetDuration = 0.5f;
+    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")]
+    [MinMaxSlider(-180,180,true)] public Vector2 lookRange,lookRangeDeadZone;
 
+    [TitleGroup("전투")] [FoldoutGroup("전투/Charge")] public float chargeDuration = 1.0f;
+    
     [TitleGroup("Input")] public float dash_roll_delay = 0.15f;
 }

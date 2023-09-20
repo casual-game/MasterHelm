@@ -10,17 +10,22 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public static Vector2 JS_Attack = Vector2.zero,JS_Move = Vector2.zero,JS_Action = Vector2.zero;
-    public static bool BTN_Attack = false,BTN_Action,Bool_Move;
-    public UnityEvent E_BTN_Action_Begin;
-    public UnityEvent E_BTN_Action_Fin;
+    public static bool BTN_Attack = false,BTN_Action,Bool_Move,Bool_Attack;
+    public UnityEvent E_LateUpdate;
+    public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin;
     //string들을 미리 캐시로 저장
     #region strings
     public static string s_speed = "Speed",s_rot = "Rot",s_turn = "Turn",s_crouch = "Crouch",s_roll = "Roll"
-        ,s_footstep = "Footstep";
+        ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal";
     #endregion
     public void Awake()
     {
         instance = this;
+    }
+
+    public void LateUpdate()
+    {
+        E_LateUpdate?.Invoke();
     }
 
     public void Input_JS_Move(InputAction.CallbackContext inputValue)
@@ -43,7 +48,19 @@ public class GameManager : MonoBehaviour
     }
     public void Input_JS_Attack(InputAction.CallbackContext inputValue)
     {
-        if (inputValue.performed && BTN_Attack) JS_Attack = inputValue.ReadValue<Vector2>();
+        if (inputValue.started)
+        {
+            Bool_Attack = false;
+        }
+        else if (inputValue.performed && BTN_Attack)
+        {
+            JS_Attack = inputValue.ReadValue<Vector2>();
+            Bool_Attack = true;
+        }
+        else if (inputValue.canceled)
+        {
+            Bool_Attack = false;
+        }
     }
     public void Input_JS_Action(InputAction.CallbackContext inputValue)
     {
@@ -55,11 +72,13 @@ public class GameManager : MonoBehaviour
         {
             BTN_Attack = true;
             JS_Attack = Vector2.zero;
+            E_BTN_Attack_Begin?.Invoke();
         }
         else if (inputValue.canceled)
         {
             BTN_Attack = false;
             JS_Attack = Vector2.zero;
+            E_BTN_Attack_Fin?.Invoke();
         }
     }
     public void Input_BTN_Action(InputAction.CallbackContext inputValue)
