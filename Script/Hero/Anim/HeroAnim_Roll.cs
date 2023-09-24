@@ -49,8 +49,8 @@ public class HeroAnim_Roll : Hero_Anim_Base
                 ref movement.rotateCurrentVelocity, hero.turnDuration_roll * Mathf.Abs(degDiff));
         }
         //최종 이동 설정
-        Vector3 targetPos = mt.position + animator.deltaPosition * hero.moveMotionSpeed_roll;
+        Vector3 targetPos = animator.deltaPosition * hero.moveMotionSpeed_roll;
         Quaternion targetRot = Quaternion.Euler(0,targetDeg,0);
-        movement.Move(targetPos,targetRot);
+        movement.Move_Nav(targetPos,targetRot);
     }
 }

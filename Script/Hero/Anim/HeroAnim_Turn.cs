@@ -16,7 +16,7 @@ public class HeroAnim_Turn : Hero_Anim_Base
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotCurrentState(animator,stateInfo)) return;
-        movement.Move(movement.transform.position + animator.deltaPosition * hero.moveMotionSpeed_normal * 0.5f,
+        movement.Move_Nav(animator.deltaPosition * hero.moveMotionSpeed_normal * 0.5f,
             animator.rootRotation);
     }
 }

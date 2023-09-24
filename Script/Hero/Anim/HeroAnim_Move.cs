@@ -68,10 +68,22 @@ public class HeroAnim_Move : Hero_Anim_Base
         }
         //웅크리기 처리
         float currentCrouching = animator.GetFloat(GameManager.s_crouch);
-        animator.SetFloat(GameManager.s_crouch,
-            Mathf.Lerp(currentCrouching,isCrouching?1:0,hero.crouchingSpeed*Time.deltaTime));
+        float nextCrouching = Mathf.Lerp(currentCrouching, isCrouching ? 1 : 0, hero.crouchingSpeed * Time.deltaTime);
+        animator.SetFloat(GameManager.s_crouch,nextCrouching);
+        //웅크리기 -> 사다리 타기
+        if (nextCrouching > 0.8f && Interactable.currentInteractable != null)
+        {
+            movement.currentLadder = (Ladder)Interactable.currentInteractable;
+            float currentY = mt.position.y;
+            float dist_bottom = Mathf.Abs(movement.currentLadder.range.x - currentY);
+            float dist_top = Mathf.Abs(movement.currentLadder.range.y - currentY);
+            Debug.Log("Bottom: "+dist_bottom+", Top: "+ dist_top);
+            animator.SetInteger(GameManager.s_ladder_speed,(dist_bottom<dist_top)?1:-1);
+            animator.SetBool(GameManager.s_ladder,true);
+            Interactable.currentInteractable.Interact();
+        }
         //최종 움직임 처리
-        movement.Move(mt.position + animator.deltaPosition*moveMotionSpeed
+        movement.Move_Nav(animator.deltaPosition*moveMotionSpeed
             ,Quaternion.Euler(0,targetDeg,0));
         //Footstep
         float currentFootstep = animator.GetFloat(GameManager.s_footstep);

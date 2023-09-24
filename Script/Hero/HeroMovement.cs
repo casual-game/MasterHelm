@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Pathfinding;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Serialization;
 
 public partial class HeroMovement : MonoBehaviour
@@ -13,9 +13,10 @@ public partial class HeroMovement : MonoBehaviour
     [ReadOnly] public MoveState moveState = MoveState.Locomotion;
     //Private
     private Animator animator;
-    private AIPath aiPath;
+    [HideInInspector] public NavMeshAgent agent;
     private Hero hero;
     //Animator State Machine에 사용되는 변수
+    [HideInInspector] public Ladder currentLadder = null;
     [HideInInspector] public float animatorParameters_footstep;//Animator의 Footstep 커브의 이전 버전 저장용으로 쓰임.
     [HideInInspector] public float rotateCurrentVelocity,rotAnimCurrentVelocity;
     [HideInInspector] public float ratio_speed; //애니메이터 파라미터 Easing에 사용됨
@@ -26,10 +27,9 @@ public partial class HeroMovement : MonoBehaviour
     void Setting()
     {
         animator = GetComponent<Animator>();
-        aiPath = GetComponent<AIPath>();
         hero = GetComponentInParent<Hero>();
-
-        
+        agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = false;
         
         GameManager.instance.E_BTN_Action_Begin.AddListener(E_BTN_Action_Begin);
         GameManager.instance.E_BTN_Action_Fin.AddListener(E_BTN_Action_Fin);
@@ -39,11 +39,15 @@ public partial class HeroMovement : MonoBehaviour
     }
 
     //Public
-    public void Move(Vector3 nextPos,Quaternion nextRot)
+    public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {
-        aiPath.FinalizeMovement(nextPos,nextRot);
+        transform.rotation = nextRot;
+        agent.Move(relativePos);
     }
-    
+    public void Move_Normal(Vector3 nextPos,Quaternion nextRot)
+    {
+        transform.SetPositionAndRotation(nextPos, nextRot);
+    }
     #region Action
     private float action_BeginTime = -100;
     public void E_BTN_Action_Begin()

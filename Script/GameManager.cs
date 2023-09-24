@@ -16,7 +16,12 @@ public class GameManager : MonoBehaviour
     //string들을 미리 캐시로 저장
     #region strings
     public static string s_speed = "Speed",s_rot = "Rot",s_turn = "Turn",s_crouch = "Crouch",s_roll = "Roll"
-        ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal";
+        ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player"
+        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed";
+    #endregion
+
+    #region Curves
+    public static AnimationCurve curve_inout = AnimationCurve.EaseInOut(0,0,1,1);
     #endregion
     public void Awake()
     {
