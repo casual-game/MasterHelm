@@ -7,8 +7,9 @@ using UnityEngine.Serialization;
 public partial class Hero : MonoBehaviour
 {
     
-    [TitleGroup("움직임")][FoldoutGroup("움직임/공통")] public float crouchingSpeed = 5.0f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/공통")] public AnimationCurve moveCurve;
+    [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float crouchingSpeed = 5.0f;
+    [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float ladderClimbMotionSpeed = 2.0f;
+    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public AnimationCurve moveCurve;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float moveMotionSpeed_normal = 0.75f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float acceleration_normal = 1.5f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float deceleration_normal = 2.5f;
@@ -23,8 +24,8 @@ public partial class Hero : MonoBehaviour
     [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")] public float lookTargetDuration = 0.5f;
     [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")]
     [MinMaxSlider(-180,180,true)] public Vector2 lookRange,lookRangeDeadZone;
-
-    [TitleGroup("전투")] [FoldoutGroup("전투/Charge")] public float chargeDuration = 1.0f;
+    [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float hit_Strong_MoveDistance = 1.0f;
+    [TitleGroup("전투")] [FoldoutGroup("전투/차지")] public float chargeDuration = 1.0f;
     
     [TitleGroup("Input")] public float dash_roll_delay = 0.15f;
 }

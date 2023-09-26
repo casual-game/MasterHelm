@@ -5,9 +5,11 @@ using UnityEngine;
 public class Hero_Anim_Base : StateMachineBehaviour
 {
     public HeroMovement.MoveState moveState;
+    public bool useNavPosition = true;
     private bool script_entered = false;
     protected Hero hero;
     protected HeroMovement movement;
+    protected bool isFinished = false;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -18,12 +20,15 @@ public class Hero_Anim_Base : StateMachineBehaviour
             script_entered = true;
         }
 
+        isFinished = false;
         movement.moveState = moveState;
+        movement.agent.updatePosition = useNavPosition;
     }
 
-    protected bool IsNotCurrentState(Animator animator, AnimatorStateInfo stateInfo)
+    protected bool IsNotAvailable(Animator animator, AnimatorStateInfo stateInfo)
     {
-        return animator.IsInTransition(0) &&
-               animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
+        bool isNotCurrentState = animator.IsInTransition(0) &&
+                              animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
+        return isNotCurrentState || isFinished;
     }
 }

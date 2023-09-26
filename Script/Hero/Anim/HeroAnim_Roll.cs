@@ -11,24 +11,34 @@ public class HeroAnim_Roll : Hero_Anim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        animator.SetBool(GameManager.s_roll,false);
         startDeg = movement.transform.rotation.eulerAngles.y;
-        endDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                 CamArm.instance.transform.rotation.eulerAngles.y;
-        endDeg = -endDeg + 180;
+        if (GameManager.Bool_Move)
+        {
+            endDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                     CamArm.instance.transform.rotation.eulerAngles.y;
+            endDeg = -endDeg + 180;
+        }
+        else endDeg = startDeg;
         pattern = 0;
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
-        if (IsNotCurrentState(animator,stateInfo)) return;
-        //조이스틱 각도 계산
-        float jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                      CamArm.instance.transform.rotation.eulerAngles.y;
-        jsDeg = -jsDeg + 180;
-        //pattern에 알맞은 동작
+        if (IsNotAvailable(animator,stateInfo)) return;
         Transform mt = movement.transform;
+        
+        //조이스틱 각도 계산
+        float jsDeg;
+        if (GameManager.Bool_Move)
+        {
+            jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                    CamArm.instance.transform.rotation.eulerAngles.y;
+            jsDeg = -jsDeg + 180;
+        }
+        else jsDeg = mt.rotation.eulerAngles.y;
+        //pattern에 알맞은 동작
+        
         float targetDeg;
         if (pattern == 0)
         {

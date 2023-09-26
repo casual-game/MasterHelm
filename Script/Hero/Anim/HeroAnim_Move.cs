@@ -7,13 +7,12 @@ public class HeroAnim_Move : Hero_Anim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        animator.SetBool(GameManager.s_turn,false);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
-        if (IsNotCurrentState(animator,stateInfo)) return;
+        if (IsNotAvailable(animator,stateInfo)) return;
         //변수 선언
         Transform mt = movement.transform;
         float currentSpeed = movement.ratio_speed;
@@ -46,7 +45,12 @@ public class HeroAnim_Move : Hero_Anim_Base
                            && 145 < Mathf.Abs(degDiff)
                            && Mathf.Abs(currentAnimDeg)<0.175f
                            && !animator.IsInTransition(0);
-            animator.SetBool(GameManager.s_turn, canTurn);
+            if (canTurn)
+            {
+                animator.SetTrigger(GameManager.s_transition);
+                isFinished = true;
+                return;
+            }
             //값들을 변환하여 회전 애니메이션에 반영, 실제 회전 각도 계산
             degDiff = Mathf.Clamp(degDiff, -60, 60) / 60.0f;
             targetDeg = Mathf.SmoothDampAngle(mt.eulerAngles.y, jsDeg,
@@ -70,18 +74,6 @@ public class HeroAnim_Move : Hero_Anim_Base
         float currentCrouching = animator.GetFloat(GameManager.s_crouch);
         float nextCrouching = Mathf.Lerp(currentCrouching, isCrouching ? 1 : 0, hero.crouchingSpeed * Time.deltaTime);
         animator.SetFloat(GameManager.s_crouch,nextCrouching);
-        //웅크리기 -> 사다리 타기
-        if (nextCrouching > 0.8f && Interactable.currentInteractable != null)
-        {
-            movement.currentLadder = (Ladder)Interactable.currentInteractable;
-            float currentY = mt.position.y;
-            float dist_bottom = Mathf.Abs(movement.currentLadder.range.x - currentY);
-            float dist_top = Mathf.Abs(movement.currentLadder.range.y - currentY);
-            Debug.Log("Bottom: "+dist_bottom+", Top: "+ dist_top);
-            animator.SetInteger(GameManager.s_ladder_speed,(dist_bottom<dist_top)?1:-1);
-            animator.SetBool(GameManager.s_ladder,true);
-            Interactable.currentInteractable.Interact();
-        }
         //최종 움직임 처리
         movement.Move_Nav(animator.deltaPosition*moveMotionSpeed
             ,Quaternion.Euler(0,targetDeg,0));

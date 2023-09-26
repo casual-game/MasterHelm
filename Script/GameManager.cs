@@ -15,9 +15,10 @@ public class GameManager : MonoBehaviour
     public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin;
     //string들을 미리 캐시로 저장
     #region strings
-    public static string s_speed = "Speed",s_rot = "Rot",s_turn = "Turn",s_crouch = "Crouch",s_roll = "Roll"
+    public static string s_speed = "Speed",s_rot = "Rot",s_crouch = "Crouch",s_state_change = "State_Change",s_state_target = "State_Target"
         ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player"
-        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed";
+        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition"
+        ,s_hit = "Hit",s_hit_additive = "Hit_Additive",s_hit_rot = "Hit_Rot";
     #endregion
 
     #region Curves
@@ -33,6 +34,8 @@ public class GameManager : MonoBehaviour
         E_LateUpdate?.Invoke();
     }
 
+    #region InputSystem
+    //기본
     public void Input_JS_Move(InputAction.CallbackContext inputValue)
     {
         if (inputValue.started)
@@ -101,4 +104,40 @@ public class GameManager : MonoBehaviour
             E_BTN_Action_Fin?.Invoke();
         }
     }
+    //디버그
+    public UnityEvent E_Debug1_Begin, E_Debug1_Fin,E_Debug2_Begin, E_Debug2_Fin,E_Debug3_Begin, E_Debug3_Fin;
+    public void Input_BTN_Debug1(InputAction.CallbackContext inputValue)
+    {
+        if (inputValue.started)
+        {
+            E_Debug1_Begin?.Invoke();
+        }
+        else if (inputValue.canceled)
+        {
+            E_Debug1_Fin?.Invoke();
+        }
+    }
+    public void Input_BTN_Debug2(InputAction.CallbackContext inputValue)
+    {
+        if (inputValue.started)
+        {
+            E_Debug2_Begin?.Invoke();
+        }
+        else if (inputValue.canceled)
+        {
+            E_Debug2_Fin?.Invoke();
+        }
+    }
+    public void Input_BTN_Debug3(InputAction.CallbackContext inputValue)
+    {
+        if (inputValue.started)
+        {
+            E_Debug3_Begin?.Invoke();
+        }
+        else if (inputValue.canceled)
+        {
+            E_Debug3_Fin?.Invoke();
+        }
+    }
+    #endregion
 }
