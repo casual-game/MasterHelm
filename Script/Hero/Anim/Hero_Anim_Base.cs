@@ -9,7 +9,7 @@ public class Hero_Anim_Base : StateMachineBehaviour
     private bool script_entered = false;
     protected Hero hero;
     protected HeroMovement movement;
-    protected bool isFinished = false;
+    [HideInInspector] public bool isFinished = false;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -21,6 +21,7 @@ public class Hero_Anim_Base : StateMachineBehaviour
         }
 
         isFinished = false;
+        movement.anim_base = this;
         movement.moveState = moveState;
         movement.agent.updatePosition = useNavPosition;
     }

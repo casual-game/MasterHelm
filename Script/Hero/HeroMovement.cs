@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using EPOOutline;
+using RootMotion.Dynamics;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
@@ -14,8 +16,11 @@ public partial class HeroMovement : MonoBehaviour
     //Private
     private Animator animator;
     [HideInInspector] public NavMeshAgent agent;
+    [HideInInspector] public PuppetMaster puppetMaster;
     private Hero hero;
+    private Outlinable outlinable;
     //Animator State Machine에 사용되는 변수
+    [HideInInspector] public Hero_Anim_Base anim_base;
     [HideInInspector] public Ladder currentLadder = null;
     [HideInInspector] public float animatorParameters_footstep;//Animator의 Footstep 커브의 이전 버전 저장용으로 쓰임.
     [HideInInspector] public float rotateCurrentVelocity,rotAnimCurrentVelocity;
@@ -26,9 +31,11 @@ public partial class HeroMovement : MonoBehaviour
     }
     void Setting()
     {
+        puppetMaster = transform.parent.GetComponentInChildren<PuppetMaster>();
         animator = GetComponent<Animator>();
         hero = GetComponentInParent<Hero>();
         agent = GetComponent<NavMeshAgent>();
+        outlinable = GetComponent<Outlinable>();
         agent.updateRotation = false;
         
         GameManager.instance.E_BTN_Action_Begin.AddListener(E_BTN_Action_Begin);
@@ -39,7 +46,6 @@ public partial class HeroMovement : MonoBehaviour
         
         GameManager.instance.E_Debug1_Begin.AddListener(Hit_Normal);
         GameManager.instance.E_Debug2_Begin.AddListener(Hit_Strong);
-        GameManager.instance.E_Debug3_Begin.AddListener(Hit_Smash);
     }
 
     //Public
@@ -89,8 +95,18 @@ public partial class HeroMovement : MonoBehaviour
         if (canRoll && isTimting)
         {
             animator.SetTrigger(GameManager.s_state_change);
-            animator.SetInteger(GameManager.s_state_target,0);
+            animator.SetInteger(GameManager.s_state_type,0);
             action_BeginTime = -100;
+            return;
+        }
+        //Smashed이후 빠른 기상
+        bool canSpeedRoll = Time.time < falledTime + hero.hit_Smash_RecoveryInputDelay && moveState == MoveState.Hit;
+        if (canSpeedRoll)
+        {
+            animator.SetBool(GameManager.s_hit,false);
+            animator.SetFloat(GameManager.s_hit_rot,-1);
+            anim_base.isFinished = true;
+            print("ASDFASDF");
             return;
         }
     }
@@ -117,12 +133,27 @@ public partial class HeroMovement : MonoBehaviour
     }
 
     private int hit_strong_type = 0;
+    private float hit_strong_delay = 0.2f, hit_strong_time = -100;
+    [HideInInspector] public float falledTime = -100;
+    public AttackMotionType attackMotionType;
+    public PlayerSmashedType playerSmashedType;
     public void Hit_Strong()
     {
+        if (Time.time < hit_strong_time + hit_strong_delay) return;
+        anim_base.isFinished = true;
+        hit_strong_time = Time.time;
         hit_strong_type = (hit_strong_type + 1) % 2;
         animator.SetBool(GameManager.s_hit,true);
         animator.SetTrigger(GameManager.s_state_change);
-        
+        animator.SetFloat(GameManager.s_hit_rot,1);
+        //히트 모션 타입 설정
+        int smashedType = (int)playerSmashedType;
+        if(smashedType<0) animator.SetInteger(GameManager.s_hit_type,hit_strong_type);
+        else
+        {
+            Effect_Roll();
+            animator.SetInteger(GameManager.s_hit_type,smashedType);
+        }
         //타겟 벡터
         Vector3 hitpoint = Vector3.zero;
         Vector3 targetHitVec = hitpoint-transform.position;
@@ -131,15 +162,18 @@ public partial class HeroMovement : MonoBehaviour
         Vector3 myLookVec = transform.forward;
         float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
         float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
-        float degDiff = targetHitDeg - myLookDeg;
+        float degDiff = targetHitDeg - myLookDeg + (int)attackMotionType;
         while (degDiff < -180) degDiff += 360;
         while (degDiff > 180) degDiff -= 360;
         degDiff /= 180.0f;
         animator.SetFloat(GameManager.s_hit_rot,degDiff);
         animator.SetTrigger(GameManager.s_hit_additive);
     }
-    public void Hit_Smash()
+    public void FallDown()
     {
-        
+        falledTime = Time.time;
+        Transform t = transform;
+        p_smoke.transform.SetPositionAndRotation(t.position + t.forward*-0.2f ,t.rotation);
+        p_smoke.Play();   
     }
 }

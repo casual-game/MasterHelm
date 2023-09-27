@@ -1,19 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
     private int footstepIndex = 0;
-    private ParticleSystem p_roll, p_footstep_1,p_footstep_2;
+    private ParticleSystem p_smoke,p_roll, p_footstep_1,p_footstep_2;
     [FoldoutGroup("Particle")] public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
-
+    [FoldoutGroup("Color")] public Color c_hit_begin,c_hit_fin;
+    
+    
+    [Button]
+    public void Blink()
+    {
+        outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor,c_hit_begin);
+        outlinable.OutlineParameters.FillPass.DOColor(GameManager.s_publiccolor, c_hit_fin, 0.5f);
+    }
     private void Setting_Effect()
     {
         Transform particleT = transform.parent.Find("Particle");
         p_footstep_1 = particleT.Find("Footstep_1").GetComponent<ParticleSystem>();
         p_footstep_2 = particleT.Find("Footstep_2").GetComponent<ParticleSystem>();
+        p_smoke = particleT.Find("Smoke").GetComponent<ParticleSystem>();
         p_roll = particleT.Find("Roll").GetComponent<ParticleSystem>();
     }
     //Smokes
@@ -57,5 +67,4 @@ public partial class HeroMovement : MonoBehaviour
         p_roll.transform.SetPositionAndRotation(t.position + t.forward * 0.5f,t.rotation);
         p_roll.Play();
     }
-    //
 }
