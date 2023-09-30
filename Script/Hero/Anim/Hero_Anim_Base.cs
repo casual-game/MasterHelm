@@ -6,6 +6,7 @@ public class Hero_Anim_Base : StateMachineBehaviour
 {
     public HeroMovement.MoveState moveState;
     public bool useNavPosition = true;
+    public bool useTrail = false;
     private bool script_entered = false;
     protected Hero hero;
     protected HeroMovement movement;
@@ -24,6 +25,7 @@ public class Hero_Anim_Base : StateMachineBehaviour
         movement.anim_base = this;
         movement.moveState = moveState;
         movement.agent.updatePosition = useNavPosition;
+        movement.trailEffect.active = useTrail;
     }
 
     protected bool IsNotAvailable(Animator animator, AnimatorStateInfo stateInfo)

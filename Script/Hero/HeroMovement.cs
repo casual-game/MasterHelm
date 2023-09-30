@@ -7,6 +7,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public partial class HeroMovement : MonoBehaviour
 {
@@ -103,10 +104,10 @@ public partial class HeroMovement : MonoBehaviour
         bool canSpeedRoll = Time.time < falledTime + hero.hit_Smash_RecoveryInputDelay && moveState == MoveState.Hit;
         if (canSpeedRoll)
         {
+            Effect_FastRoll();
             animator.SetBool(GameManager.s_hit,false);
             animator.SetFloat(GameManager.s_hit_rot,-1);
             anim_base.isFinished = true;
-            print("ASDFASDF");
             return;
         }
     }
@@ -130,6 +131,7 @@ public partial class HeroMovement : MonoBehaviour
         degDiff /= 180.0f;
         animator.SetFloat(GameManager.s_hit_rot,degDiff);
         animator.SetTrigger(GameManager.s_hit_additive);
+        Effect_Hit_Normal();
     }
 
     private int hit_strong_type = 0;
@@ -142,13 +144,23 @@ public partial class HeroMovement : MonoBehaviour
         if (Time.time < hit_strong_time + hit_strong_delay) return;
         anim_base.isFinished = true;
         hit_strong_time = Time.time;
-        hit_strong_type = (hit_strong_type + 1) % 2;
+        
         animator.SetBool(GameManager.s_hit,true);
         animator.SetTrigger(GameManager.s_state_change);
         animator.SetFloat(GameManager.s_hit_rot,1);
         //히트 모션 타입 설정
         int smashedType = (int)playerSmashedType;
-        if(smashedType<0) animator.SetInteger(GameManager.s_hit_type,hit_strong_type);
+        if (smashedType < 0)
+        {
+            hit_strong_type = (hit_strong_type + 1) % 2;
+            if (Time.time - blood_norm_lastTime > hero.blood_normal_delay)
+            {
+                blood_norm_lastTime = Time.time;
+                Instantiate(bloodNOrm, transform.position + Vector3.up*0.8f, transform.rotation, null);
+            }
+            
+            animator.SetInteger(GameManager.s_hit_type,hit_strong_type);
+        }
         else
         {
             Effect_Roll();
@@ -168,6 +180,7 @@ public partial class HeroMovement : MonoBehaviour
         degDiff /= 180.0f;
         animator.SetFloat(GameManager.s_hit_rot,degDiff);
         animator.SetTrigger(GameManager.s_hit_additive);
+        Effect_Hit_Strong();
     }
     public void FallDown()
     {
