@@ -7,9 +7,6 @@ using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
-    
-    public GameObject bloodNOrm,bloodStrong;
-    private float blood_norm_lastTime = -100;
     private int footstepIndex = 0;
     [HideInInspector]public TrailEffect trailEffect;
     private ParticleSystem p_smoke,p_roll, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
@@ -43,7 +40,7 @@ public partial class HeroMovement : MonoBehaviour
             .Append(outlinable.OutlineParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
     }
-
+    
     //Smokes
     public void Effect_Footstep_L()
     {
@@ -97,21 +94,38 @@ public partial class HeroMovement : MonoBehaviour
         if(!s_blink_hit_normal.IsInitialized()) s_blink_hit_normal.Play();
         else s_blink_hit_normal.Restart();
         
-        Vector3 currentPos = transform.position;
+        Transform t = transform;
+        Vector3 currentPos = t.position;
         p_blood_normal.transform.position = currentPos + Vector3.up*0.75f;
         p_blood_normal.Play();
         
+        //Blood
+        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
+        Quaternion bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
+        BloodManager.instance.Blood_Normal(ref bloodPos,ref bloodRot);
     }
-    public void Effect_Hit_Strong()
+    public void Effect_Hit_Strong(bool isBloodBottom)
     {
         if(!s_blink_hit_strong.IsInitialized()) s_blink_hit_strong.Play();
         else s_blink_hit_strong.Restart();
-        
-        Vector3 currentPos = transform.position;
+        Transform t = transform;
+        Vector3 currentPos = t.position;
         p_blood_normal.transform.position = currentPos + Vector3.up*0.75f;
         p_blood_strong.transform.position = currentPos + Vector3.up*0.75f;
         p_blood_normal.Play();
         p_blood_strong.Play();
-        //Instantiate(bloodStrong[Random.Range(0,bloodStrong.Length)], transform.position + Vector3.up*0.8f, transform.rotation, null);
+        //Blood
+        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
+        Quaternion bloodRot;
+        if (isBloodBottom)
+        {
+            bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
+            BloodManager.instance.Blood_Strong_Bottom(ref bloodPos,ref bloodRot);
+        }
+        else
+        {
+            bloodRot = t.rotation;
+            BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
+        }
     }
 }

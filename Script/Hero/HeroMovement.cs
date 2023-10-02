@@ -144,28 +144,13 @@ public partial class HeroMovement : MonoBehaviour
         if (Time.time < hit_strong_time + hit_strong_delay) return;
         anim_base.isFinished = true;
         hit_strong_time = Time.time;
+        hit_strong_type = (hit_strong_type + 1) % 2;
         
         animator.SetBool(GameManager.s_hit,true);
         animator.SetTrigger(GameManager.s_state_change);
         animator.SetFloat(GameManager.s_hit_rot,1);
-        //히트 모션 타입 설정
-        int smashedType = (int)playerSmashedType;
-        if (smashedType < 0)
-        {
-            hit_strong_type = (hit_strong_type + 1) % 2;
-            if (Time.time - blood_norm_lastTime > hero.blood_normal_delay)
-            {
-                blood_norm_lastTime = Time.time;
-                Instantiate(bloodNOrm, transform.position + Vector3.up*0.8f, transform.rotation, null);
-            }
-            
-            animator.SetInteger(GameManager.s_hit_type,hit_strong_type);
-        }
-        else
-        {
-            Effect_Roll();
-            animator.SetInteger(GameManager.s_hit_type,smashedType);
-        }
+        if(playerSmashedType == PlayerSmashedType.None) animator.SetInteger(GameManager.s_hit_type,hit_strong_type);
+        else animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
         //타겟 벡터
         Vector3 hitpoint = Vector3.zero;
         Vector3 targetHitVec = hitpoint-transform.position;
@@ -180,7 +165,9 @@ public partial class HeroMovement : MonoBehaviour
         degDiff /= 180.0f;
         animator.SetFloat(GameManager.s_hit_rot,degDiff);
         animator.SetTrigger(GameManager.s_hit_additive);
-        Effect_Hit_Strong();
+        
+        bool isBloodBottom = playerSmashedType is PlayerSmashedType.None or PlayerSmashedType.Bound or PlayerSmashedType.Stun;
+        Effect_Hit_Strong(isBloodBottom);
     }
     public void FallDown()
     {
