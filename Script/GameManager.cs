@@ -23,7 +23,8 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Curves
-    public static AnimationCurve curve_inout = AnimationCurve.EaseInOut(0,0,1,1);
+    public AnimationCurve curve_inout,curve_in,curve_out;
+    
     #endregion
     public void Awake()
     {

@@ -27,7 +27,7 @@ public class HeroAnim_Ladder_On_Bottom : Hero_Anim_Base
         if (IsNotAvailable(animator,stateInfo)) return;
         if (stateInfo.normalizedTime< 0.5f)
         {
-            float ratio = GameManager.curve_inout.Evaluate((stateInfo.normalizedTime-startRatio)/(0.5f-startRatio));
+            float ratio = GameManager.instance.curve_inout.Evaluate((stateInfo.normalizedTime-startRatio)/(0.5f-startRatio));
             Vector3 nextPos = Vector3.Lerp(startPos, endPos, ratio);
             Quaternion nextRot = Quaternion.Lerp(startRot, endRot, ratio);
             movement.Move_Normal(nextPos, nextRot);
