@@ -30,7 +30,8 @@ public partial class HeroMovement : MonoBehaviour
     }
     private void Attack_Pressed()
     {
-        animator.SetBool(GameManager.s_charge_normal,true);
+        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
+        if(false) animator.SetBool(GameManager.s_charge_normal,true);
         p_charge_begin.Play();
         charged = false;
         chargeBeginTime = Time.unscaledTime;
@@ -48,8 +49,9 @@ public partial class HeroMovement : MonoBehaviour
         {
             p_charge_Impact.transform.localScale = Vector3.one * 0.35f;
             p_charge_Impact.Play();
+            NormalAttack();
         }
-        
+        else StrongAttack();
         RemoveListner();
         GameManager.instance.E_LateUpdate.AddListener(ReleasedUpdate);
     }
