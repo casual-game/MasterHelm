@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeroAnim_Ladder_Off_TopRoll : Hero_Anim_Base
+public class HeroAnim_Ladder_Off_TopRoll : HeroAnim_Base
 {
     public AnimationCurve moveCurve;
     private Vector3 startPos, endPos;

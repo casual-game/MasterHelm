@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeroAnim_Ladder_Move : Hero_Anim_Base
+public class HeroAnim_Ladder_Move : HeroAnim_Base
 {
     private float refSpeed;
     private float ladderSpeedSmoothTime = 0.1f;

@@ -31,7 +31,7 @@ public partial class HeroMovement : MonoBehaviour
     private void Attack_Pressed()
     {
         bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
-        if(false) animator.SetBool(GameManager.s_charge_normal,true);
+        if(canChargeMotion) animator.SetBool(GameManager.s_charge_normal,true);
         p_charge_begin.Play();
         charged = false;
         chargeBeginTime = Time.unscaledTime;
@@ -58,6 +58,7 @@ public partial class HeroMovement : MonoBehaviour
 
     private void PressedUpdate()
     {
+        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
         //공격 조이스틱 각도 계산,Display 회전
         float jsDeg;
         if (!GameManager.Bool_Attack)
@@ -103,7 +104,8 @@ public partial class HeroMovement : MonoBehaviour
             lookScale += 5 * Time.deltaTime;
             lookScale = Mathf.Clamp01(lookScale);
             lookIcon.localScale = Vector3.one * lookScale;
-            lookAtIK.solver.SetLookAtWeight(lookScale);
+            if(canChargeMotion) lookAtIK.solver.SetLookAtWeight(lookScale);
+            else lookAtIK.solver.SetLookAtWeight(0);
         }
         //차지
         if (!charged && Time.unscaledTime > chargeBeginTime + hero.chargeDuration)
@@ -118,6 +120,7 @@ public partial class HeroMovement : MonoBehaviour
 
     private void ReleasedUpdate()
     {
+        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
         float eulery = transform.rotation.eulerAngles.y;
         float targetDeg = Mathf.SmoothDampAngle(lookDisplayT.eulerAngles.y, 
             eulery, ref lookDisplayRefDeg, hero.lookDisplayDuration);
@@ -145,7 +148,8 @@ public partial class HeroMovement : MonoBehaviour
             lookIcon.localScale = Vector3.one * lookScale;
             lookDisplayT.rotation = Quaternion.Euler(0,targetDeg,0);
             lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
-            lookAtIK.solver.SetLookAtWeight(lookScale);
+            if(canChargeMotion) lookAtIK.solver.SetLookAtWeight(lookScale);
+            else lookAtIK.solver.SetLookAtWeight(0);
         }
     }
 

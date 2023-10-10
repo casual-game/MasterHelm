@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Serialization;
 
-public class HeroAnim_Hit_Strong : Hero_Anim_Base
+public class HeroAnim_Hit_Strong : HeroAnim_Base
 {
     public AnimationCurve moveFlowCurve,motionSpeedCurve,endRatioCurve;
     private float lastRatio,endRatio,motionSpeed;

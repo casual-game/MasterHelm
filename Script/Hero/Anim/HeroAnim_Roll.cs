@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeroAnim_Roll : Hero_Anim_Base
+public class HeroAnim_Roll : HeroAnim_Base
 {
     private int pattern = 0;
     private float startDeg,endDeg;
@@ -62,5 +62,11 @@ public class HeroAnim_Roll : Hero_Anim_Base
         Vector3 targetPos = animator.deltaPosition * hero.moveMotionSpeed_roll;
         Quaternion targetRot = Quaternion.Euler(0,targetDeg,0);
         movement.Move_Nav(targetPos,targetRot);
+
+        if (stateInfo.normalizedTime > 0.63f)
+        {
+            isFinished = true;
+            movement.ChangeAnimationState(HeroMovement.AnimationState.Locomotion);
+        }
     }
 }

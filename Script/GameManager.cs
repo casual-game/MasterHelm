@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     public static Vector2 JS_Attack = Vector2.zero,JS_Move = Vector2.zero,JS_Action = Vector2.zero;
     public static bool BTN_Attack = false,BTN_Action,Bool_Move,Bool_Attack;
+    [ShowInInspector] public static float AttackReleasedTime = -100;
     public UnityEvent E_LateUpdate;
     public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin;
     //string들을 미리 캐시로 저장
@@ -72,6 +74,11 @@ public class GameManager : MonoBehaviour
             Bool_Attack = false;
         }
     }
+
+    public static float DelayCheck_Attack()
+    {
+        return Time.time - AttackReleasedTime;
+    }
     public void Input_JS_Action(InputAction.CallbackContext inputValue)
     {
         if (inputValue.performed && BTN_Action) JS_Action = inputValue.ReadValue<Vector2>();
@@ -88,6 +95,7 @@ public class GameManager : MonoBehaviour
         {
             BTN_Attack = false;
             JS_Attack = Vector2.zero;
+            AttackReleasedTime = Time.time;
             E_BTN_Attack_Fin?.Invoke();
         }
     }

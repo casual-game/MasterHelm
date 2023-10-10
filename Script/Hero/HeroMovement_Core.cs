@@ -4,16 +4,27 @@ using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
+    public enum  AnimationState
+    {
+        Locomotion = 0,Roll = 1,Attack=2
+    }
+    public void ChangeAnimationState(AnimationState animationState)
+    {
+        animator.SetInteger(GameManager.s_state_type,(int)animationState);
+        animator.SetTrigger(GameManager.s_state_change);
+    }
     //공격
     [HideInInspector] public bool isRightAtack = true;
+    public int attackIndex = -1;
+    [HideInInspector] public PlayerAttackMotionData currentAttackMotionData = null;
     [HideInInspector] private float attackPreInputTime=-100;
     private void NormalAttack()
     {
         if (moveState == MoveState.Locomotion)
         {
             Equip(weaponPack_Main);
-            animator.SetTrigger(GameManager.s_state_change);
-            animator.SetInteger(GameManager.s_state_type,1);
+            ChangeAnimationState(AnimationState.Attack);
+            Effect_Smoke(0.25f);
         }
         else
         {
@@ -61,8 +72,7 @@ public partial class HeroMovement : MonoBehaviour
         bool canRoll = moveState == MoveState.Locomotion;
         if (canRoll && isTimting)
         {
-            animator.SetTrigger(GameManager.s_state_change);
-            animator.SetInteger(GameManager.s_state_type,0);
+            ChangeAnimationState(AnimationState.Roll);
             action_BeginTime = -100;
             return;
         }
@@ -142,4 +152,7 @@ public partial class HeroMovement : MonoBehaviour
         p_smoke.transform.SetPositionAndRotation(t.position + t.forward*-0.2f ,t.rotation);
         p_smoke.Play();   
     }
+
+
+    
 }

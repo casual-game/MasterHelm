@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeroAnim_Normal : Hero_Anim_Base
+public class HeroAnim_Normal : HeroAnim_Base
 {
     public float motionSpeed = 1.0f;
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

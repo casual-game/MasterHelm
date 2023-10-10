@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeroAnim_Ladder_On_Bottom : Hero_Anim_Base
+public class HeroAnim_Ladder_On_Bottom : HeroAnim_Base
 {
     private Vector3 startPos, endPos;
     private Quaternion startRot, endRot;

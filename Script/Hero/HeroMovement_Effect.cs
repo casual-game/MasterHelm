@@ -11,7 +11,7 @@ public partial class HeroMovement : MonoBehaviour
     [HideInInspector]public TrailEffect trailEffect;
     private ParticleSystem p_smoke,p_roll, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
     private Sequence s_blink_hit_normal,s_blink_hit_strong,s_blink_evade;
-    [FoldoutGroup("Particle")] public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
+    [FoldoutGroup("Particle")] public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge;
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
     public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
     
@@ -39,9 +39,20 @@ public partial class HeroMovement : MonoBehaviour
             .OnStart(() => { outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_evade_begin); })
             .Append(outlinable.OutlineParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
+
+        var trailModule = p_charge.trails;
+        trailModule.colorOverTrail = weaponPack_Main.mainGradient;
     }
-    
-    //Smokes
+
+    public void Effect_MainParticle()
+    {
+        var mainParticle = weapondata[_currentWeaponPack].mainParticle;
+        if (mainParticle == null) return;
+
+        Transform t = transform;
+        mainParticle.transform.SetPositionAndRotation(t.position, t.rotation);
+        mainParticle.Play();
+    }
     public void Effect_Footstep_L()
     {
         footstepIndex = (footstepIndex + 1) % 2;
@@ -82,13 +93,18 @@ public partial class HeroMovement : MonoBehaviour
         p_roll.transform.SetPositionAndRotation(t.position + t.forward * 0.5f,t.rotation);
         p_roll.Play();
     }
-
     public void Effect_FastRoll()
     {
         if(!s_blink_evade.IsInitialized()) s_blink_evade.Play();
         else s_blink_evade.Restart();
     }
 
+    public void Effect_Smoke(float fwd = 0)
+    {
+        Transform t = transform;
+        p_smoke.transform.position = t.position + t.forward*fwd;
+        p_smoke.Play();
+    }
     public void Effect_Hit_Normal()
     {
         if(!s_blink_hit_normal.IsInitialized()) s_blink_hit_normal.Play();

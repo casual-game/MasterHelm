@@ -11,11 +11,11 @@ public partial class HeroMovement : MonoBehaviour
     [FoldoutGroup("Equipment")] public Prefab_Prop shield;
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield,t_back;
     
-    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield)> weapondata;
+    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null;
     private void Setting_Equipment()
     {
-        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield)>();
+        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)>();
         AddWeaponPack(weaponPack_Main,t_back,true);
         AddWeaponPack(weaponPack_SkillL,folder,false);
         AddWeaponPack(weaponPack_SkillR,folder,false);
@@ -25,10 +25,12 @@ public partial class HeroMovement : MonoBehaviour
         void AddWeaponPack(Data_WeaponPack weaponPack,Transform detachT,bool canKeep)
         {
             Prefab_Prop l = weaponPack.wepaon_L == null? null : Instantiate(weaponPack.wepaon_L);
-            Prefab_Prop r = weaponPack.weapon_R == null? null : Instantiate(weaponPack.weapon_R); 
+            Prefab_Prop r = weaponPack.weapon_R == null? null : Instantiate(weaponPack.weapon_R);
+            ParticleSystem p = weaponPack.mainEffect == null ? null : Instantiate(weaponPack.mainEffect);
             if(l!=null) l.Setting_Hero(outlinable,canKeep,t_hand_l,detachT);
             if(r!=null) r.Setting_Hero(outlinable,canKeep,t_hand_r,detachT);
-            weapondata.Add(weaponPack,(l,r,weaponPack.useShield));
+            if(p!=null) p.transform.SetParent(folder);
+            weapondata.Add(weaponPack,(l,r,weaponPack.useShield,p));
         }
     }
     [Button]
@@ -56,5 +58,13 @@ public partial class HeroMovement : MonoBehaviour
         else shield.Detach();
         
     
+    }
+
+    public void UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
+    {
+        (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle) data = weapondata[weaponPack];
+        if(data.weaponL!=null) data.weaponL.SetTrail(weaponL);
+        if(data.weaponR!=null) data.weaponR.SetTrail(weaponR); 
+        if(this.shield!=null) this.shield.SetTrail(shield);
     }
 }

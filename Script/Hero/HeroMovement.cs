@@ -21,7 +21,7 @@ public partial class HeroMovement : MonoBehaviour
     private Hero hero;
     private Outlinable outlinable;
     //Animator State Machine에 사용되는 변수
-    [HideInInspector] public Hero_Anim_Base anim_base;
+    [HideInInspector] public HeroAnim_Base anim_base;
     [HideInInspector] public Ladder currentLadder = null;
     [HideInInspector] public float animatorParameters_footstep;//Animator의 Footstep 커브의 이전 버전 저장용으로 쓰임.
     [HideInInspector] public float rotateCurrentVelocity,rotAnimCurrentVelocity;
@@ -49,7 +49,6 @@ public partial class HeroMovement : MonoBehaviour
         GameManager.instance.E_Debug1_Begin.AddListener(Hit_Normal);
         GameManager.instance.E_Debug2_Begin.AddListener(Hit_Strong);
     }
-
     //Public
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {

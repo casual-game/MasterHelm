@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RootMotion.Dynamics;
 using UnityEngine;
 
-public class HeroAnim_Hit_Smash : Hero_Anim_Base
+public class HeroAnim_Hit_Smash : HeroAnim_Base
 {
     public float motionSpeed = 1.0f;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
