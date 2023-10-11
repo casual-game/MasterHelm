@@ -42,9 +42,11 @@ public partial class HeroMovement : MonoBehaviour
 
     private void Attack_Released()
     {
+        //파티클, 애니메이션 원상복구
         animator.SetBool(GameManager.s_charge_normal,false);
         p_charge_begin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         p_charge_fin.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        //공격 설정. 상황 판단은 해당 함수 내부에서 체크한다.
         if (!charged)
         {
             p_charge_Impact.transform.localScale = Vector3.one * 0.35f;
@@ -52,6 +54,7 @@ public partial class HeroMovement : MonoBehaviour
             NormalAttack();
         }
         else StrongAttack();
+        //이벤트 삭제
         RemoveListner();
         GameManager.instance.E_LateUpdate.AddListener(ReleasedUpdate);
     }
@@ -157,5 +160,12 @@ public partial class HeroMovement : MonoBehaviour
     {
         GameManager.instance.E_LateUpdate.RemoveListener(PressedUpdate);
         GameManager.instance.E_LateUpdate.RemoveListener(ReleasedUpdate);
+    }
+
+
+
+    public bool IsCharged()
+    {
+        return charged;
     }
 }

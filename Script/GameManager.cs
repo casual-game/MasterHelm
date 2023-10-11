@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player"
         ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition"
         ,s_hit = "Hit",s_hit_additive = "Hit_Additive",s_hit_rot = "Hit_Rot",s_hit_type = "Hit_Type"
-        ,s_publiccolor = "_PublicColor";
+        ,s_publiccolor = "_PublicColor",s_leftstate = "LeftState",s_chargeenterindex = "ChargeEnterIndex";
     #endregion
 
     #region Curves

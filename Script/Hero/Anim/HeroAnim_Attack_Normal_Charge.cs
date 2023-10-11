@@ -10,6 +10,7 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         base.OnStateEnter(animator, stateInfo, layerIndex);
         _enteredTime = Time.time;
         animator.speed = 0.75f;
+        
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -20,7 +21,14 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         //공격 입력이 확인되면 다음 모션으로 이동
         if (GameManager.DelayCheck_Attack() < hero.preinput_attack)
         {
-            animator.SetTrigger(GameManager.s_transition);
+            //기본 공격
+            if(!movement.IsCharged()) animator.SetTrigger(GameManager.s_transition);
+            //강 공격
+            else
+            {
+                movement.Equip(movement.weaponPack_Main);
+                movement.ChangeAnimationState(HeroMovement.AnimationState.Attack_Strong);
+            }
             isFinished = true;
         }
         //대기시간 지나고 입력 없으면 기본 자세로 복귀

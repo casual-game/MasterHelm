@@ -10,9 +10,15 @@ public partial class HeroMovement : MonoBehaviour
 
     [FoldoutGroup("Equipment")] public Prefab_Prop shield;
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield,t_back;
-    
+    [ShowInInspector]
+    private int leftEnterIndex, rightEnterIndex;
     private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null;
+
+    public Data_WeaponPack Get_CurrentWeaponPack()
+    {
+        return _currentWeaponPack;
+    }
     private void Setting_Equipment()
     {
         weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)>();
@@ -31,6 +37,22 @@ public partial class HeroMovement : MonoBehaviour
             if(r!=null) r.Setting_Hero(outlinable,canKeep,t_hand_r,detachT);
             if(p!=null) p.transform.SetParent(folder);
             weapondata.Add(weaponPack,(l,r,weaponPack.useShield,p));
+        }
+        //Animator의 ChargeEnterIndex용 변수 설정
+        bool foundLeft = false, foundRight = false;
+        for (int i = 0; i < weaponPack_Main.PlayerAttackMotionDatas_Normal.Count; i++)
+        {
+            var data = weaponPack_Main.PlayerAttackMotionDatas_Normal[i];
+            if (!foundLeft && data.playerAttackType_Start == PlayerAttackType.LeftState)
+            {
+                foundLeft = true;
+                leftEnterIndex = i;
+            }
+            if (!foundRight && data.playerAttackType_Start == PlayerAttackType.RightState)
+            {
+                foundRight = true;
+                rightEnterIndex = i;
+            }
         }
     }
     [Button]
@@ -66,5 +88,15 @@ public partial class HeroMovement : MonoBehaviour
         if(data.weaponL!=null) data.weaponL.SetTrail(weaponL);
         if(data.weaponR!=null) data.weaponR.SetTrail(weaponR); 
         if(this.shield!=null) this.shield.SetTrail(shield);
+    }
+
+    public int Get_LeftEnterIndex()
+    {
+        return leftEnterIndex;
+    }
+
+    public int Get_RightEnterIndex()
+    {
+        return rightEnterIndex;
     }
 }

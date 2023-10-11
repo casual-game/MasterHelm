@@ -4,26 +4,38 @@ using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
-    public enum  AnimationState
+    public enum AnimationState
     {
-        Locomotion = 0,Roll = 1,Attack=2
+        Locomotion = 0,
+        Roll = 1,
+        Attack_Normal = 2,
+        Attack_Strong = 3
     }
+
     public void ChangeAnimationState(AnimationState animationState)
     {
-        animator.SetInteger(GameManager.s_state_type,(int)animationState);
+        animator.SetInteger(GameManager.s_state_type, (int)animationState);
         animator.SetTrigger(GameManager.s_state_change);
     }
-    //공격
+
+    //첫번째 공격
     [HideInInspector] public bool isRightAtack = true;
     public int attackIndex = -1;
     [HideInInspector] public PlayerAttackMotionData currentAttackMotionData = null;
-    [HideInInspector] private float attackPreInputTime=-100;
+    [HideInInspector] private float attackPreInputTime = -100;
+
+    public bool CanStrongAttack()
+    {
+        return false;
+    }
+
     private void NormalAttack()
     {
         if (moveState == MoveState.Locomotion)
         {
+            animator.SetInteger(GameManager.s_chargeenterindex,-1);
             Equip(weaponPack_Main);
-            ChangeAnimationState(AnimationState.Attack);
+            ChangeAnimationState(AnimationState.Attack_Normal);
             Effect_Smoke(0.25f);
         }
         else
@@ -31,10 +43,14 @@ public partial class HeroMovement : MonoBehaviour
             attackPreInputTime = Time.time;
         }
     }
-
     public void StrongAttack()
     {
-        Equip(null);
+        if (CanStrongAttack())
+        {
+            
+        }
+        else NormalAttack();
+        
     }
     //액션 기능
     private float action_BeginTime = -100;

@@ -20,6 +20,7 @@ public class HeroAnim_Roll : HeroAnim_Base
         }
         else endDeg = startDeg;
         pattern = 0;
+        animator.SetBool(GameManager.s_leftstate,true);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
