@@ -34,7 +34,7 @@ public partial class HeroMovement : MonoBehaviour
         if (moveState == MoveState.Locomotion)
         {
             animator.SetInteger(GameManager.s_chargeenterindex,-1);
-            Equip(weaponPack_Main);
+            Equip(weaponPack_Normal);
             ChangeAnimationState(AnimationState.Attack_Normal);
             Effect_Smoke(0.25f);
         }
@@ -47,7 +47,7 @@ public partial class HeroMovement : MonoBehaviour
     {
         if (CanStrongAttack())
         {
-            
+            ChangeAnimationState(AnimationState.Attack_Strong);
         }
         else NormalAttack();
         

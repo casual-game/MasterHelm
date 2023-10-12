@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using RPGCharacterAnims.Extensions;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public partial class HeroMovement : MonoBehaviour
 {
-    [FoldoutGroup("Equipment")] public Data_WeaponPack weaponPack_Main,weaponPack_SkillL,weaponPack_SkillR,weaponPack_Ranged;
+    [FoldoutGroup("Equipment")] public Data_WeaponPack weaponPack_Normal,weaponPack_StrongL,weaponPack_StrongR;
 
     [FoldoutGroup("Equipment")] public Prefab_Prop shield;
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield,t_back;
     [ShowInInspector]
     private int leftEnterIndex, rightEnterIndex;
-    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)> weapondata;
+    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null;
 
     public Data_WeaponPack Get_CurrentWeaponPack()
@@ -21,34 +22,37 @@ public partial class HeroMovement : MonoBehaviour
     }
     private void Setting_Equipment()
     {
-        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle)>();
-        AddWeaponPack(weaponPack_Main,t_back,true);
-        AddWeaponPack(weaponPack_SkillL,folder,false);
-        AddWeaponPack(weaponPack_SkillR,folder,false);
-        AddWeaponPack(weaponPack_Ranged,folder,false);
+        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
+        AddWeaponPack(weaponPack_Normal,t_back,true);
+        AddWeaponPack(weaponPack_StrongL,folder,false);
+        AddWeaponPack(weaponPack_StrongR,folder,false);
         shield = Instantiate(shield);
         shield.Setting_Hero(outlinable,true,t_shield,t_back);
         void AddWeaponPack(Data_WeaponPack weaponPack,Transform detachT,bool canKeep)
         {
             Prefab_Prop l = weaponPack.wepaon_L == null? null : Instantiate(weaponPack.wepaon_L);
             Prefab_Prop r = weaponPack.weapon_R == null? null : Instantiate(weaponPack.weapon_R);
-            ParticleSystem p = weaponPack.mainEffect == null ? null : Instantiate(weaponPack.mainEffect);
+            List<ParticleSystem> attackParticles = new List<ParticleSystem>();
+            foreach (var p in weaponPack.attackEffects)
+            {
+                ParticleSystem attackParticle = Instantiate(p,folder);
+                attackParticles.Add(attackParticle);
+            }
             if(l!=null) l.Setting_Hero(outlinable,canKeep,t_hand_l,detachT);
             if(r!=null) r.Setting_Hero(outlinable,canKeep,t_hand_r,detachT);
-            if(p!=null) p.transform.SetParent(folder);
-            weapondata.Add(weaponPack,(l,r,weaponPack.useShield,p));
+            weapondata.Add(weaponPack,(l,r,weaponPack.useShield,attackParticles));
         }
         //Animator의 ChargeEnterIndex용 변수 설정
         bool foundLeft = false, foundRight = false;
-        for (int i = 0; i < weaponPack_Main.PlayerAttackMotionDatas_Normal.Count; i++)
+        for (int i = 0; i < weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count; i++)
         {
-            var data = weaponPack_Main.PlayerAttackMotionDatas_Normal[i];
-            if (!foundLeft && data.playerAttackType_Start == PlayerAttackType.LeftState)
+            var data = weaponPack_Normal.PlayerAttackMotionDatas_Normal[i];
+            if (!foundLeft && data.playerAttackType_End == PlayerAttackType.LeftState)
             {
                 foundLeft = true;
                 leftEnterIndex = i;
             }
-            if (!foundRight && data.playerAttackType_Start == PlayerAttackType.RightState)
+            if (!foundRight && data.playerAttackType_End == PlayerAttackType.RightState)
             {
                 foundRight = true;
                 rightEnterIndex = i;
@@ -84,7 +88,7 @@ public partial class HeroMovement : MonoBehaviour
 
     public void UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
-        (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,ParticleSystem mainParticle) data = weapondata[weaponPack];
+        (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles) data = weapondata[weaponPack];
         if(data.weaponL!=null) data.weaponL.SetTrail(weaponL);
         if(data.weaponR!=null) data.weaponR.SetTrail(weaponR); 
         if(this.shield!=null) this.shield.SetTrail(shield);

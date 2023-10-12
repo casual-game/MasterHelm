@@ -12,8 +12,9 @@ public class Data_WeaponPack : ScriptableObject
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public bool useShield = false;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] [LabelText("이펙트 적용 그라디언트")]
     public Gradient mainGradient;
-    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] [LabelText("핵심 이펙트")]
-    public ParticleSystem mainEffect;
+
+    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")]
+    public List<ParticleSystem> attackEffects = new List<ParticleSystem>();
     //메인 무기
     [FormerlySerializedAs("PlayerAttackMotionDatas_Main")] [TitleGroup("일반 공격으로 사용")] [FoldoutGroup("일반 공격으로 사용/Data")][LabelText("일반 공격 정보")]
     public List<PlayerAttackMotionData> PlayerAttackMotionDatas_Normal = new List<PlayerAttackMotionData>();
@@ -22,7 +23,7 @@ public class Data_WeaponPack : ScriptableObject
     public bool isLeftIsMirror = false;
 
     [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")]
-    public float weaponOffRatio = 0.5f;
+    public float weaponOffRatio = 1.0f;
     [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")] [LabelText("강 공격 정보 (Left 기준)")]
     public PlayerAttackMotionData playerAttackMotionData_Strong;
 
@@ -32,13 +33,14 @@ public class PlayerAttackMotionData
 {
     [FormerlySerializedAs("playerAttackEndType")]
     [PropertySpace(16)]
-    [LabelText("시작 상태")] public PlayerAttackType playerAttackType_Start;
     [LabelText("종료 상태")] public PlayerAttackType playerAttackType_End;
     [PropertySpace(8)]
     public float playSpeed = 1.0f;
     public float moveSpeed = 1.0f;
+    public float transitionRatio = 0.41f;
+    public float chargeComboDelay = 0.0f;
     public float chargeWaitDuration = 0.5f;
-    [FormerlySerializedAs("chargeTransitionRatio")] public float inputRatio = 0.41f;
+    
     [PropertySpace(16)]
     public List<TrailData> TrailDatas = new List<TrailData>();
 }

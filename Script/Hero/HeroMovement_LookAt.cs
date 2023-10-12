@@ -32,10 +32,10 @@ public partial class HeroMovement : MonoBehaviour
     {
         bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
         if(canChargeMotion) animator.SetBool(GameManager.s_charge_normal,true);
+        
         p_charge_begin.Play();
         charged = false;
         chargeBeginTime = Time.unscaledTime;
-        
         RemoveListner();
         GameManager.instance.E_LateUpdate.AddListener(PressedUpdate);
     }

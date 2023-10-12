@@ -35,4 +35,20 @@ public class HeroAnim_Base : StateMachineBehaviour
                               animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
         return isNotCurrentState || isFinished;
     }
+    protected void UpdateTrail(float normalizedTime, Data_WeaponPack weaponPack)
+    {
+        bool trail_weaponL = false, trail_weaponR = false, trail_shield = false;
+        foreach (var trailData in movement.currentAttackMotionData.TrailDatas)
+        {
+            bool canTrail = trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;
+            if (canTrail)
+            {
+                trail_weaponL = trailData.weaponL;
+                trail_weaponR = trailData.weaponR;
+                trail_shield = trailData.shield;
+                break;
+            }
+        }
+        movement.UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
+    }
 }

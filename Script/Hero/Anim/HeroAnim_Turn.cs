@@ -9,7 +9,7 @@ public class HeroAnim_Turn : HeroAnim_Base
         base.OnStateEnter(animator, stateInfo, layerIndex);
         movement.ratio_speed = 0.35f;
         animator.SetFloat(GameManager.s_speed,movement.ratio_speed);
-        animator.SetBool(GameManager.s_leftstate,true);
+        animator.SetBool(GameManager.s_leftstate,false);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

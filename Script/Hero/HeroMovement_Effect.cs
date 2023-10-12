@@ -9,7 +9,7 @@ public partial class HeroMovement : MonoBehaviour
 {
     private int footstepIndex = 0;
     [HideInInspector]public TrailEffect trailEffect;
-    private ParticleSystem p_smoke,p_roll, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
+    private ParticleSystem p_smoke,p_roll,p_change, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
     private Sequence s_blink_hit_normal,s_blink_hit_strong,s_blink_evade;
     [FoldoutGroup("Particle")] public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge;
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
@@ -24,6 +24,7 @@ public partial class HeroMovement : MonoBehaviour
         p_footstep_2 = particleT.Find("Footstep_2").GetComponent<ParticleSystem>();
         p_smoke = particleT.Find("Smoke").GetComponent<ParticleSystem>();
         p_roll = particleT.Find("Roll").GetComponent<ParticleSystem>();
+        p_change = particleT.Find("Change").GetComponent<ParticleSystem>();
         p_blood_normal = particleT.Find("Blood_Normal").GetComponent<ParticleSystem>();
         p_blood_strong = particleT.Find("Blood_Strong").GetComponent<ParticleSystem>();
 
@@ -41,12 +42,12 @@ public partial class HeroMovement : MonoBehaviour
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
 
         var trailModule = p_charge.trails;
-        trailModule.colorOverTrail = weaponPack_Main.mainGradient;
+        trailModule.colorOverTrail = weaponPack_Normal.mainGradient;
     }
 
-    public void Effect_MainParticle()
+    public void Effect_AttackParticle(int index)
     {
-        var mainParticle = weapondata[_currentWeaponPack].mainParticle;
+        var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
         if (mainParticle == null) return;
 
         Transform t = transform;
@@ -97,6 +98,13 @@ public partial class HeroMovement : MonoBehaviour
     {
         if(!s_blink_evade.IsInitialized()) s_blink_evade.Play();
         else s_blink_evade.Restart();
+    }
+
+    public void Effect_Change()
+    {
+        Transform t = transform;
+        p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
+        p_change.Play();
     }
 
     public void Effect_Smoke(float fwd = 0)
