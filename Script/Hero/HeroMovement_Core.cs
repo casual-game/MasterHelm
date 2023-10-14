@@ -18,50 +18,52 @@ public partial class HeroMovement : MonoBehaviour
         animator.SetTrigger(GameManager.s_state_change);
     }
 
+    public void PreInput()
+    {
+        if (GameManager.DelayCheck_Attack() < hero.preinput_attack)
+        {
+            NormalAttack();
+        }
+        else if (DelayCheck_Roll() < hero.preinput_roll)
+        {
+            Roll();
+        }
+        else
+        {
+            if(GameManager.BTN_Attack && p_charge_begin.isPlaying) animator.SetBool(GameManager.s_charge_normal,true);
+        }
+        
+    }
     //첫번째 공격
-    [HideInInspector] public bool isRightAtack = true;
     public int attackIndex = -1;
     [HideInInspector] public PlayerAttackMotionData currentAttackMotionData = null;
-    [HideInInspector] private float attackPreInputTime = -100;
-
-    public bool CanStrongAttack()
-    {
-        return false;
-    }
-
     private void NormalAttack()
     {
         if (moveState == MoveState.Locomotion)
         {
             animator.SetInteger(GameManager.s_chargeenterindex,-1);
-            Equip(weaponPack_Normal);
             ChangeAnimationState(AnimationState.Attack_Normal);
-            Effect_Smoke(0.25f);
-        }
-        else
-        {
-            attackPreInputTime = Time.time;
         }
     }
     public void StrongAttack()
     {
-        if (CanStrongAttack())
-        {
+        if (moveState is MoveState.Locomotion or MoveState.Roll && IsCharged())
             ChangeAnimationState(AnimationState.Attack_Strong);
-        }
         else NormalAttack();
-        
     }
     //액션 기능
-    private float action_BeginTime = -100;
+    private float _action_BeginTime = -100;
+    private float _inputtime_action = -100;
+    private int _fastRoll = 0;
     public void E_BTN_Action_Begin()
     {
-        action_BeginTime = Time.unscaledTime;
+        _action_BeginTime = Time.unscaledTime;
     }
     public void E_BTN_Action_Fin()
     {
+        _fastRoll = Mathf.Clamp(_fastRoll-1, 0, 3);
        Vector3 currentPos= transform.position;
-        bool isTimting = Time.unscaledTime - action_BeginTime < hero.dash_roll_delay;
+        bool isTimting = Time.unscaledTime - _action_BeginTime < hero.dash_roll_delay;
         //인터렉션
         if (Interactable.currentInteractable != null)
         {
@@ -79,21 +81,21 @@ public partial class HeroMovement : MonoBehaviour
                 animator.SetFloat(GameManager.s_ladder_speed, (dist_bottom < dist_top) ? 1 : -1);
                 animator.SetBool(GameManager.s_ladder, true);
                 Interactable.currentInteractable.Interact();
-                action_BeginTime = -100;
+                _action_BeginTime = -100;
                 return;
             }
         }
 
         //구르기
         bool canRoll = moveState == MoveState.Locomotion;
-        if (canRoll && isTimting)
+        if (isTimting)
         {
-            ChangeAnimationState(AnimationState.Roll);
-            action_BeginTime = -100;
-            return;
+            if (canRoll) Roll();
+            else _inputtime_action = Time.time;
         }
         //Smashed이후 빠른 기상
-        bool canSpeedRoll = Time.time < falledTime + hero.hit_Smash_RecoveryInputDelay && moveState == MoveState.Hit;
+        bool canSpeedRoll = Time.time < falledTime + hero.hit_Smash_RecoveryInputDelay 
+                            && moveState == MoveState.Hit && _fastRoll>0;
         if (canSpeedRoll)
         {
             Effect_FastRoll();
@@ -103,7 +105,28 @@ public partial class HeroMovement : MonoBehaviour
             return;
         }
     }
+    public void ResetRollInput()
+    {
+        _inputtime_action = -100;
+    }
+    public float DelayCheck_Roll()
+    {
+        return Time.time - _inputtime_action;
+    }
+    public void Roll()
+    {
+        attackIndex = -1;
+        Equip(null);
+        ChangeAnimationState(AnimationState.Roll);
+        _action_BeginTime = -100;
+        return;
+    }
     //히트
+    private int hit_strong_type = 0;
+    private float hit_strong_delay = 0.2f, hit_strong_time = -100;
+    [HideInInspector] public float falledTime = -100;
+    public AttackMotionType attackMotionType;
+    public PlayerSmashedType playerSmashedType;
     public void Hit_Normal()
     {
         //감속시킨다.
@@ -125,18 +148,23 @@ public partial class HeroMovement : MonoBehaviour
         animator.SetTrigger(GameManager.s_hit_additive);
         Effect_Hit_Normal();
     }
-
-    private int hit_strong_type = 0;
-    private float hit_strong_delay = 0.2f, hit_strong_time = -100;
-    [HideInInspector] public float falledTime = -100;
-    public AttackMotionType attackMotionType;
-    public PlayerSmashedType playerSmashedType;
     public void Hit_Strong()
     {
+        if (moveState == MoveState.Roll)
+        {
+            Hit_Normal();
+            return;
+        }
         if (Time.time < hit_strong_time + hit_strong_delay) return;
+        _fastRoll = 2;
+        anim_base.cleanFinished = true;
         anim_base.isFinished = true;
         hit_strong_time = Time.time;
         hit_strong_type = (hit_strong_type + 1) % 2;
+        attackIndex = -1;
+        animator.SetBool(GameManager.s_leftstate,false);
+        if (_currentWeaponPack != null) UpdateTrail(_currentWeaponPack,false,false,false);
+        Equip(null);
         
         animator.SetBool(GameManager.s_hit,true);
         animator.SetTrigger(GameManager.s_state_change);
@@ -168,7 +196,7 @@ public partial class HeroMovement : MonoBehaviour
         p_smoke.transform.SetPositionAndRotation(t.position + t.forward*-0.2f ,t.rotation);
         p_smoke.Play();   
     }
-
+    
 
     
 }

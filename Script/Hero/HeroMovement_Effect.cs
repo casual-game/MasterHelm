@@ -47,6 +47,7 @@ public partial class HeroMovement : MonoBehaviour
 
     public void Effect_AttackParticle(int index)
     {
+        if (animator.IsInTransition(0)) return;
         var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
         if (mainParticle == null) return;
 

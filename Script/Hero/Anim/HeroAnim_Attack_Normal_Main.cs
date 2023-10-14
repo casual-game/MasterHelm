@@ -18,6 +18,8 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         _strongFinished = false;
         animator.speed = movement.currentAttackMotionData.playSpeed;
         animator.SetBool(GameManager.s_leftstate,movement.currentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
+        movement.Equip(movement.weaponPack_Normal);
+        if (movement.attackIndex == 0) movement.Effect_Smoke(0.25f);
         if (_isLastAttack)
         {
             movement.Effect_Smoke();
@@ -30,6 +32,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
+        if (cleanFinished) return;
         if (_strongFinished) return;
         //마지막 공격일때.. Trail 끄기, 필터링
         if (_isLastAttack)
@@ -45,7 +48,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         float normalizedTime = stateInfo.normalizedTime;
         UpdateTrail(normalizedTime,movement.weaponPack_Normal);
         movement.Move_Nav(animator.deltaPosition*movement.currentAttackMotionData.moveSpeed,animator.rootRotation);
-        
+        //차지 공격으로 캔슬한 경우
         if (GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.IsCharged() && !GameManager.BTN_Attack)
         {
             movement.UpdateTrail(movement.weaponPack_Normal,false,false,false);
@@ -64,11 +67,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         }
         else if (_isLastAttack && normalizedTime > movement.currentAttackMotionData.transitionRatio)
         {
-            movement.UpdateTrail(movement.weaponPack_Normal,false,false,false);
-            movement.ChangeAnimationState(HeroMovement.AnimationState.Locomotion);
-            movement.Equip(null);
-            movement.attackIndex = -1;
-            isFinished = true;
+            Set_Locomotion();
         }
     }
 }

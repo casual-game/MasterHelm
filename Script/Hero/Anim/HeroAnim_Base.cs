@@ -11,6 +11,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected Hero hero;
     protected HeroMovement movement;
     [HideInInspector] public bool isFinished = false;
+    [HideInInspector] public bool cleanFinished = false; //isFinished상태에서도 작동하는 일부 사례에서만 쓰입니다. (히트 시 attack계열 작업 종료)
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -22,6 +23,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         }
 
         isFinished = false;
+        cleanFinished = false;
         movement.anim_base = this;
         movement.moveState = moveState;
         movement.agent.updatePosition = useNavPosition;
@@ -50,5 +52,14 @@ public class HeroAnim_Base : StateMachineBehaviour
             }
         }
         movement.UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
+    }
+
+    protected void Set_Locomotion()
+    {
+        movement.UpdateTrail(movement.weaponPack_Normal,false,false,false);
+        movement.ChangeAnimationState(HeroMovement.AnimationState.Locomotion);
+        movement.Equip(null);
+        movement.attackIndex = -1;
+        isFinished = true;
     }
 }

@@ -30,10 +30,20 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
-       
+        if (cleanFinished) return;
+        //강공격으로 캔슬할 경우 처리
+        if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.IsCharged())
+        {
+            movement.UpdateTrail(_weaponPack,false,false,false);
+            movement.ChangeAnimationState(HeroMovement.AnimationState.Attack_Strong);
+            isFinished = true;
+            return;
+        }
+        
         float normalizedTime = stateInfo.normalizedTime;
-        //무기 먼저 Dissolve Out
-        if (!_weaponOff && normalizedTime > _weaponPack.weaponOffRatio)
+        bool isCurrentWeapon = movement.Get_CurrentWeaponPack() == _weaponPack;
+        //무기 먼저 Dissolve Out. 설정에 따라 발동 안할수도 있음. 이 경우, Charge에서 해준다.
+        if (!_weaponOff && isCurrentWeapon && normalizedTime > _weaponPack.weaponOffRatio)
         {
             _weaponOff = true;
             movement.UpdateTrail(movement.Get_CurrentWeaponPack(),false,false,false);
@@ -41,7 +51,9 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         }
         //핵심
         UpdateTrail(normalizedTime,_weaponPack);
-        movement.Move_Nav(animator.deltaPosition*movement.currentAttackMotionData.moveSpeed,animator.rootRotation);
+        if (_weaponOff || isCurrentWeapon) 
+            movement.Move_Nav(animator.deltaPosition*movement.currentAttackMotionData.moveSpeed,animator.rootRotation);
+        
         
         
         if (IsNotAvailable(animator,stateInfo)) return; 

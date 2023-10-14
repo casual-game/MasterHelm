@@ -74,7 +74,6 @@ public class GameManager : MonoBehaviour
             Bool_Attack = false;
         }
     }
-
     public static float DelayCheck_Attack()
     {
         return Time.time - AttackReleasedTime;

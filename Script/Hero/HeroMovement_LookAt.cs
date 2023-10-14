@@ -45,7 +45,7 @@ public partial class HeroMovement : MonoBehaviour
         //파티클, 애니메이션 원상복구
         animator.SetBool(GameManager.s_charge_normal,false);
         p_charge_begin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        p_charge_fin.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        p_charge_fin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         //공격 설정. 상황 판단은 해당 함수 내부에서 체크한다.
         if (!charged)
         {

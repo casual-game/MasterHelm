@@ -14,12 +14,9 @@ public partial class HeroMovement : MonoBehaviour
     [ShowInInspector]
     private int leftEnterIndex, rightEnterIndex;
     private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)> weapondata;
-    private Data_WeaponPack _currentWeaponPack = null;
+    private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
 
-    public Data_WeaponPack Get_CurrentWeaponPack()
-    {
-        return _currentWeaponPack;
-    }
+    
     private void Setting_Equipment()
     {
         weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
@@ -71,6 +68,8 @@ public partial class HeroMovement : MonoBehaviour
             if(past.weaponL!=null) past.weaponL.Detach();
             if(past.weaponR!=null) past.weaponR.Detach();
         }
+
+        _lastWeaponPack = _currentWeaponPack;
         _currentWeaponPack = weaponPack;
         //현 무기 장착
         if (weaponPack != null)
@@ -93,7 +92,15 @@ public partial class HeroMovement : MonoBehaviour
         if(data.weaponR!=null) data.weaponR.SetTrail(weaponR); 
         if(this.shield!=null) this.shield.SetTrail(shield);
     }
-
+    
+    public Data_WeaponPack Get_LastWeaponPack()
+    {
+        return _lastWeaponPack;
+    }
+    public Data_WeaponPack Get_CurrentWeaponPack()
+    {
+        return _currentWeaponPack;
+    }
     public int Get_LeftEnterIndex()
     {
         return leftEnterIndex;

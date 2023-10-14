@@ -30,6 +30,7 @@ public partial class Hero : MonoBehaviour
     [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float hit_Smash_RecoveryInputDelay = 0.2f;
     [TitleGroup("전투")] [FoldoutGroup("전투/차지")] public float chargeDuration = 1.0f;
     
-    [TitleGroup("입력")] public float dash_roll_delay = 0.15f;
-    [TitleGroup("입력")] public float preinput_attack = 0.5f;
+    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")] public float dash_roll_delay = 0.15f;
+    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float preinput_roll = 1.0f;
+    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float preinput_attack = 1.0f;
 }
