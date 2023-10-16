@@ -5,21 +5,23 @@ using UnityEngine;
 public class HeroAnim_Ladder_On_Top : HeroAnim_Base
 {
     public AnimationCurve moveCurve;
-    private Vector3 startPos, endPos;
-    private Quaternion startRot, endRot;
-    private float startRatio;
+    private Vector3 _startPos, _endPos;
+    private Quaternion _startRot, _endRot;
+    private float _startRatio;
+    private Ladder _ladder;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
+        _ladder = movement.CurrentLadder;
         animator.SetFloat(GameManager.s_ladder_speed,0);
         Transform mt = movement.transform;
-        Transform lt = movement.currentLadder.transform;
-        startRot = mt.rotation;
-        endRot = Quaternion.Euler(0,180 + lt.rotation.eulerAngles.y,0);
-        startPos = mt.position;
-        endPos = lt.position + lt.forward * 1.4f;
-        endPos.y = movement.currentLadder.range.y - 1.09f;
-        startRatio = stateInfo.normalizedTime;
+        Transform lt = _ladder.transform;
+        _startRot = mt.rotation;
+        _endRot = Quaternion.Euler(0,180 + lt.rotation.eulerAngles.y,0);
+        _startPos = mt.position;
+        _endPos = lt.position + lt.forward * 1.4f;
+        _endPos.y = _ladder.range.y - 1.09f;
+        _startRatio = stateInfo.normalizedTime;
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -28,14 +30,14 @@ public class HeroAnim_Ladder_On_Top : HeroAnim_Base
         if (IsNotAvailable(animator,stateInfo)) return;
         if (stateInfo.normalizedTime< 0.4f)
         {
-            float ratio = moveCurve.Evaluate((stateInfo.normalizedTime-startRatio)/(0.4f-startRatio));
-            Vector3 nextPos = Vector3.Lerp(startPos, endPos, ratio);
-            Quaternion nextRot = Quaternion.Lerp(startRot, endRot, ratio);
+            float ratio = moveCurve.Evaluate((stateInfo.normalizedTime-_startRatio)/(0.4f-_startRatio));
+            Vector3 nextPos = Vector3.Lerp(_startPos, _endPos, ratio);
+            Quaternion nextRot = Quaternion.Lerp(_startRot, _endRot, ratio);
             movement.Move_Normal(nextPos, nextRot);
         }
         else
         {
-            movement.Move_Normal(endPos,endRot);
+            movement.Move_Normal(_endPos,_endRot);
             isFinished = true;
             return;
         }

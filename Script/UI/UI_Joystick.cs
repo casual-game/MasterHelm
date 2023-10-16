@@ -19,8 +19,9 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         moveBG = GetComponent<OnScreenStick>().behaviour == OnScreenStick.Behaviour.ExactPositionWithDynamicOrigin;
         inner = GetComponent<Image>();
-        bg = transform.parent.GetChild(0).GetComponent<Image>();
-        canvasRect = transform.parent?.GetComponentInParent<RectTransform>();
+        var parent = transform.parent;
+        bg = parent.GetChild(0).GetComponent<Image>();
+        canvasRect = parent.GetComponentInParent<RectTransform>();
         RectTransform innerT = inner.rectTransform, bgT = bg.rectTransform;
         firstAnchoredPosition = bgT.anchoredPosition;
         
@@ -46,7 +47,9 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void OnPointerUp(PointerEventData eventData)
     {
         if(moveBG) bg.rectTransform.anchoredPosition = firstAnchoredPosition;
-        s_Released.Restart();
+        
+        if(!s_Released.IsInitialized()) s_Released.Play();
+        else s_Released.Restart();
     }
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -56,8 +59,9 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 eventData.position, eventData.pressEventCamera, out var position);
             bg.rectTransform.anchoredPosition = position;
         }
-        
-        s_Pressed.Restart();
+
+        if (!s_Pressed.IsInitialized()) s_Pressed.Play();
+        else s_Pressed.Restart();
     }
 
     public void OnDestroy()

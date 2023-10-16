@@ -6,62 +6,64 @@ using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
-    private LookAtIK lookAtIK;
-    private Transform lookDisplayT,lookTargetT;
-    private Transform lookIcon;
-    private float lookDisplayRefDeg,lookTargetRefDeg;
-    private float lookScale = 0;
-    private float chargeBeginTime = -100;
-    private bool charged = false;
     private void Setting_LookAt()
     {
-        GameManager.instance.E_BTN_Attack_Begin.AddListener(Attack_Pressed);
-        GameManager.instance.E_BTN_Attack_Fin.AddListener(Attack_Released);
-        lookAtIK = GetComponent<LookAtIK>();
+        GameManager.instance.E_BTN_Attack_Begin.AddListener(E_BTN_Attack_Pressed);
+        GameManager.instance.E_BTN_Attack_Fin.AddListener(E_BTN_Attack_Released);
+        _lookAtIK = GetComponent<LookAtIK>();
         Transform lookRootT = transform.Find("LookAt");
-        lookDisplayT = lookRootT.Find("LookDisplay");
-        lookTargetT = lookRootT.Find("LookTarget");
-        lookIcon = lookDisplayT.GetChild(0);
+        _lookDisplayT = lookRootT.Find("LookDisplay");
+        _lookTargetT = lookRootT.Find("LookTarget");
+        _lookIcon = _lookDisplayT.GetChild(0);
         
-        lookScale = 0;
-        lookIcon.localScale = Vector3.zero;
-        lookAtIK.solver.SetLookAtWeight(0);
-        lookDisplayT.rotation = Quaternion.Euler(0,transform.rotation.eulerAngles.y,0);
+        _lookScale = 0;
+        _lookIcon.localScale = Vector3.zero;
+        _lookAtIK.solver.SetLookAtWeight(0);
+        _lookDisplayT.rotation = Quaternion.Euler(0,transform.rotation.eulerAngles.y,0);
     }
-    private void Attack_Pressed()
+    
+    //Private
+    private LookAtIK _lookAtIK;
+    private Transform _lookDisplayT,_lookTargetT;
+    private Transform _lookIcon;
+    private float _lookDisplayRefDeg,_lookTargetRefDeg;
+    private float _lookScale = 0;
+    private float _chargeBeginTime = -100;
+    private bool _charged = false;
+    
+    //Event
+    private void E_BTN_Attack_Pressed()
     {
-        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
-        if(canChargeMotion) animator.SetBool(GameManager.s_charge_normal,true);
+        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
+        if(canChargeMotion) _animator.SetBool(GameManager.s_charge_normal,true);
         
         p_charge_begin.Play();
-        charged = false;
-        chargeBeginTime = Time.unscaledTime;
-        RemoveListner();
-        GameManager.instance.E_LateUpdate.AddListener(PressedUpdate);
+        _charged = false;
+        _chargeBeginTime = Time.time;
+        E_BTN_Attack_RemoveListner();
+        GameManager.instance.E_LateUpdate.AddListener(E_BTN_Attack_PressedUpdate);
     }
-
-    private void Attack_Released()
+    private void E_BTN_Attack_Released()
     {
         //파티클, 애니메이션 원상복구
-        animator.SetBool(GameManager.s_charge_normal,false);
+        _animator.SetBool(GameManager.s_charge_normal,false);
         p_charge_begin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         p_charge_fin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         //공격 설정. 상황 판단은 해당 함수 내부에서 체크한다.
-        if (!charged)
+        if (!_charged)
         {
             p_charge_Impact.transform.localScale = Vector3.one * 0.35f;
             p_charge_Impact.Play();
-            NormalAttack();
+            Core_NormalAttack();
         }
-        else StrongAttack();
+        else Core_StrongAttack();
         //이벤트 삭제
-        RemoveListner();
-        GameManager.instance.E_LateUpdate.AddListener(ReleasedUpdate);
+        E_BTN_Attack_RemoveListner();
+        GameManager.instance.E_LateUpdate.AddListener(E_BTN_Attack_ReleasedUpdate);
     }
-
-    private void PressedUpdate()
+    private void E_BTN_Attack_PressedUpdate()
     {
-        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
+        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
         //공격 조이스틱 각도 계산,Display 회전
         float jsDeg;
         if (!GameManager.Bool_Attack)
@@ -75,9 +77,9 @@ public partial class HeroMovement : MonoBehaviour
             jsDeg = -jsDeg + 180;
         }
         
-        float targetDisplayDeg = Mathf.SmoothDampAngle(lookDisplayT.eulerAngles.y, 
-            jsDeg, ref lookDisplayRefDeg, hero.lookDisplayDuration);
-        lookDisplayT.rotation = Quaternion.Euler(0,targetDisplayDeg,0);
+        float targetDisplayDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
+            jsDeg, ref _lookDisplayRefDeg, _hero.lookDisplayDuration);
+        _lookDisplayT.rotation = Quaternion.Euler(0,targetDisplayDeg,0);
         //플레이어 각도와의 차이 계산, Target 회전
         float degDiff;
         if (!GameManager.Bool_Attack)
@@ -89,83 +91,79 @@ public partial class HeroMovement : MonoBehaviour
             degDiff = -transform.rotation.eulerAngles.y+jsDeg;
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
-            if (hero.lookRangeDeadZone.x > degDiff || degDiff > hero.lookRangeDeadZone.y)
+            if (_hero.lookRangeDeadZone.x > degDiff || degDiff > _hero.lookRangeDeadZone.y)
             {
-                if (Mathf.DeltaAngle(transform.rotation.eulerAngles.y, lookTargetT.rotation.eulerAngles.y) > 0)
-                    degDiff = hero.lookRange.y;
-                else degDiff = hero.lookRange.x;
+                if (Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.rotation.eulerAngles.y) > 0)
+                    degDiff = _hero.lookRange.y;
+                else degDiff = _hero.lookRange.x;
             }
-            degDiff = Mathf.Clamp(degDiff,hero.lookRange.x, hero.lookRange.y);
+            degDiff = Mathf.Clamp(degDiff,_hero.lookRange.x, _hero.lookRange.y);
         } 
-        float currentDiff = Mathf.DeltaAngle(transform.rotation.eulerAngles.y, lookTargetT.eulerAngles.y);
+        float currentDiff = Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.eulerAngles.y);
         float targetTargetDeg = Mathf.SmoothDamp(transform.rotation.eulerAngles.y + currentDiff, 
-            transform.rotation.eulerAngles.y + degDiff, ref lookTargetRefDeg, hero.lookTargetDuration);
-        lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
+            transform.rotation.eulerAngles.y + degDiff, ref _lookTargetRefDeg, _hero.lookTargetDuration);
+        _lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
         //크기 조정
-        if (lookScale < 1)
+        if (_lookScale < 1)
         {
-            lookScale += 5 * Time.deltaTime;
-            lookScale = Mathf.Clamp01(lookScale);
-            lookIcon.localScale = Vector3.one * lookScale;
-            if(canChargeMotion) lookAtIK.solver.SetLookAtWeight(lookScale);
-            else lookAtIK.solver.SetLookAtWeight(0);
+            _lookScale += 5 * Time.deltaTime;
+            _lookScale = Mathf.Clamp01(_lookScale);
+            _lookIcon.localScale = Vector3.one * _lookScale;
+            if(canChargeMotion) _lookAtIK.solver.SetLookAtWeight(_lookScale);
+            else _lookAtIK.solver.SetLookAtWeight(0);
         }
         //차지
-        if (!charged && Time.unscaledTime > chargeBeginTime + hero.chargeDuration)
+        if (!_charged && Time.time > _chargeBeginTime + _hero.chargeDuration)
         {
-            charged = true;
+            _charged = true;
             p_charge_fin.Play();
-
             p_charge_Impact.transform.localScale = Vector3.one * 0.5f;
             p_charge_Impact.Play();
         }
     }
-
-    private void ReleasedUpdate()
+    private void E_BTN_Attack_ReleasedUpdate()
     {
-        bool canChargeMotion = moveState == MoveState.Locomotion || moveState == MoveState.Roll;
+        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
         float eulery = transform.rotation.eulerAngles.y;
-        float targetDeg = Mathf.SmoothDampAngle(lookDisplayT.eulerAngles.y, 
-            eulery, ref lookDisplayRefDeg, hero.lookDisplayDuration);
-        float targetTargetDeg = Mathf.SmoothDamp(lookTargetT.eulerAngles.y, 
-            eulery, ref lookTargetRefDeg, hero.lookTargetDuration);
+        float targetDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
+            eulery, ref _lookDisplayRefDeg, _hero.lookDisplayDuration);
+        float targetTargetDeg = Mathf.SmoothDamp(_lookTargetT.eulerAngles.y, 
+            eulery, ref _lookTargetRefDeg, _hero.lookTargetDuration);
         //크기 조정
-        if (lookScale > 0)
+        if (_lookScale > 0)
         {
-            lookScale -= 3 * Time.deltaTime;
-            lookScale = Mathf.Clamp01(lookScale);
+            _lookScale -= 3 * Time.deltaTime;
+            _lookScale = Mathf.Clamp01(_lookScale);
         }
         //종료
         bool correctDeg = Mathf.DeltaAngle(targetTargetDeg, eulery) < 0.1f;
-        if (lookScale < 0.01f && correctDeg)
+        if (_lookScale < 0.01f && correctDeg)
         {
-            lookScale = 0;
-            lookIcon.localScale = Vector3.zero;
-            lookAtIK.solver.SetLookAtWeight(0);
-            lookDisplayT.rotation = Quaternion.Euler(0,eulery,0);
-            lookTargetT.rotation = Quaternion.Euler(0,eulery,0);
-            GameManager.instance.E_LateUpdate.RemoveListener(ReleasedUpdate);
+            _lookScale = 0;
+            _lookIcon.localScale = Vector3.zero;
+            _lookAtIK.solver.SetLookAtWeight(0);
+            _lookDisplayT.rotation = Quaternion.Euler(0,eulery,0);
+            _lookTargetT.rotation = Quaternion.Euler(0,eulery,0);
+            GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
         }
         else
         {
-            lookIcon.localScale = Vector3.one * lookScale;
-            lookDisplayT.rotation = Quaternion.Euler(0,targetDeg,0);
-            lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
-            if(canChargeMotion) lookAtIK.solver.SetLookAtWeight(lookScale);
-            else lookAtIK.solver.SetLookAtWeight(0);
+            _lookIcon.localScale = Vector3.one * _lookScale;
+            _lookDisplayT.rotation = Quaternion.Euler(0,targetDeg,0);
+            _lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
+            if(canChargeMotion) _lookAtIK.solver.SetLookAtWeight(_lookScale);
+            else _lookAtIK.solver.SetLookAtWeight(0);
         }
     }
-
-    private void RemoveListner()
+    private void E_BTN_Attack_RemoveListner()
     {
-        GameManager.instance.E_LateUpdate.RemoveListener(PressedUpdate);
-        GameManager.instance.E_LateUpdate.RemoveListener(ReleasedUpdate);
+        GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_PressedUpdate);
+        GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
     }
-
-
-
-    public bool IsCharged()
+    
+    //Getter
+    public bool Get_Charged()
     {
-        return charged;
+        return _charged;
     }
 }

@@ -67,7 +67,7 @@ public class HeroAnim_Roll : HeroAnim_Base
         if (stateInfo.normalizedTime > 0.63f)
         {
             isFinished = true;
-            movement.ChangeAnimationState(HeroMovement.AnimationState.Locomotion);
+            movement.Set_AnimationState(HeroMovement.AnimationState.Locomotion);
         }
     }
 }

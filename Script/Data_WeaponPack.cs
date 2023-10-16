@@ -39,6 +39,7 @@ public class PlayerAttackMotionData
     public float moveSpeed = 1.0f;
     public float transitionRatio = 0.41f;
     public float chargeComboDelay = 0.0f;
+    [InfoBox("ChargeWaitDuration: 마지막 기본공격에서는 구르기 딜레이 시간으로 사용됩니다.")]
     public float chargeWaitDuration = 0.5f;
     
     [PropertySpace(16)]

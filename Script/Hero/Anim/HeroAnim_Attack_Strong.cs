@@ -13,17 +13,17 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         base.OnStateEnter(animator, stateInfo, layerIndex);
         GameManager.AttackReleasedTime = -100;
         _weaponPack = isLeft? movement.weaponPack_StrongL: movement.weaponPack_StrongR;
-        movement.attackIndex++;
-        movement.currentAttackMotionData = _weaponPack.playerAttackMotionData_Strong;
+        movement.Set_AttackIndex(movement.AttackIndex+1);
+        movement.Set_CurrentAttackMotionData(_weaponPack.playerAttackMotionData_Strong);
         _enteredTime = Time.time;
         _trailFinished = false;
         _weaponOff = false;
-        animator.speed = movement.currentAttackMotionData.playSpeed;
-        animator.SetBool(GameManager.s_leftstate,movement.currentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
+        animator.speed = movement.CurrentAttackMotionData.playSpeed;
+        animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         movement.Effect_Smoke(0.25f);
         movement.trailEffect.active = true;
         movement.Effect_FastRoll();
-        movement.Equip(_weaponPack);
+        movement.Equipment_Equip(_weaponPack);
         movement.Effect_Change();
     }
 
@@ -32,10 +32,10 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (cleanFinished) return;
         //강공격으로 캔슬할 경우 처리
-        if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.IsCharged())
+        if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.Get_Charged())
         {
-            movement.UpdateTrail(_weaponPack,false,false,false);
-            movement.ChangeAnimationState(HeroMovement.AnimationState.Attack_Strong);
+            movement.Equipment_UpdateTrail(_weaponPack,false,false,false);
+            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Strong);
             isFinished = true;
             return;
         }
@@ -46,13 +46,13 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         if (!_weaponOff && isCurrentWeapon && normalizedTime > _weaponPack.weaponOffRatio)
         {
             _weaponOff = true;
-            movement.UpdateTrail(movement.Get_CurrentWeaponPack(),false,false,false);
-            movement.Equip(movement.weaponPack_Normal);
+            movement.Equipment_UpdateTrail(movement.Get_CurrentWeaponPack(),false,false,false);
+            movement.Equipment_Equip(movement.weaponPack_Normal);
         }
         //핵심
         UpdateTrail(normalizedTime,_weaponPack);
         if (_weaponOff || isCurrentWeapon) 
-            movement.Move_Nav(animator.deltaPosition*movement.currentAttackMotionData.moveSpeed,animator.rootRotation);
+            movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,animator.rootRotation);
         
         
         
@@ -64,15 +64,15 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             movement.trailEffect.active = false;
         }
         //종료 설정
-        if (normalizedTime > movement.currentAttackMotionData.transitionRatio)
+        if (normalizedTime > movement.CurrentAttackMotionData.transitionRatio)
         {
             int targetIndex;
-            bool checkLeft = movement.currentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState;
+            bool checkLeft = movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState;
             if (checkLeft) targetIndex = movement.Get_LeftEnterIndex();
             else targetIndex = movement.Get_RightEnterIndex();
             animator.SetInteger(GameManager.s_chargeenterindex,targetIndex);
-            movement.ChangeAnimationState(HeroMovement.AnimationState.Attack_Normal);
-            movement.attackIndex = targetIndex;
+            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Normal);
+            movement.Set_AttackIndex(targetIndex);
             isFinished = true;
         }
         

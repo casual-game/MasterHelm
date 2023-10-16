@@ -6,10 +6,10 @@ public class HeroAnim_Move : HeroAnim_Base
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        bool doPreInput = movement != null && movement.moveState != HeroMovement.MoveState.Locomotion;
+        bool doPreInput = movement != null && movement.HeroMoveState != HeroMovement.MoveState.Locomotion;
         base.OnStateEnter(animator, stateInfo, layerIndex);
         animator.SetBool(GameManager.s_leftstate,false);
-        if(doPreInput) movement.PreInput();
+        if(doPreInput) movement.Core_PreInput();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -18,7 +18,7 @@ public class HeroAnim_Move : HeroAnim_Base
         if (IsNotAvailable(animator,stateInfo)) return;
         //변수 선언
         Transform mt = movement.transform;
-        float currentSpeed = movement.ratio_speed;
+        float currentSpeed = movement.Get_SpeedRatio();
         float currentAnimDeg = animator.GetFloat(GameManager.s_rot);
         float targetSpeed, targetDeg = mt.rotation.eulerAngles.y;
         //데이터 확정
@@ -32,8 +32,8 @@ public class HeroAnim_Move : HeroAnim_Base
         {
             //이동
             targetSpeed = Mathf.Min(1.0f, currentSpeed + acceleraton * Time.deltaTime);
-            movement.ratio_speed = targetSpeed;
-            animator.SetFloat(GameManager.s_speed,hero.moveCurve.Evaluate(movement.ratio_speed));
+            movement.Set_SpeedRatio(targetSpeed);
+            animator.SetFloat(GameManager.s_speed,hero.moveCurve.Evaluate(movement.Get_SpeedRatio()));
             //조이스틱 각도 계산
             float jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
                           CamArm.instance.transform.rotation.eulerAngles.y;
@@ -44,7 +44,7 @@ public class HeroAnim_Move : HeroAnim_Base
             while (degDiff > 180) degDiff -= 360;
             //Turn 애니메이션 전환 가능 여부 확인,전환
             bool canTurn = !isCrouching
-                           &&movement.ratio_speed > 0.95f
+                           &&movement.Get_SpeedRatio() > 0.95f
                            && 145 < Mathf.Abs(degDiff)
                            && Mathf.Abs(currentAnimDeg)<0.175f
                            && !animator.IsInTransition(0);
@@ -66,8 +66,8 @@ public class HeroAnim_Move : HeroAnim_Base
         {
             //이동
             targetSpeed = Mathf.Max(0.0f, currentSpeed - deceleration * Time.deltaTime);
-            movement.ratio_speed = targetSpeed;
-            animator.SetFloat(GameManager.s_speed,hero.moveCurve.Evaluate(movement.ratio_speed));
+            movement.Set_SpeedRatio(targetSpeed);
+            animator.SetFloat(GameManager.s_speed,hero.moveCurve.Evaluate(movement.Get_SpeedRatio()));
             //회전 애니메이션
             float animDeg = Mathf.SmoothDampAngle(animator.GetFloat(GameManager.s_rot), 0,
                 ref movement.rotAnimCurrentVelocity, 0.25f);
@@ -82,8 +82,8 @@ public class HeroAnim_Move : HeroAnim_Base
             ,Quaternion.Euler(0,targetDeg,0));
         //Footstep
         float currentFootstep = animator.GetFloat(GameManager.s_footstep);
-        if(currentFootstep>0 && movement.animatorParameters_footstep<0) movement.Effect_Footstep_R();
-        else if(currentFootstep<0 && movement.animatorParameters_footstep>0) movement.Effect_Footstep_L();
-        movement.animatorParameters_footstep = currentFootstep;
+        if(currentFootstep>0 && movement.Get_AnimatorParameters_Footstep()<0) movement.Effect_Footstep_R();
+        else if(currentFootstep<0 && movement.Get_AnimatorParameters_Footstep()>0) movement.Effect_Footstep_L();
+        movement.Set_AnimatorParameters_Footstep(currentFootstep);;
     }
 }

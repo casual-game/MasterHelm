@@ -7,14 +7,6 @@ using UnityEngine;
 
 public partial class HeroMovement : MonoBehaviour
 {
-    private int footstepIndex = 0;
-    [HideInInspector]public TrailEffect trailEffect;
-    private ParticleSystem p_smoke,p_roll,p_change, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
-    private Sequence s_blink_hit_normal,s_blink_hit_strong,s_blink_evade;
-    [FoldoutGroup("Particle")] public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge;
-    [FoldoutGroup("Color")][ColorUsage(true,true)] 
-    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
-    
     private void Setting_Effect()
     {
         trailEffect = transform.Find("SkinnedMesh").GetComponent<TrailEffect>();
@@ -29,25 +21,39 @@ public partial class HeroMovement : MonoBehaviour
         p_blood_strong = particleT.Find("Blood_Strong").GetComponent<ParticleSystem>();
 
         s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
-            .Append(outlinable.OutlineParameters.FillPass
+            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .Append(_outlinable.OutlineParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.3f).SetEase(Ease.InQuad));
         s_blink_hit_strong = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
-            .Append(outlinable.OutlineParameters.FillPass
+            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .Append(_outlinable.OutlineParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.5f).SetEase(Ease.InCirc));
         s_blink_evade = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_evade_begin); })
-            .Append(outlinable.OutlineParameters.FillPass
+            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_evade_begin); })
+            .Append(_outlinable.OutlineParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
 
         var trailModule = p_charge.trails;
         trailModule.colorOverTrail = weaponPack_Normal.mainGradient;
     }
-
+    
+    //Public
+    [HideInInspector]
+    public TrailEffect trailEffect;
+    [FoldoutGroup("Particle")] 
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge;
+    [FoldoutGroup("Color")][ColorUsage(true,true)] 
+    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
+    
+    //Private
+    private ParticleSystem p_smoke,p_roll,p_change, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
+    private Sequence s_blink_hit_normal,s_blink_hit_strong,s_blink_evade;
+    private int footstepIndex = 0;//footstep 파티클 풀링에 쓰인다.
+    
+    //Effect
     public void Effect_AttackParticle(int index)
     {
-        if (animator.IsInTransition(0)) return;
+        if (_animator.IsInTransition(0)) return;
         var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
         if (mainParticle == null) return;
 
@@ -59,7 +65,7 @@ public partial class HeroMovement : MonoBehaviour
     {
         footstepIndex = (footstepIndex + 1) % 2;
         Transform t = transform;
-        Vector3 pos = animator.GetBoneTransform(HumanBodyBones.LeftFoot).position +t.forward*-0.3f;
+        Vector3 pos = _animator.GetBoneTransform(HumanBodyBones.LeftFoot).position +t.forward*-0.3f;
         Quaternion rot = t.rotation;
         if (footstepIndex == 0)
         {
@@ -76,7 +82,7 @@ public partial class HeroMovement : MonoBehaviour
     {
         footstepIndex = (footstepIndex + 1) % 2;
         Transform t = transform;
-        Vector3 pos = animator.GetBoneTransform(HumanBodyBones.RightFoot).position +t.forward*-0.3f;
+        Vector3 pos = _animator.GetBoneTransform(HumanBodyBones.RightFoot).position +t.forward*-0.3f;
         Quaternion rot = t.rotation;
         if (footstepIndex == 0)
         {
@@ -100,14 +106,12 @@ public partial class HeroMovement : MonoBehaviour
         if(!s_blink_evade.IsInitialized()) s_blink_evade.Play();
         else s_blink_evade.Restart();
     }
-
     public void Effect_Change()
     {
         Transform t = transform;
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
     }
-
     public void Effect_Smoke(float fwd = 0)
     {
         Transform t = transform;

@@ -10,16 +10,16 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         GameManager.AttackReleasedTime = -100;
-        movement.attackIndex++;
-        movement.currentAttackMotionData = movement.weaponPack_Normal.PlayerAttackMotionDatas_Normal[movement.attackIndex];
-        _isLastAttack = movement.weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count - 1 == movement.attackIndex;
+        movement.Set_AttackIndex(movement.AttackIndex+1);
+        movement.Set_CurrentAttackMotionData(movement.weaponPack_Normal.PlayerAttackMotionDatas_Normal[movement.AttackIndex]);
+        _isLastAttack = movement.weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count - 1 == movement.AttackIndex;
         _enteredTime = Time.time;
         _trailFinished = false;
         _strongFinished = false;
-        animator.speed = movement.currentAttackMotionData.playSpeed;
-        animator.SetBool(GameManager.s_leftstate,movement.currentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
-        movement.Equip(movement.weaponPack_Normal);
-        if (movement.attackIndex == 0) movement.Effect_Smoke(0.25f);
+        animator.speed = movement.CurrentAttackMotionData.playSpeed;
+        animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
+        movement.Equipment_Equip(movement.weaponPack_Normal);
+        if (movement.AttackIndex == 0) movement.Effect_Smoke(0.25f);
         if (_isLastAttack)
         {
             movement.Effect_Smoke();
@@ -47,25 +47,34 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         //isFinished 가 False여도 동작한다.
         float normalizedTime = stateInfo.normalizedTime;
         UpdateTrail(normalizedTime,movement.weaponPack_Normal);
-        movement.Move_Nav(animator.deltaPosition*movement.currentAttackMotionData.moveSpeed,animator.rootRotation);
+        movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,animator.rootRotation);
         //차지 공격으로 캔슬한 경우
-        if (GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.IsCharged() && !GameManager.BTN_Attack)
+        if (GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.Get_Charged() && !GameManager.BTN_Attack)
         {
-            movement.UpdateTrail(movement.weaponPack_Normal,false,false,false);
-            movement.ChangeAnimationState(HeroMovement.AnimationState.Attack_Strong);
+            movement.Equipment_UpdateTrail(movement.weaponPack_Normal,false,false,false);
+            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Strong);
             isFinished = true;
             _strongFinished = true;
+        }
+        //구르기 입력 확인, 구르기
+        if (_isLastAttack && Time.time - _enteredTime > movement.CurrentAttackMotionData.chargeWaitDuration 
+                          && movement.Get_CurrentRollDelay() < hero.preinput_roll)
+        {
+            movement.Core_Roll();
+            isFinished = true;
+            _strongFinished = true;
+            return;
         }
         //isFinished 가 False이면 안함
         if (isFinished) return;
         //타이밍이 되면 무조건 Charge모션으로 넘어갑니다.
-        if (!_isLastAttack && normalizedTime > movement.currentAttackMotionData.transitionRatio)
+        if (!_isLastAttack && normalizedTime > movement.CurrentAttackMotionData.transitionRatio)
         {
             
             animator.SetTrigger(GameManager.s_transition);
             isFinished = true;
         }
-        else if (_isLastAttack && normalizedTime > movement.currentAttackMotionData.transitionRatio)
+        else if (_isLastAttack && normalizedTime > movement.CurrentAttackMotionData.transitionRatio)
         {
             Set_Locomotion();
         }

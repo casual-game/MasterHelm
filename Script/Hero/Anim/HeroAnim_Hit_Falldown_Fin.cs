@@ -10,7 +10,7 @@ public class HeroAnim_Hit_Falldown_Fin : HeroAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         animator.SetBool(GameManager.s_hit,false);
-        movement.ResetRollInput();
+        movement.Core_ResetRollInput();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -24,9 +24,9 @@ public class HeroAnim_Base : StateMachineBehaviour
 
         isFinished = false;
         cleanFinished = false;
-        movement.anim_base = this;
-        movement.moveState = moveState;
-        movement.agent.updatePosition = useNavPosition;
+        movement.Set_AnimBase(this);
+        movement.Set_HeroMoveState(moveState);
+        movement.Get_NavMeshAgent().updatePosition = useNavPosition;
         movement.trailEffect.active = useTrail;
         animator.speed = 1.0f;
     }
@@ -40,7 +40,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void UpdateTrail(float normalizedTime, Data_WeaponPack weaponPack)
     {
         bool trail_weaponL = false, trail_weaponR = false, trail_shield = false;
-        foreach (var trailData in movement.currentAttackMotionData.TrailDatas)
+        foreach (var trailData in movement.CurrentAttackMotionData.TrailDatas)
         {
             bool canTrail = trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;
             if (canTrail)
@@ -51,15 +51,15 @@ public class HeroAnim_Base : StateMachineBehaviour
                 break;
             }
         }
-        movement.UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
+        movement.Equipment_UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
     }
 
     protected void Set_Locomotion()
     {
-        movement.UpdateTrail(movement.weaponPack_Normal,false,false,false);
-        movement.ChangeAnimationState(HeroMovement.AnimationState.Locomotion);
-        movement.Equip(null);
-        movement.attackIndex = -1;
+        movement.Equipment_UpdateTrail(movement.weaponPack_Normal,false,false,false);
+        movement.Set_AnimationState(HeroMovement.AnimationState.Locomotion);
+        movement.Equipment_Equip(null);
+        movement.Set_AttackIndex(-1);
         isFinished = true;
     }
 }

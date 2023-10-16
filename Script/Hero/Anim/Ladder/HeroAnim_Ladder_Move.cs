@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class HeroAnim_Ladder_Move : HeroAnim_Base
 {
-    private float refSpeed;
-    private float ladderSpeedSmoothTime = 0.1f;
+    private const float LadderSpeedSmoothTime = 0.1f;
+    private float _refSpeed;
+    private Ladder _ladder;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        refSpeed = 0;
+        _refSpeed = 0;
+        _ladder = movement.CurrentLadder;
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -24,29 +26,30 @@ public class HeroAnim_Ladder_Move : HeroAnim_Base
             float jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
                           CamArm.instance.transform.rotation.eulerAngles.y;
             jsDeg = -jsDeg + 180;
-            float delta = Mathf.DeltaAngle(jsDeg, movement.currentLadder.transform.rotation.eulerAngles.y);
+            float delta = Mathf.DeltaAngle(jsDeg, _ladder.transform.rotation.eulerAngles.y);
             delta = Mathf.Abs(delta);
             if (delta > 90) targetSpeed = 1;
             else targetSpeed = -1;
         }
 
+        
         float currentSpeed = animator.GetFloat(GameManager.s_ladder_speed);
-        float nextSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref refSpeed, ladderSpeedSmoothTime);
+        float nextSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref _refSpeed, LadderSpeedSmoothTime);
         animator.SetFloat(GameManager.s_ladder_speed,nextSpeed);
 
         Transform mt = movement.transform;
         Vector3 nextPos = mt.position + new Vector3(0,animator.deltaPosition.y*hero.ladderClimbMotionSpeed,0);
-        float pos_y = Mathf.Clamp(nextPos.y, movement.currentLadder.range.x, movement.currentLadder.range.y);
-        float ratio = (pos_y - movement.currentLadder.range.x) / (movement.currentLadder.range.y - movement.currentLadder.range.x);
+        float pos_y = Mathf.Clamp(nextPos.y, _ladder.range.x, _ladder.range.y);
+        float ratio = (pos_y - _ladder.range.x) / (_ladder.range.y - _ladder.range.x);
         nextPos.y = pos_y;
-        if (pos_y - movement.currentLadder.range.x < 0.5f)
+        if (pos_y - _ladder.range.x < 0.5f)
         {
             animator.SetTrigger(GameManager.s_transition);
             animator.SetFloat(GameManager.s_ladder_speed,-1);
             isFinished = true;
             return;
         }
-        else if (movement.currentLadder.range.y - pos_y < 1.0f)
+        else if (_ladder.range.y - pos_y < 1.0f)
         {
             animator.SetTrigger(GameManager.s_transition);
             animator.SetFloat(GameManager.s_ladder_speed,1);

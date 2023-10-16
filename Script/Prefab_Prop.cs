@@ -32,6 +32,12 @@ public class Prefab_Prop : MonoBehaviour
             if(trail.active!=active) trail.active = active;
         }
     }
+
+    public bool GetTrail()
+    {
+        if (!gameObject.activeSelf) return false;
+        return _trails[0].active;
+    }
     public void Attach()
     {
         if(!_canKeep) UT_ActivateProp_CantKeep().Forget();
