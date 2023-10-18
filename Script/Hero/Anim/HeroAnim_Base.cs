@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class HeroAnim_Base : StateMachineBehaviour
 {
-    public HeroMovement.MoveState moveState;
+    public Hero.MoveState moveState;
     public bool useNavPosition = true;
     public bool useTrail = false;
     private bool script_entered = false;
-    protected Hero hero;
-    protected HeroMovement movement;
+    protected HeroData hero;
+    protected Hero movement;
     [HideInInspector] public bool isFinished = false;
     [HideInInspector] public bool cleanFinished = false; //isFinished상태에서도 작동하는 일부 사례에서만 쓰입니다. (히트 시 attack계열 작업 종료)
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -17,8 +17,8 @@ public class HeroAnim_Base : StateMachineBehaviour
         base.OnStateEnter(animator, stateInfo, layerIndex);
         if (!script_entered)
         {
-            hero = animator.GetComponentInParent<Hero>();
-            movement = animator.GetComponent<HeroMovement>();
+            movement = animator.GetComponent<Hero>();
+            hero = movement.heroData;
             script_entered = true;
         }
 
@@ -57,7 +57,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Locomotion()
     {
         movement.Equipment_UpdateTrail(movement.weaponPack_Normal,false,false,false);
-        movement.Set_AnimationState(HeroMovement.AnimationState.Locomotion);
+        movement.Set_AnimationState(Hero.AnimationState.Locomotion);
         movement.Equipment_Equip(null);
         movement.Set_AttackIndex(-1);
         isFinished = true;

@@ -4,22 +4,14 @@ using DG.Tweening;
 using Sirenix.OdinInspector;
 using TrailsFX;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public partial class HeroMovement : MonoBehaviour
+public partial class Hero : MonoBehaviour
 {
     private void Setting_Effect()
     {
         trailEffect = transform.Find("SkinnedMesh").GetComponent<TrailEffect>();
         trailEffect.active = false;
-        Transform particleT = transform.parent.Find("Particle");
-        p_footstep_1 = particleT.Find("Footstep_1").GetComponent<ParticleSystem>();
-        p_footstep_2 = particleT.Find("Footstep_2").GetComponent<ParticleSystem>();
-        p_smoke = particleT.Find("Smoke").GetComponent<ParticleSystem>();
-        p_roll = particleT.Find("Roll").GetComponent<ParticleSystem>();
-        p_change = particleT.Find("Change").GetComponent<ParticleSystem>();
-        p_blood_normal = particleT.Find("Blood_Normal").GetComponent<ParticleSystem>();
-        p_blood_strong = particleT.Find("Blood_Strong").GetComponent<ParticleSystem>();
-
         s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
             .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
             .Append(_outlinable.OutlineParameters.FillPass
@@ -40,15 +32,16 @@ public partial class HeroMovement : MonoBehaviour
     //Public
     [HideInInspector]
     public TrailEffect trailEffect;
+
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge;
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge
+        ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
+
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
     public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
     
     //Private
-    private ParticleSystem p_smoke,p_roll,p_change, p_footstep_1,p_footstep_2,p_blood_normal,p_blood_strong;
     private Sequence s_blink_hit_normal,s_blink_hit_strong,s_blink_evade;
-    private int footstepIndex = 0;//footstep 파티클 풀링에 쓰인다.
     
     //Effect
     public void Effect_AttackParticle(int index)
@@ -63,37 +56,11 @@ public partial class HeroMovement : MonoBehaviour
     }
     public void Effect_Footstep_L()
     {
-        footstepIndex = (footstepIndex + 1) % 2;
-        Transform t = transform;
-        Vector3 pos = _animator.GetBoneTransform(HumanBodyBones.LeftFoot).position +t.forward*-0.3f;
-        Quaternion rot = t.rotation;
-        if (footstepIndex == 0)
-        {
-            p_footstep_1.transform.SetPositionAndRotation(pos,rot);
-            p_footstep_1.Play();
-        }
-        else
-        {
-            p_footstep_2.transform.SetPositionAndRotation(pos,rot);
-            p_footstep_2.Play();
-        }
+        p_footstep_l.Play();
     }
     public void Effect_Footstep_R()
     {
-        footstepIndex = (footstepIndex + 1) % 2;
-        Transform t = transform;
-        Vector3 pos = _animator.GetBoneTransform(HumanBodyBones.RightFoot).position +t.forward*-0.3f;
-        Quaternion rot = t.rotation;
-        if (footstepIndex == 0)
-        {
-            p_footstep_1.transform.SetPositionAndRotation(pos,rot);
-            p_footstep_1.Play();
-        }
-        else
-        {
-            p_footstep_2.transform.SetPositionAndRotation(pos,rot);
-            p_footstep_2.Play();
-        }
+        p_footstep_r.Play();
     }
     public void Effect_Roll()
     {
@@ -125,7 +92,6 @@ public partial class HeroMovement : MonoBehaviour
         
         Transform t = transform;
         Vector3 currentPos = t.position;
-        p_blood_normal.transform.position = currentPos + Vector3.up*0.75f;
         p_blood_normal.Play();
         
         //Blood
@@ -139,8 +105,6 @@ public partial class HeroMovement : MonoBehaviour
         else s_blink_hit_strong.Restart();
         Transform t = transform;
         Vector3 currentPos = t.position;
-        p_blood_normal.transform.position = currentPos + Vector3.up*0.75f;
-        p_blood_strong.transform.position = currentPos + Vector3.up*0.75f;
         p_blood_normal.Play();
         p_blood_strong.Play();
         //Blood

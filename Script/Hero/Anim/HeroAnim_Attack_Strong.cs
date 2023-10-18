@@ -35,7 +35,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.Get_Charged())
         {
             movement.Equipment_UpdateTrail(_weaponPack,false,false,false);
-            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Strong);
+            movement.Set_AnimationState(Hero.AnimationState.Attack_Strong);
             isFinished = true;
             return;
         }
@@ -71,7 +71,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             if (checkLeft) targetIndex = movement.Get_LeftEnterIndex();
             else targetIndex = movement.Get_RightEnterIndex();
             animator.SetInteger(GameManager.s_chargeenterindex,targetIndex);
-            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Normal);
+            movement.Set_AnimationState(Hero.AnimationState.Attack_Normal);
             movement.Set_AttackIndex(targetIndex);
             isFinished = true;
         }

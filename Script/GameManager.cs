@@ -9,12 +9,14 @@ using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance;
+    public static GameManager Instance;
+    public static Transform Folder_Hero;
     public static Vector2 JS_Attack = Vector2.zero,JS_Move = Vector2.zero,JS_Action = Vector2.zero;
     public static bool BTN_Attack = false,BTN_Action,Bool_Move,Bool_Attack;
     [ShowInInspector] public static float AttackReleasedTime = -100;
     public UnityEvent E_LateUpdate;
     public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin;
+    
     //string들을 미리 캐시로 저장
     #region strings
     public static string s_speed = "Speed",s_rot = "Rot",s_crouch = "Crouch",s_state_change = "State_Change",s_state_type = "State_Type"
@@ -30,7 +32,17 @@ public class GameManager : MonoBehaviour
     #endregion
     public void Awake()
     {
-        instance = this;
+        Instance = this;
+        Transform mainFolder = CreateFolder("Folder", null);
+        Folder_Hero = CreateFolder("Hero", mainFolder);
+        Transform CreateFolder(string folderName,Transform parent)
+        {
+            GameObject f = new GameObject(folderName);
+            f.transform.SetParent(parent);
+            f.transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);
+            f.transform.localScale = Vector3.one;
+            return f.transform;
+        }
     }
 
     public void LateUpdate()

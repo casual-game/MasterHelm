@@ -52,7 +52,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         if (GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.Get_Charged() && !GameManager.BTN_Attack)
         {
             movement.Equipment_UpdateTrail(movement.weaponPack_Normal,false,false,false);
-            movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Strong);
+            movement.Set_AnimationState(Hero.AnimationState.Attack_Strong);
             isFinished = true;
             _strongFinished = true;
         }

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using RootMotion.FinalIK;
 using UnityEngine;
 
-public partial class HeroMovement : MonoBehaviour
+public partial class Hero : MonoBehaviour
 {
     private void Setting_LookAt()
     {
-        GameManager.instance.E_BTN_Attack_Begin.AddListener(E_BTN_Attack_Pressed);
-        GameManager.instance.E_BTN_Attack_Fin.AddListener(E_BTN_Attack_Released);
+        GameManager.Instance.E_BTN_Attack_Begin.AddListener(E_BTN_Attack_Pressed);
+        GameManager.Instance.E_BTN_Attack_Fin.AddListener(E_BTN_Attack_Released);
         _lookAtIK = GetComponent<LookAtIK>();
         Transform lookRootT = transform.Find("LookAt");
         _lookDisplayT = lookRootT.Find("LookDisplay");
@@ -41,7 +41,7 @@ public partial class HeroMovement : MonoBehaviour
         _charged = false;
         _chargeBeginTime = Time.time;
         E_BTN_Attack_RemoveListner();
-        GameManager.instance.E_LateUpdate.AddListener(E_BTN_Attack_PressedUpdate);
+        GameManager.Instance.E_LateUpdate.AddListener(E_BTN_Attack_PressedUpdate);
     }
     private void E_BTN_Attack_Released()
     {
@@ -59,7 +59,7 @@ public partial class HeroMovement : MonoBehaviour
         else Core_StrongAttack();
         //이벤트 삭제
         E_BTN_Attack_RemoveListner();
-        GameManager.instance.E_LateUpdate.AddListener(E_BTN_Attack_ReleasedUpdate);
+        GameManager.Instance.E_LateUpdate.AddListener(E_BTN_Attack_ReleasedUpdate);
     }
     private void E_BTN_Attack_PressedUpdate()
     {
@@ -78,7 +78,7 @@ public partial class HeroMovement : MonoBehaviour
         }
         
         float targetDisplayDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
-            jsDeg, ref _lookDisplayRefDeg, _hero.lookDisplayDuration);
+            jsDeg, ref _lookDisplayRefDeg, heroData.lookDisplayDuration);
         _lookDisplayT.rotation = Quaternion.Euler(0,targetDisplayDeg,0);
         //플레이어 각도와의 차이 계산, Target 회전
         float degDiff;
@@ -91,17 +91,17 @@ public partial class HeroMovement : MonoBehaviour
             degDiff = -transform.rotation.eulerAngles.y+jsDeg;
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
-            if (_hero.lookRangeDeadZone.x > degDiff || degDiff > _hero.lookRangeDeadZone.y)
+            if (heroData.lookRangeDeadZone.x > degDiff || degDiff > heroData.lookRangeDeadZone.y)
             {
                 if (Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.rotation.eulerAngles.y) > 0)
-                    degDiff = _hero.lookRange.y;
-                else degDiff = _hero.lookRange.x;
+                    degDiff = heroData.lookRange.y;
+                else degDiff = heroData.lookRange.x;
             }
-            degDiff = Mathf.Clamp(degDiff,_hero.lookRange.x, _hero.lookRange.y);
+            degDiff = Mathf.Clamp(degDiff,heroData.lookRange.x, heroData.lookRange.y);
         } 
         float currentDiff = Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.eulerAngles.y);
         float targetTargetDeg = Mathf.SmoothDamp(transform.rotation.eulerAngles.y + currentDiff, 
-            transform.rotation.eulerAngles.y + degDiff, ref _lookTargetRefDeg, _hero.lookTargetDuration);
+            transform.rotation.eulerAngles.y + degDiff, ref _lookTargetRefDeg, heroData.lookTargetDuration);
         _lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
         //크기 조정
         if (_lookScale < 1)
@@ -113,7 +113,7 @@ public partial class HeroMovement : MonoBehaviour
             else _lookAtIK.solver.SetLookAtWeight(0);
         }
         //차지
-        if (!_charged && Time.time > _chargeBeginTime + _hero.chargeDuration)
+        if (!_charged && Time.time > _chargeBeginTime + heroData.chargeDuration)
         {
             _charged = true;
             p_charge_fin.Play();
@@ -126,9 +126,9 @@ public partial class HeroMovement : MonoBehaviour
         bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
         float eulery = transform.rotation.eulerAngles.y;
         float targetDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
-            eulery, ref _lookDisplayRefDeg, _hero.lookDisplayDuration);
+            eulery, ref _lookDisplayRefDeg, heroData.lookDisplayDuration);
         float targetTargetDeg = Mathf.SmoothDamp(_lookTargetT.eulerAngles.y, 
-            eulery, ref _lookTargetRefDeg, _hero.lookTargetDuration);
+            eulery, ref _lookTargetRefDeg, heroData.lookTargetDuration);
         //크기 조정
         if (_lookScale > 0)
         {
@@ -144,7 +144,7 @@ public partial class HeroMovement : MonoBehaviour
             _lookAtIK.solver.SetLookAtWeight(0);
             _lookDisplayT.rotation = Quaternion.Euler(0,eulery,0);
             _lookTargetT.rotation = Quaternion.Euler(0,eulery,0);
-            GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
+            GameManager.Instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
         }
         else
         {
@@ -157,8 +157,8 @@ public partial class HeroMovement : MonoBehaviour
     }
     private void E_BTN_Attack_RemoveListner()
     {
-        GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_PressedUpdate);
-        GameManager.instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
+        GameManager.Instance.E_LateUpdate.RemoveListener(E_BTN_Attack_PressedUpdate);
+        GameManager.Instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
     }
     
     //Getter

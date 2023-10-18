@@ -53,7 +53,7 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
             //기본 공격
             if(!movement.Get_Charged()) animator.SetTrigger(GameManager.s_transition);
             //강 공격
-            else movement.Set_AnimationState(HeroMovement.AnimationState.Attack_Strong);
+            else movement.Set_AnimationState(Hero.AnimationState.Attack_Strong);
             isFinished = true;
         }
         //대기시간 지나고 입력 없으면 기본 자세로 복귀

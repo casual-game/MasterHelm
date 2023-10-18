@@ -6,7 +6,7 @@ public class HeroAnim_Move : HeroAnim_Base
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        bool doPreInput = movement != null && movement.HeroMoveState != HeroMovement.MoveState.Locomotion;
+        bool doPreInput = movement != null && movement.HeroMoveState != Hero.MoveState.Locomotion;
         base.OnStateEnter(animator, stateInfo, layerIndex);
         animator.SetBool(GameManager.s_leftstate,false);
         if(doPreInput) movement.Core_PreInput();

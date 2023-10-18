@@ -5,14 +5,14 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public partial class HeroMovement : MonoBehaviour
+public partial class Hero : MonoBehaviour
 {
     private void Setting_Equipment()
     {
         weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
         AddWeaponPack(weaponPack_Normal,t_back,true);
-        AddWeaponPack(weaponPack_StrongL,_folder,false);
-        AddWeaponPack(weaponPack_StrongR,_folder,false);
+        AddWeaponPack(weaponPack_StrongL,GameManager.Folder_Hero,false);
+        AddWeaponPack(weaponPack_StrongR,GameManager.Folder_Hero,false);
         shield = Instantiate(shield);
         shield.Setting_Hero(_outlinable,true,t_shield,t_back);
         void AddWeaponPack(Data_WeaponPack weaponPack,Transform detachT,bool canKeep)
@@ -22,7 +22,7 @@ public partial class HeroMovement : MonoBehaviour
             List<ParticleSystem> attackParticles = new List<ParticleSystem>();
             foreach (var p in weaponPack.attackEffects)
             {
-                ParticleSystem attackParticle = Instantiate(p,_folder);
+                ParticleSystem attackParticle = Instantiate(p,GameManager.Folder_Hero);
                 attackParticles.Add(attackParticle);
             }
             if(l!=null) l.Setting_Hero(_outlinable,canKeep,t_hand_l,detachT);

@@ -1,36 +1,113 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using EPOOutline;
+using RootMotion.Dynamics;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public partial class Hero : MonoBehaviour
 {
+    private void Start()
+    {
+        Setting();
+    }
+    private void Setting()
+    {
+        _animator = GetComponent<Animator>();
+        _agent = GetComponent<NavMeshAgent>();
+        _outlinable = GetComponent<Outlinable>();
+        _agent.updateRotation = false;
+        
+        GameManager.Instance.E_BTN_Action_Begin.AddListener(E_BTN_Action_Begin);
+        GameManager.Instance.E_BTN_Action_Fin.AddListener(E_BTN_Action_Fin);
+        
+        Setting_Core();
+        Setting_Effect();
+        Setting_LookAt();
+        Setting_Equipment();
+    }
     
-    [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float crouchingSpeed = 5.0f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float ladderClimbMotionSpeed = 2.0f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public AnimationCurve moveCurve;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float moveMotionSpeed_normal = 0.75f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float acceleration_normal = 1.5f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float deceleration_normal = 2.5f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float turnDuration_normal = 0.25f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float moveMotionSpeed_crouch = 0.65f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float acceleration_crouch = 1.5f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float deceleration_crouch = 2.5f;
-    [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float turnDuration_crouch = 0.25f;
-    [TitleGroup("움직임")] [FoldoutGroup("움직임/구르기")] public float moveMotionSpeed_roll = 0.5f; 
-    [TitleGroup("움직임")] [FoldoutGroup("움직임/구르기")] public float turnDuration_roll = 0.75f; 
-    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")] public float lookDisplayDuration = 0.125f;
-    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")] public float lookTargetDuration = 0.5f;
-    [TitleGroup("움직임")] [FoldoutGroup("움직임/LookAt")]
-    [MinMaxSlider(-180,180,true)] public Vector2 lookRange,lookRangeDeadZone;
-    [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float blood_normal_delay = 1.75f;
-    [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float hit_Strong_MoveDistance = 1.0f;
-    [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float hit_Smash_MotionSpeed = 1.0f;
-    [TitleGroup("전투")] [FoldoutGroup("전투/피격")] public float hit_Smash_RecoveryInputDelay = 0.2f;
-    [TitleGroup("전투")] [FoldoutGroup("전투/차지")] public float chargeDuration = 1.0f;
+    //Public
+    public enum MoveState { Locomotion = 0,Roll = 1,Interact = 2,Hit=3,NormalAttack=4,StrongAttack=5}
+    public MoveState HeroMoveState
+    {
+        get;
+        private set;
+    }
+    public Ladder CurrentLadder
+    {
+        get;
+        private set;
+    }
+    public HeroData heroData;
+    [HideInInspector] public float rotateCurrentVelocity,rotAnimCurrentVelocity; //회전 계산 시, ref로 사용됨.
     
-    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")] public float dash_roll_delay = 0.15f;
-    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float preinput_roll = 1.0f;
-    [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float preinput_attack = 1.0f;
+    //Private
+    private Animator _animator;
+    private NavMeshAgent _agent;
+    
+    private Outlinable _outlinable;
+    private HeroAnim_Base _animBase;
+    private float _animatorParametersFootstep;//Animator의 Footstep 커브의 이전 버전 저장용으로 쓰임.
+    private float _speedRatio; //애니메이터 파라미터 Easing에 사용됨
+    
+    //Setter
+    public void Set_AnimBase(HeroAnim_Base animBase)
+    {
+        _animBase = animBase;
+    }
+    public void Set_Ladder(Ladder ladder)
+    {
+        CurrentLadder = ladder;
+    }
+    public void Set_AnimatorParameters_Footstep(float fp)
+    {
+        _animatorParametersFootstep = fp;
+    }
+    public void Set_HeroMoveState(MoveState heroMoveState)
+    {
+        HeroMoveState = heroMoveState;
+    }
+    public void Set_RotateCurrentVelocity(float f)
+    {
+        rotateCurrentVelocity = f;
+    }
+    public void Set_RotAnimCurrentVelocity(float f)
+    {
+        rotAnimCurrentVelocity = f;
+    }
+    public void Set_SpeedRatio(float f)
+    {
+        _speedRatio = f;
+    }
+    
+    //Getter
+    public NavMeshAgent Get_NavMeshAgent()
+    {
+        return _agent;
+    }
+    public float Get_AnimatorParameters_Footstep()
+    {
+        return _animatorParametersFootstep;
+    }
+    public float Get_SpeedRatio()
+    {
+        return _speedRatio;
+    }
+    
+    //Move
+    public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
+    {
+        transform.rotation = nextRot;
+        _agent.Move(relativePos);
+    }
+    public void Move_Normal(Vector3 nextPos,Quaternion nextRot)
+    {
+        transform.SetPositionAndRotation(nextPos, nextRot);
+    }
+    
 }

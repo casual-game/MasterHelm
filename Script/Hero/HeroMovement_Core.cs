@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class HeroMovement : MonoBehaviour
+public partial class Hero : MonoBehaviour
 {
     private void Setting_Core()
     {
@@ -62,11 +62,11 @@ public partial class HeroMovement : MonoBehaviour
     //Core
     public void Core_PreInput()
     {
-        if (GameManager.DelayCheck_Attack() < _hero.preinput_attack)
+        if (GameManager.DelayCheck_Attack() < heroData.preinput_attack)
         {
             Core_NormalAttack();
         }
-        else if (Get_CurrentRollDelay() < _hero.preinput_roll)
+        else if (Get_CurrentRollDelay() < heroData.preinput_roll)
         {
             Core_Roll();
         }
@@ -175,7 +175,7 @@ public partial class HeroMovement : MonoBehaviour
     {
         _fastRoll = Mathf.Clamp(_fastRoll-1, 0, 3);
        Vector3 currentPos= transform.position;
-        bool isTimting = Time.unscaledTime - _actionBeginTime < _hero.dash_roll_delay;
+        bool isTimting = Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay;
         //인터렉션
         if (Interactable.currentInteractable != null)
         {
@@ -206,7 +206,7 @@ public partial class HeroMovement : MonoBehaviour
             else _inputTimeAction = Time.time;
         }
         //Smashed이후 빠른 기상
-        bool canSpeedRoll = Time.time < _falledTime + _hero.hit_Smash_RecoveryInputDelay 
+        bool canSpeedRoll = Time.time < _falledTime + heroData.hit_Smash_RecoveryInputDelay 
                             && HeroMoveState == MoveState.Hit && _fastRoll>0;
         if (canSpeedRoll)
         {
