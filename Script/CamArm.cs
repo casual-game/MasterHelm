@@ -6,6 +6,7 @@ using UnityEngine;
 public class CamArm : MonoBehaviour
 {
     public static CamArm instance;
+    public Camera mainCam;
     public Transform target;
     public float moveSpeed = 3.0f;
     public Vector3 addVec;
@@ -14,6 +15,7 @@ public class CamArm : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        mainCam = GetComponentInChildren<Camera>();
     }
 
     void Update()

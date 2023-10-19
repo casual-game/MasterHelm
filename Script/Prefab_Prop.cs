@@ -32,7 +32,6 @@ public class Prefab_Prop : MonoBehaviour
             if(trail.active!=active) trail.active = active;
         }
     }
-
     public bool GetTrail()
     {
         if (!gameObject.activeSelf) return false;
@@ -70,7 +69,28 @@ public class Prefab_Prop : MonoBehaviour
             transform.SetParent(detachT);
         }
     }
-    
+    public void Setting_Monster(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
+    {
+        Setting();
+        _attachCopyT = transform.Find("AttachCopyT_Monster");
+        _detachCopyT = transform.Find("DetachCopyT_Monster");
+        _attachT = attachT;
+        _detachT = detachT;
+        _nullFolder = nullFolder;
+        _outlinable = outlinable;
+        _canKeep = canKeep;
+        
+        if (canKeep)
+        {
+            outlinable.TryAddTarget(_outlineTarget);
+            UT_DeactivateProp_CanKeep().Forget();
+        }
+        else
+        {
+            gameObject.SetActive(false);
+            transform.SetParent(detachT);
+        }
+    }
     //내부 전용 함수
     private void Setting()
     {
