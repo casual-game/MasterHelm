@@ -12,17 +12,17 @@ public partial class Hero : MonoBehaviour
     {
         trailEffect = transform.Find("SkinnedMesh").GetComponent<TrailEffect>();
         trailEffect.active = false;
-        s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
-            .Append(_outlinable.OutlineParameters.FillPass
+        s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false)
+            .OnStart(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.3f).SetEase(Ease.InQuad));
-        s_blink_hit_strong = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
-            .Append(_outlinable.OutlineParameters.FillPass
+        s_blink_hit_strong = DOTween.Sequence().SetAutoKill(false)
+            .OnStart(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.5f).SetEase(Ease.InCirc));
-        s_blink_evade = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() => { _outlinable.OutlineParameters.FillPass.SetColor(GameManager.s_publiccolor, c_evade_begin); })
-            .Append(_outlinable.OutlineParameters.FillPass
+        s_blink_evade = DOTween.Sequence().SetAutoKill(false)
+            .OnStart(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_evade_begin); })
+            .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
 
         var trailModule = p_charge.trails;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public partial class Hero : MonoBehaviour
@@ -124,6 +125,7 @@ public partial class Hero : MonoBehaviour
         _animator.SetTrigger(GameManager.s_hit_additive);
         Effect_Hit_Normal();
     }
+    [Button]
     public void Core_Hit_Strong(AttackMotionType attackMotionType,PlayerSmashedType playerSmashedType)
     {
         if (HeroMoveState == MoveState.Roll)
@@ -144,7 +146,7 @@ public partial class Hero : MonoBehaviour
         
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
-        _animator.SetFloat(GameManager.s_hit_rot,1);
+        //_animator.SetFloat(GameManager.s_hit_rot,1);
         if(playerSmashedType == PlayerSmashedType.None) _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
         else _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
         //타겟 벡터
