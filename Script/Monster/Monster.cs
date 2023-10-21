@@ -14,6 +14,8 @@ public partial class Monster : MonoBehaviour
 {
     public void Setting_Monster()
     {
+        _shadow = transform.Find(GameManager.s_shadow);
+        _shadowScale = _shadow.localScale;
         _agent = GetComponent<NavMeshAgent>();
         var smr = GetComponentInChildren<SkinnedMeshRenderer>();
         _material = smr.material;
@@ -39,6 +41,8 @@ public partial class Monster : MonoBehaviour
     private NavMeshAgent _agent;
     private Outlinable _outlinable;
     private OutlineTarget _outlineTarget;
+    private Transform _shadow;
+    private Vector3 _shadowScale;
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
@@ -76,8 +80,9 @@ public partial class Monster : MonoBehaviour
     //Unitask
     async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
     {
+        gameObject.SetActive(true);
         _animator.Rebind();
-        _animator.SetBool(GameManager.s_spawn,Random.Range(0,2)==0);
+        _animator.SetBool(GameManager.s_spawn,Random.Range(0,2)==1);
         _isAlive = true;
         p_spawn.Play();
         Move_Nav(relativePos,rot);
@@ -93,11 +98,13 @@ public partial class Monster : MonoBehaviour
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
+            _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
         _outlineTarget.CutoutThreshold = 0;
+        _shadow.localScale = _shadowScale;
     }
     async UniTaskVoid Despawn()
     {
@@ -111,13 +118,21 @@ public partial class Monster : MonoBehaviour
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
+            _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;
+        _shadow.localScale = Vector3.zero;
 
         if (!ui_Sequence_Deactivated.IsComplete()) await ui_Sequence_Deactivated.AwaitForComplete();
+        if(s_punch_up.IsPlaying()) s_punch_up.Pause();
+        if(s_punch_down.IsPlaying()) s_punch_down.Pause();
+        if(s_punch_up_compact.IsPlaying()) s_punch_up_compact.Pause();
+        if(s_punch_down_compact.IsPlaying()) s_punch_down_compact.Pause();
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
+        gameObject.SetActive(false);
     }
     
     //Setter

@@ -47,7 +47,7 @@ public partial class Monster_Normal : Monster
         Effect_Hit_Normal();
     }
     [Button]
-    public void Core_Hit_Strong(AttackMotionType attackMotionType,PlayerSmashedType playerSmashedType)
+    public void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
     {
         if (Time.time < _hitStrongTime + HitStrongDelay) return;
         _animBase.isFinished = true;
@@ -57,8 +57,16 @@ public partial class Monster_Normal : Monster
         
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
-        if(playerSmashedType == PlayerSmashedType.None) _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
-        else _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+        if (playerSmashedType == PlayerSmashedType.None)
+        {
+            Punch_Down(1.0f);
+            _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
+        }
+        else
+        {
+            Punch_Down(1.1f);
+            _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+        }
         
         bool isBloodBottom = playerSmashedType is PlayerSmashedType.None or PlayerSmashedType.Bound or PlayerSmashedType.Stun;
         Effect_Hit_Strong(isBloodBottom);
