@@ -29,6 +29,7 @@ public partial class Hero : MonoBehaviour
         Setting_Effect();
         Setting_LookAt();
         Setting_Equipment();
+        Setting_Spawn();
     }
     
     //Public
@@ -49,7 +50,6 @@ public partial class Hero : MonoBehaviour
     //Private
     private Animator _animator;
     private NavMeshAgent _agent;
-    
     private Outlinable _outlinable;
     private HeroAnim_Base _animBase;
     private float _animatorParametersFootstep;//Animator의 Footstep 커브의 이전 버전 저장용으로 쓰임.

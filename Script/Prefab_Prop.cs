@@ -47,6 +47,18 @@ public class Prefab_Prop : MonoBehaviour
         if(!_canKeep) UT_DeactivateProp_CantKeep().Forget();
         else UT_DeactivateProp_CanKeep().Forget();
     }
+    //Can
+    //CanKeep 일때만 사용..
+    public void Spawn()
+    {
+        gameObject.SetActive(true);
+        UT_DeactivateProp_CanKeep().Forget();
+    }
+    //CanKeep일때만 사용..
+    public void Despawn()
+    {
+        UT_DeactivateProp_CantKeep().Forget();
+    }
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
     {
         Setting();
@@ -61,7 +73,8 @@ public class Prefab_Prop : MonoBehaviour
         if (canKeep)
         {
             outlinable.TryAddTarget(_outlineTarget);
-            UT_DeactivateProp_CanKeep().Forget();
+            gameObject.SetActive(false);
+            transform.SetParent(detachT);
         }
         else
         {
@@ -159,7 +172,7 @@ public class Prefab_Prop : MonoBehaviour
             _outlineTarget.CutoutThreshold = 1;
 
             gameObject.SetActive(false);
-            if(_outlinable.OutlineTargets.Contains(_outlineTarget)) _outlinable.RemoveTarget(_outlineTarget);
+            if(!_canKeep && _outlinable.OutlineTargets.Contains(_outlineTarget)) _outlinable.RemoveTarget(_outlineTarget);
         }
     }
     //UniTask - Keep가능
