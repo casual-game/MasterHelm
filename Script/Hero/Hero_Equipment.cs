@@ -56,7 +56,7 @@ public partial class Hero : MonoBehaviour
     private int leftEnterIndex, rightEnterIndex;
     private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
-
+    
     //Getter
     public Data_WeaponPack Get_LastWeaponPack()
     {
@@ -74,7 +74,6 @@ public partial class Hero : MonoBehaviour
     {
         return rightEnterIndex;
     }
-    
     //Equipment
     public void Equipment_Equip(Data_WeaponPack weaponPack)
     {
@@ -84,8 +83,19 @@ public partial class Hero : MonoBehaviour
         if (_currentWeaponPack != null)
         {
             var past = weapondata[_currentWeaponPack];
-            if(past.weaponL!=null) past.weaponL.Detach();
-            if(past.weaponR!=null) past.weaponR.Detach();
+            if (past.weaponL != null)
+            {
+                past.weaponL.Detach();
+                //past.weaponL.Collision_Reset();
+            }
+
+            if (past.weaponR != null)
+            {
+                past.weaponR.Detach();
+                //past.weaponR.Collision_Reset();
+            }
+            
+            //if(past.useShield) shield.Collision_Reset();
         }
 
         _lastWeaponPack = _currentWeaponPack;
@@ -105,12 +115,39 @@ public partial class Hero : MonoBehaviour
     }
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
-        (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles) data = weapondata[weaponPack];
-        if(data.weaponL!=null) data.weaponL.SetTrail(weaponL);
-        if(data.weaponR!=null) data.weaponR.SetTrail(weaponR); 
-        if(this.shield!=null) this.shield.SetTrail(shield);
+        var data = weapondata[weaponPack];
+        if (data.weaponL != null)
+        {
+            data.weaponL.SetTrail(weaponL);
+            //if(weaponL) data.weaponL.Collision_Interact();
+        }
+
+        if (data.weaponR != null)
+        {
+            data.weaponR.SetTrail(weaponR);
+            //if(weaponR) data.weaponR.Collision_Interact();
+        }
+
+        if (this.shield != null)
+        {
+            this.shield.SetTrail(shield);
+            //if(shield) this.shield.Collision_Interact();
+        }
     }
 
-    
+    public void Equipment_Collision_Interact(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
+    {
+        var data = weapondata[weaponPack];
+        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact();
+        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact();
+        if(shield && data.useShield) this.shield.Collision_Interact();
+    }
+    public void Equipment_Collision_Reset(Data_WeaponPack weaponPack)
+    {
+        var data = weapondata[weaponPack];
+        if(data.weaponL!=null) data.weaponL.Collision_Reset();
+        if (data.weaponR != null) data.weaponR.Collision_Reset();
+        if(data.useShield) shield.Collision_Reset();
+    }
     
 }

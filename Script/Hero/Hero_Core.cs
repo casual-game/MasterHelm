@@ -104,6 +104,7 @@ public partial class Hero : MonoBehaviour
         _actionBeginTime = -100;
         return;
     }
+    [Button]
     public void Core_Hit_Normal()
     {
         //감속시킨다.
@@ -123,6 +124,7 @@ public partial class Hero : MonoBehaviour
         degDiff /= 180.0f;
         _animator.SetFloat(GameManager.s_hit_rot,degDiff);
         _animator.SetTrigger(GameManager.s_hit_additive);
+        Tween_Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
     }
     [Button]
@@ -147,8 +149,16 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         //_animator.SetFloat(GameManager.s_hit_rot,1);
-        if(playerSmashedType == PlayerSmashedType.None) _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
-        else _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+        if (playerSmashedType == PlayerSmashedType.None)
+        {
+            _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
+            Tween_Punch_Down(1.05f);
+        }
+        else
+        {
+            _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+            Tween_Punch_Down(1.1f);
+        }
         //타겟 벡터
         Vector3 hitpoint = Vector3.zero;
         Vector3 targetHitVec = hitpoint-transform.position;
@@ -212,7 +222,7 @@ public partial class Hero : MonoBehaviour
                             && HeroMoveState == MoveState.Hit && _fastRoll>0;
         if (canSpeedRoll)
         {
-            Effect_FastRoll();
+            Tween_Blink_Evade(1.0f);
             _animator.SetBool(GameManager.s_hit,false);
             _animator.SetFloat(GameManager.s_hit_rot,-1);
             _animBase.isFinished = true;

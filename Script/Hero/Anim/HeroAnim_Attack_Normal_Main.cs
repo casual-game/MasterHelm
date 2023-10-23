@@ -19,14 +19,16 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         animator.speed = movement.CurrentAttackMotionData.playSpeed;
         animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         movement.Equipment_Equip(movement.weaponPack_Normal);
+        movement.Equipment_Collision_Reset(movement.weaponPack_Normal);
         if (movement.AttackIndex == 0) movement.Effect_Smoke(0.25f);
         if (_isLastAttack)
         {
             movement.Effect_Smoke();
             movement.p_charge.Play();
             movement.trailEffect.active = true;
-            movement.Effect_FastRoll();
+            movement.Tween_Blink_Evade(1.0f);
         }
+        
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

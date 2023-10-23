@@ -24,6 +24,8 @@ public class Prefab_Prop : MonoBehaviour
     private bool _canKeep = false;
     private TrailEffect[] _trails;
     private ParticleSystem _p_spawn;
+    private List<Collider> _interact_currentTargets,_interact_interactedTargets;
+    private bool _isHero;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -52,12 +54,30 @@ public class Prefab_Prop : MonoBehaviour
     public void Spawn()
     {
         gameObject.SetActive(true);
-        UT_DeactivateProp_CanKeep().Forget();
+        UT_DeactivateProp_CanKeep(false).Forget();
+    }
+
+    public void Collision_Interact()//공격 판정 계산할때 호출
+    {
+        if (_isHero)
+        {
+            foreach (var coll in _interact_currentTargets)
+            {
+                if(_interact_interactedTargets.Contains(coll)) continue;
+                coll.TryGetComponent<Monster>(out var monster);
+                monster.Core_Hit_Strong();
+                _interact_interactedTargets.Add(coll);
+            }
+        }
+    }
+    public void Collision_Reset()//공격 가능 대상 초기화할때 호출
+    {
+        if(_isHero) _interact_interactedTargets.Clear();
     }
     //CanKeep일때만 사용..
     public void Despawn()
     {
-        UT_DeactivateProp_CantKeep().Forget();
+        UT_DeactivateProp_CantKeep(false).Forget();
     }
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
     {
@@ -69,7 +89,7 @@ public class Prefab_Prop : MonoBehaviour
         _nullFolder = nullFolder;
         _outlinable = outlinable;
         _canKeep = canKeep;
-        
+        _isHero = true;
         if (canKeep)
         {
             outlinable.TryAddTarget(_outlineTarget);
@@ -92,7 +112,7 @@ public class Prefab_Prop : MonoBehaviour
         _nullFolder = nullFolder;
         _outlinable = outlinable;
         _canKeep = canKeep;
-        
+        _isHero = false;
         if (canKeep)
         {
             outlinable.TryAddTarget(_outlineTarget);
@@ -112,14 +132,38 @@ public class Prefab_Prop : MonoBehaviour
         _outlineTarget.CutoutTextureName = "_AdvancedDissolveCutoutStandardMap1";
         _trails = GetComponents<TrailEffect>();
         _p_spawn = GetComponentInChildren<ParticleSystem>();
+        _interact_currentTargets = new List<Collider>();
+        _interact_interactedTargets = new List<Collider>();
         foreach (var trail in _trails)
         {
             trail.active = false;
             //trail.Clear();
         }
     }
-
-
+    private void OnTriggerEnter(Collider other)
+    {
+        if (_isHero)
+        {
+            if (!other.CompareTag(GameManager.s_monster)) return;
+            if(!_interact_currentTargets.Contains(other))_interact_currentTargets.Add(other);
+        }
+        else
+        {
+            
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (_isHero)
+        {
+            if (!other.CompareTag(GameManager.s_monster)) return;
+            if(_interact_currentTargets.Contains(other))_interact_currentTargets.Remove(other);
+        }
+        else
+        {
+            
+        }
+    }
     //UniTask - Keep불가능
     private async UniTaskVoid UT_ActivateProp_CantKeep()
     {
@@ -149,11 +193,11 @@ public class Prefab_Prop : MonoBehaviour
             _outlineTarget.CutoutThreshold = 0;
         }
     }
-    private async UniTaskVoid UT_DeactivateProp_CantKeep()
+    private async UniTaskVoid UT_DeactivateProp_CantKeep(bool useParticle = true)
     {
         _targetActivation = false;
         transform.SetParent(_detachT);
-        _p_spawn.Play();
+        if(useParticle) _p_spawn.Play();
         while (_activateRatio>0 &&!_targetActivation)
         {
             _activateRatio -= Time.deltaTime*_deactivateSpeed;
@@ -207,11 +251,11 @@ public class Prefab_Prop : MonoBehaviour
             _outlineTarget.CutoutThreshold = 0;
         }
     }
-    private async UniTaskVoid UT_DeactivateProp_CanKeep()
+    private async UniTaskVoid UT_DeactivateProp_CanKeep(bool useParticle = true)
     {
         _targetActivation = false;
         transform.SetParent(_nullFolder);
-        _p_spawn.Play();
+        if(useParticle) _p_spawn.Play();
         //일단 사라짐
         while (_activateRatio>0 &&!_targetActivation)
         {

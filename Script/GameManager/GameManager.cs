@@ -13,8 +13,8 @@ public partial class GameManager : MonoBehaviour
     
     
     public static string s_speed = "Speed",s_rot = "Rot",s_crouch = "Crouch",s_state_change = "State_Change",s_state_type = "State_Type"
-        ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player"
-        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition"
+        ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player",s_monster = "Monster"
+        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition",s_death = "Death"
         ,s_hit = "Hit",s_hit_additive = "Hit_Additive",s_hit_rot = "Hit_Rot",s_hit_type = "Hit_Type"
         ,s_publiccolor = "_PublicColor",s_leftstate = "LeftState",s_chargeenterindex = "ChargeEnterIndex",s_spawn = "Spawn",s_shadow = "Shadow";
     public AnimationCurve curve_inout,curve_in,curve_out;

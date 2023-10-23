@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class HeroAnim_Attack_Strong : HeroAnim_Base
 {
-    private bool _trailFinished,_weaponOff;
-    private float _enteredTime;
+    private bool _weaponOff;
     private Data_WeaponPack _weaponPack;
     public bool isLeft;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -15,16 +14,13 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         _weaponPack = isLeft? movement.weaponPack_StrongL: movement.weaponPack_StrongR;
         movement.Set_AttackIndex(movement.AttackIndex+1);
         movement.Set_CurrentAttackMotionData(_weaponPack.playerAttackMotionData_Strong);
-        _enteredTime = Time.time;
-        _trailFinished = false;
         _weaponOff = false;
         animator.speed = movement.CurrentAttackMotionData.playSpeed;
         animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         movement.Effect_Smoke(0.25f);
-        movement.trailEffect.active = true;
-        movement.Effect_FastRoll();
         movement.Equipment_Equip(_weaponPack);
         movement.Effect_Change();
+        movement.Equipment_Collision_Reset(_weaponPack);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -57,12 +53,6 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         
         
         if (IsNotAvailable(animator,stateInfo)) return; 
-        //플레이어 잔상 Trail 끄기
-        if (Time.time - _enteredTime > 0.3f && !_trailFinished)
-        {
-            _trailFinished = true;
-            movement.trailEffect.active = false;
-        }
         //종료 설정
         if (normalizedTime > movement.CurrentAttackMotionData.transitionRatio)
         {

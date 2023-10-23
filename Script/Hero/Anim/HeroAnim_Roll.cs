@@ -21,6 +21,8 @@ public class HeroAnim_Roll : HeroAnim_Base
         else endDeg = startDeg;
         pattern = 0;
         animator.SetBool(GameManager.s_leftstate,false);
+        
+        movement.Tween_Punch_Up_Compact(0.4f);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -8,6 +8,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     public bool useNavPosition = true;
     public bool useTrail = false;
     private bool script_entered = false;
+    private static TrailData static_trailData = null;
     protected HeroData hero;
     protected Hero movement;
     [HideInInspector] public bool isFinished = false;
@@ -21,7 +22,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             hero = movement.heroData;
             script_entered = true;
         }
-
+        
         isFinished = false;
         cleanFinished = false;
         movement.Set_AnimBase(this);
@@ -48,10 +49,16 @@ public class HeroAnim_Base : StateMachineBehaviour
                 trail_weaponL = trailData.weaponL;
                 trail_weaponR = trailData.weaponR;
                 trail_shield = trailData.shield;
+                if (static_trailData != trailData)
+                {
+                    static_trailData = trailData;
+                    movement.Equipment_Collision_Reset(weaponPack);
+                }
                 break;
             }
         }
         movement.Equipment_UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
+        movement.Equipment_Collision_Interact(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
     }
 
     protected void Set_Locomotion()

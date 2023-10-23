@@ -119,6 +119,8 @@ public partial class Hero : MonoBehaviour
             p_charge_fin.Play();
             p_charge_Impact.transform.localScale = Vector3.one * 0.5f;
             p_charge_Impact.Play();
+            Tween_Punch_Down_Compact(1.2f);
+            Tween_Blink_Evade(1.0f);
         }
     }
     private void E_BTN_Attack_ReleasedUpdate()

@@ -111,6 +111,7 @@ public partial class Monster : MonoBehaviour
         _isAlive = false;
         Unequip();
         DeactivateUI();
+        p_spawn.Play();
         while (!_isAlive && _dissolveRatio<1)
         {
             _dissolveRatio += Time.deltaTime*_dissolveSpeed;
@@ -150,5 +151,16 @@ public partial class Monster : MonoBehaviour
     public void Move_Normal(Vector3 nextPos,Quaternion nextRot)
     {
         transform.SetPositionAndRotation(nextPos, nextRot);
+    }
+    
+    //Core
+    public virtual void Core_Hit_Normal()
+    {
+        
+    }
+
+    public virtual void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    {
+        
     }
 }

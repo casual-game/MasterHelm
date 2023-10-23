@@ -16,6 +16,7 @@ public class CamArm : MonoBehaviour
     {
         instance = this;
         mainCam = GetComponentInChildren<Camera>();
+        transform.position = target.position + addVec;
     }
 
     void Update()

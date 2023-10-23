@@ -28,7 +28,7 @@ public partial class Monster_Normal : Monster
         _animator.SetTrigger(GameManager.s_state_change);
     }
     [Button]
-    public void Core_Hit_Normal()
+    public override void Core_Hit_Normal()
     {
         //타겟 벡터
         Vector3 hitpoint = Vector3.zero;
@@ -44,10 +44,11 @@ public partial class Monster_Normal : Monster
         degDiff /= 180.0f;
         _animator.SetFloat(GameManager.s_hit_rot,degDiff);
         _animator.SetTrigger(GameManager.s_hit_additive);
+        Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
     }
     [Button]
-    public void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    public override void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
     {
         if (Time.time < _hitStrongTime + HitStrongDelay) return;
         _animBase.isFinished = true;
