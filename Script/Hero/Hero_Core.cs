@@ -63,6 +63,7 @@ public partial class Hero : MonoBehaviour
     //Core
     public void Core_PreInput()
     {
+        
         if (GameManager.DelayCheck_Attack() < heroData.preinput_attack)
         {
             Core_NormalAttack();
@@ -111,7 +112,7 @@ public partial class Hero : MonoBehaviour
         _speedRatio *=0.35f;
         _animator.SetFloat(GameManager.s_crouch,0.6f);
         //타겟 벡터
-        Vector3 hitpoint = Vector3.zero;
+        Vector3 hitpoint = GameManager.V3_Zero;
         Vector3 targetHitVec = hitpoint-transform.position;
         targetHitVec.y = 0;
 
@@ -160,7 +161,7 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down(1.1f);
         }
         //타겟 벡터
-        Vector3 hitpoint = Vector3.zero;
+        Vector3 hitpoint = GameManager.V3_Zero;
         Vector3 targetHitVec = hitpoint-transform.position;
         targetHitVec.y = 0;
 

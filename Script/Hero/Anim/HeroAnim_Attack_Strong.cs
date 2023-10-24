@@ -7,6 +7,10 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
     private bool _weaponOff;
     private Data_WeaponPack _weaponPack;
     public bool isLeft;
+    
+    private float _lookF;
+    private Transform _lookT;
+    private Quaternion _lookRot;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -16,11 +20,15 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         movement.Set_CurrentAttackMotionData(_weaponPack.playerAttackMotionData_Strong);
         _weaponOff = false;
         animator.speed = movement.CurrentAttackMotionData.playSpeed;
+        animator.ResetTrigger(GameManager.s_turn);
+        animator.SetBool(GameManager.s_charge_normal,false);
         animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         movement.Effect_Smoke(0.25f);
         movement.Equipment_Equip(_weaponPack);
         movement.Effect_Change();
         movement.Equipment_Collision_Reset(_weaponPack);
+
+        Set_LookAt(ref movement.Get_LookT(), ref movement.Get_LookF(),movement.AttackIndex ==0);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -46,9 +54,12 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             movement.Equipment_Equip(movement.weaponPack_Normal);
         }
         //핵심
-        UpdateTrail(normalizedTime,_weaponPack);
-        if (_weaponOff || isCurrentWeapon) 
-            movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,animator.rootRotation);
+        Update_Trail(normalizedTime,_weaponPack);
+        if (_weaponOff || isCurrentWeapon)
+        {
+            Update_LookDeg(ref movement.Get_LookT(), ref movement.Get_LookF(),ref movement.Get_LookRot());
+            movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,movement.Get_LookRot());
+        }
         
         
         

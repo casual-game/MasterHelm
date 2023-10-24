@@ -16,8 +16,8 @@ public partial class GameManager : MonoBehaviour
         {
             GameObject f = new GameObject(folderName);
             f.transform.SetParent(parent);
-            f.transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);
-            f.transform.localScale = Vector3.one;
+            f.transform.SetPositionAndRotation(V3_Zero,Q_Identity);
+            f.transform.localScale = GameManager.V3_One;
             return f.transform;
         }
     }

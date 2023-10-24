@@ -48,8 +48,17 @@ public class PlayerAttackMotionData
 [System.Serializable]
 public class TrailData
 {
-    [MinMaxSlider(0,1,true)] public Vector2 trailRange;
-    public bool weaponL, weaponR, shield;
+    [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
+    [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
+    public Vector2 trailRange = new Vector2(0,1);
+    
+    
+    
+    [TitleGroup("InteractType")]public bool isHitScan = false;
+    [HideIf("$isHitScan")][TitleGroup("InteractType")][MinMaxSlider(0,1,true)] 
+    public Vector2 collisionRange = new Vector2(0,1);
+    [ShowIf("$isHitScan")] [TitleGroup("InteractType")]
+    public Vector3 hitscan_pos, hitscan_rot, hitscan_scale;
 }
 public enum PlayerAttackType
 {

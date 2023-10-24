@@ -31,8 +31,11 @@ public partial class Monster : MonoBehaviour
         
         Setting_UI();
         Setting_Effect();
+        
+        Monsters.Add(this);
     }
-    
+    //Static
+    public static List<Monster> Monsters = new List<Monster>();
     //Private
     private bool _isAlive = false;
     private float _dissolveRatio = 1.0f;
@@ -61,13 +64,13 @@ public partial class Monster : MonoBehaviour
         if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,GameManager.Folder_MonsterProp);
         if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,GameManager.Folder_MonsterProp);
         if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,GameManager.Folder_MonsterProp);
-        Spawn(Vector3.zero, t.rotation,l,r,s).Forget();
+        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
     }
 
     [Button]
     public void DebugSpawn()
     {
-        Spawn(Vector3.zero,transform.rotation,_weaponL,_weaponR,_shield).Forget();
+        Spawn(GameManager.V3_Zero,transform.rotation,_weaponL,_weaponR,_shield).Forget();
     }
 
     [Button]
@@ -125,7 +128,7 @@ public partial class Monster : MonoBehaviour
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;
-        _shadow.localScale = Vector3.zero;
+        _shadow.localScale = GameManager.V3_Zero;
 
         if (!ui_Sequence_Deactivated.IsComplete()) await ui_Sequence_Deactivated.AwaitForComplete();
         if(s_punch_up.IsPlaying()) s_punch_up.Pause();
@@ -141,7 +144,11 @@ public partial class Monster : MonoBehaviour
     {
         _animBase = animBase;
     }
-    
+    //Getter
+    public bool Get_IsAlive()
+    {
+        return _isAlive;
+    }
     //Move
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {
@@ -159,7 +166,7 @@ public partial class Monster : MonoBehaviour
         
     }
 
-    public virtual void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    public virtual void Core_Hit_Strong(Transform attacker,PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
     {
         
     }

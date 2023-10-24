@@ -32,35 +32,53 @@ public class HeroAnim_Base : StateMachineBehaviour
         animator.speed = 1.0f;
     }
 
-    protected bool IsNotAvailable(Animator animator, AnimatorStateInfo stateInfo)
+    protected bool IsNotAvailable(Animator animator,AnimatorStateInfo stateInfo)
     {
         bool isNotCurrentState = animator.IsInTransition(0) &&
                               animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
         return isNotCurrentState || isFinished;
     }
-    protected void UpdateTrail(float normalizedTime, Data_WeaponPack weaponPack)
+    protected void Update_Trail(float normalizedTime,Data_WeaponPack weaponPack)
     {
-        bool trail_weaponL = false, trail_weaponR = false, trail_shield = false;
+        bool trailed = false, collided = false;
         foreach (var trailData in movement.CurrentAttackMotionData.TrailDatas)
         {
-            bool canTrail = trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;
+            bool canTrail = !trailed && trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;
+            bool canCollide = !trailData.isHitScan && !collided && 
+                              trailData.collisionRange.x <= normalizedTime && normalizedTime < trailData.collisionRange.y;
+            //trail 설정
             if (canTrail)
             {
-                trail_weaponL = trailData.weaponL;
-                trail_weaponR = trailData.weaponR;
-                trail_shield = trailData.shield;
+                trailed = true;
+                movement.Equipment_UpdateTrail(weaponPack,trailData.weaponL,trailData.weaponR,trailData.shield);
                 if (static_trailData != trailData)
                 {
                     static_trailData = trailData;
+                    movement.Set_CurrentTrail(trailData);
                     movement.Equipment_Collision_Reset(weaponPack);
                 }
-                break;
+            }
+            //충돌 설정
+            if (canCollide)
+            {
+                collided = true;
+                movement.Equipment_Collision_Interact(weaponPack,trailData.weaponL,trailData.weaponR,trailData.shield);
             }
         }
-        movement.Equipment_UpdateTrail(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
-        movement.Equipment_Collision_Interact(weaponPack,trail_weaponL,trail_weaponR,trail_shield);
+        if(!trailed) movement.Equipment_UpdateTrail(weaponPack,false,false,false);
+        if(!collided) movement.Equipment_Collision_Interact(weaponPack,false,false,false);
     }
-
+    protected void Update_LookDeg(ref Transform lookT,ref float lookF,ref Quaternion lookRot)
+    {
+        float turnSpeed = hero.attackTurnSpeed * Time.deltaTime;
+        if (lookT != null)
+        {
+            Vector3 lookVec = lookT.position - movement.transform.position;
+            lookVec.y = 0;
+            lookF = Quaternion.LookRotation(lookVec).eulerAngles.y;
+        }
+        lookRot = Quaternion.RotateTowards(movement.transform.rotation, Quaternion.Euler(0,lookF,0), turnSpeed);
+    }
     protected void Set_Locomotion()
     {
         movement.Equipment_UpdateTrail(movement.weaponPack_Normal,false,false,false);
@@ -69,4 +87,78 @@ public class HeroAnim_Base : StateMachineBehaviour
         movement.Set_AttackIndex(-1);
         isFinished = true;
     }
+    protected void Set_LookAt(ref Transform lookT, ref float lookF, bool isFirst)
+    {
+        float? lookDeg = movement.Get_LookDeg();
+        Transform myT = movement.transform;
+        Vector3 myPos = myT.position;
+        //드래그
+        if (lookDeg.HasValue)
+        {
+            //활성화된 적 중 각도가 가장 근접한 적
+            Vector3 dragVec = Quaternion.Euler(0,lookDeg.Value,0)*Vector3.forward;
+            int? index = null;
+            float dist = Mathf.Infinity;
+            for (int i = 0; i < Monster.Monsters.Count; i++)
+            {
+                if(!Monster.Monsters[i].Get_IsAlive()) continue;
+                Vector3 monsterVec = Monster.Monsters[i].transform.position - myPos;
+                monsterVec.y = 0;
+                float _dist = Vector3.Angle(dragVec, monsterVec);
+                if (_dist < dist && _dist<45)
+                {
+                    dist = _dist;
+                    index = i;
+                }
+            }
+            //활성화된 적 있을 때
+            if (index.HasValue)
+            {
+                lookT = Monster.Monsters[index.Value].transform;
+                Vector3 lookVec = lookT.position - myPos;
+                lookVec.y = 0;
+                lookF = Quaternion.LookRotation(lookVec).eulerAngles.y;
+            }
+            //없으면 그냥 원래 드래그 각도
+            else
+            {
+                lookT = null;
+                lookF = lookDeg.Value;
+            }
+        }
+        //탭
+        else if(isFirst || lookT == null)
+        {
+            //활성화된 적 중 가장 가까운 적
+            int? index = null;
+            float dist = Mathf.Infinity;
+            
+            for (int i = 0; i < Monster.Monsters.Count; i++)
+            {
+                if(!Monster.Monsters[i].Get_IsAlive()) continue;
+                float monsterDist = (myPos - Monster.Monsters[i].transform.position).sqrMagnitude;
+                if (monsterDist < dist)
+                {
+                    dist = monsterDist;
+                    index = i;
+                }
+            }
+            //활성화된 적 있을 때
+            if (index.HasValue)
+            {
+                lookT = Monster.Monsters[index.Value].transform;
+                Vector3 lookVec = lookT.position - myPos;
+                lookVec.y = 0;
+                lookF = Quaternion.LookRotation(lookVec).eulerAngles.y;
+            }
+            //횔성화된 적 없으면 그냥 현 각도
+            else 
+            {
+                lookT = null;
+                lookF = movement.transform.rotation.eulerAngles.y;
+            }
+        }
+    }
+
+    
 }

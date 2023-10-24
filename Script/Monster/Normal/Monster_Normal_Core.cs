@@ -31,7 +31,7 @@ public partial class Monster_Normal : Monster
     public override void Core_Hit_Normal()
     {
         //타겟 벡터
-        Vector3 hitpoint = Vector3.zero;
+        Vector3 hitpoint = GameManager.V3_Zero;
         Vector3 targetHitVec = hitpoint-transform.position;
         targetHitVec.y = 0;
 
@@ -48,9 +48,14 @@ public partial class Monster_Normal : Monster
         Effect_Hit_Normal();
     }
     [Button]
-    public override void Core_Hit_Strong(PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    public override void Core_Hit_Strong(Transform attacker,PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
     {
         if (Time.time < _hitStrongTime + HitStrongDelay) return;
+//
+        Vector3 lookVec = attacker.position-transform.position;
+        lookVec.y = 0;
+        transform.rotation = Quaternion.LookRotation(lookVec);
+        
         _animBase.isFinished = true;
         _hitStrongTime = Time.time;
         _hitStrongType = (_hitStrongType + 1) % 2;

@@ -47,7 +47,7 @@ public partial class Monster_Normal : Monster
     {
         base.ActivateUI();
         if (ui_Sequence_Deactivated.IsPlaying()) ui_Sequence_Deactivated.Pause();
-        img_health_root.rectTransform.localScale = Vector3.zero;
+        img_health_root.rectTransform.localScale = GameManager.V3_Zero;
         img_health_root.rectTransform.sizeDelta = new Vector2(50, 36);
         
         if (!ui_Sequence_Activate.IsInitialized()) ui_Sequence_Activate.Play();
@@ -57,7 +57,7 @@ public partial class Monster_Normal : Monster
     {
         base.DeactivateUI();
         if (ui_Sequence_Activate.IsPlaying()) ui_Sequence_Activate.Pause();
-        img_health_root.rectTransform.localScale = Vector3.one*0.0087626f;
+        img_health_root.rectTransform.localScale = GameManager.V3_One*0.0087626f;
         img_health_root.rectTransform.sizeDelta = new Vector2(147.5f, 36);
         
         if (!ui_Sequence_Deactivated.IsInitialized()) ui_Sequence_Deactivated.Play();

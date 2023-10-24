@@ -102,8 +102,12 @@ public partial class Hero : MonoBehaviour
     //Move
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {
-        transform.rotation = nextRot;
-        _agent.Move(relativePos);
+        Transform t = transform;
+        t.rotation = nextRot;
+
+        bool cantMove = (HeroMoveState == MoveState.NormalAttack || HeroMoveState == MoveState.StrongAttack) 
+                        &&_lookT != null && (t.position - _lookT.position).sqrMagnitude < 3.5f;
+        if(!cantMove) _agent.Move(relativePos);
     }
     public void Move_Normal(Vector3 nextPos,Quaternion nextRot)
     {

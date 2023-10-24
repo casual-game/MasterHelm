@@ -6,6 +6,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
 {
     private bool _isLastAttack,_trailFinished,_strongFinished;
     private float _enteredTime;
+    
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -17,6 +18,8 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         _trailFinished = false;
         _strongFinished = false;
         animator.speed = movement.CurrentAttackMotionData.playSpeed;
+        animator.ResetTrigger(GameManager.s_turn);
+        animator.SetBool(GameManager.s_charge_normal,false);
         animator.SetBool(GameManager.s_leftstate,movement.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         movement.Equipment_Equip(movement.weaponPack_Normal);
         movement.Equipment_Collision_Reset(movement.weaponPack_Normal);
@@ -28,6 +31,8 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
             movement.trailEffect.active = true;
             movement.Tween_Blink_Evade(1.0f);
         }
+        
+        Set_LookAt(ref movement.Get_LookT(), ref movement.Get_LookF(),movement.AttackIndex ==0);
         
     }
 
@@ -48,8 +53,10 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         }
         //isFinished 가 False여도 동작한다.
         float normalizedTime = stateInfo.normalizedTime;
-        UpdateTrail(normalizedTime,movement.weaponPack_Normal);
-        movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,animator.rootRotation);
+        Update_Trail(normalizedTime,movement.weaponPack_Normal);
+        Update_LookDeg(ref movement.Get_LookT(), ref movement.Get_LookF(),ref movement.Get_LookRot());
+        movement.Move_Nav(animator.deltaPosition*movement.CurrentAttackMotionData.moveSpeed,movement.Get_LookRot());
+        
         //차지 공격으로 캔슬한 경우
         if (GameManager.DelayCheck_Attack() < hero.preinput_attack && movement.Get_Charged() && !GameManager.BTN_Attack)
         {
@@ -72,7 +79,6 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         //타이밍이 되면 무조건 Charge모션으로 넘어갑니다.
         if (!_isLastAttack && normalizedTime > movement.CurrentAttackMotionData.transitionRatio)
         {
-            
             animator.SetTrigger(GameManager.s_transition);
             isFinished = true;
         }

@@ -50,7 +50,7 @@ public class HeroAnim_Move : HeroAnim_Base
                            && !animator.IsInTransition(0);
             if (canTurn)
             {
-                animator.SetTrigger(GameManager.s_transition);
+                animator.SetTrigger(GameManager.s_turn);
                 isFinished = true;
                 return;
             }

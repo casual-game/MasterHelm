@@ -22,6 +22,8 @@ public partial class Hero : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1.0f);
         _outlineTarget.CutoutThreshold = 1;
         gameObject.SetActive(false);
+        
+        Test1();
     }
     //Private
     private bool _spawned = false;
@@ -31,12 +33,11 @@ public partial class Hero : MonoBehaviour
     private Vector3 _shadowScale;
     private Material _material;
     private OutlineTarget _outlineTarget;
-    [Button]
+    
     public void Test1()
     {
-      Spawn(Vector3.zero,transform.rotation).Forget();   
+      Spawn(GameManager.V3_Zero,transform.rotation).Forget();   
     }
-    [Button]
     public void Test2()
     {
         Despawn().Forget();   
@@ -115,7 +116,7 @@ public partial class Hero : MonoBehaviour
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
             _outlineTarget.CutoutThreshold = 1;
-            _shadow.localScale = Vector3.zero;
+            _shadow.localScale = GameManager.V3_Zero;
             await UniTask.Delay(TimeSpan.FromSeconds(2.0f), DelayType.DeltaTime);
         }
         if (!_spawned)gameObject.SetActive(false);

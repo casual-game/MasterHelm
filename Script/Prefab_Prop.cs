@@ -49,14 +49,17 @@ public class Prefab_Prop : MonoBehaviour
         if(!_canKeep) UT_DeactivateProp_CantKeep().Forget();
         else UT_DeactivateProp_CanKeep().Forget();
     }
-    //Can
     //CanKeep 일때만 사용..
     public void Spawn()
     {
         gameObject.SetActive(true);
         UT_DeactivateProp_CanKeep(false).Forget();
     }
-
+    public void Despawn()
+    {
+        UT_DeactivateProp_CantKeep(false).Forget();
+    }
+    //Collision
     public void Collision_Interact()//공격 판정 계산할때 호출
     {
         if (_isHero)
@@ -65,7 +68,7 @@ public class Prefab_Prop : MonoBehaviour
             {
                 if(_interact_interactedTargets.Contains(coll)) continue;
                 coll.TryGetComponent<Monster>(out var monster);
-                monster.Core_Hit_Strong();
+                monster.Core_Hit_Strong(transform);
                 _interact_interactedTargets.Add(coll);
             }
         }
@@ -74,11 +77,7 @@ public class Prefab_Prop : MonoBehaviour
     {
         if(_isHero) _interact_interactedTargets.Clear();
     }
-    //CanKeep일때만 사용..
-    public void Despawn()
-    {
-        UT_DeactivateProp_CantKeep(false).Forget();
-    }
+    //Setting
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
     {
         Setting();
@@ -132,8 +131,8 @@ public class Prefab_Prop : MonoBehaviour
         _outlineTarget.CutoutTextureName = "_AdvancedDissolveCutoutStandardMap1";
         _trails = GetComponents<TrailEffect>();
         _p_spawn = GetComponentInChildren<ParticleSystem>();
-        _interact_currentTargets = new List<Collider>();
-        _interact_interactedTargets = new List<Collider>();
+        _interact_currentTargets = new List<Collider>(14);
+        _interact_interactedTargets = new List<Collider>(14);
         foreach (var trail in _trails)
         {
             trail.active = false;

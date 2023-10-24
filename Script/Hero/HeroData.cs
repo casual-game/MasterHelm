@@ -12,6 +12,7 @@ public class HeroData : ScriptableObject
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float acceleration_normal = 1.5f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float deceleration_normal = 2.5f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float turnDuration_normal = 0.25f;
+    [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float attackTurnSpeed = 0.25f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float moveMotionSpeed_crouch = 0.65f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float acceleration_crouch = 1.5f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/웅크리기")] public float deceleration_crouch = 2.5f;

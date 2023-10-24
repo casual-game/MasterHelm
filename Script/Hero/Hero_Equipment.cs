@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Micosmo.SensorToolkit;
 using RPGCharacterAnims.Extensions;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -9,6 +10,7 @@ public partial class Hero : MonoBehaviour
 {
     private void Setting_Equipment()
     {
+        _sensor = GetComponentInChildren<RangeSensor>();
         weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
         AddWeaponPack(weaponPack_Normal,t_back,true);
         AddWeaponPack(weaponPack_StrongL,GameManager.Folder_Hero,false);
@@ -56,7 +58,8 @@ public partial class Hero : MonoBehaviour
     private int leftEnterIndex, rightEnterIndex;
     private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
-    
+    private RangeSensor _sensor;
+    private TrailData _currentTrailData;
     //Getter
     public Data_WeaponPack Get_LastWeaponPack()
     {
@@ -73,6 +76,11 @@ public partial class Hero : MonoBehaviour
     public int Get_RightEnterIndex()
     {
         return rightEnterIndex;
+    }
+    //Setter
+    public void Set_CurrentTrail(TrailData traildata)
+    {
+        _currentTrailData = traildata;
     }
     //Equipment
     public void Equipment_Equip(Data_WeaponPack weaponPack)
@@ -148,6 +156,19 @@ public partial class Hero : MonoBehaviour
         if(data.weaponL!=null) data.weaponL.Collision_Reset();
         if (data.weaponR != null) data.weaponR.Collision_Reset();
         if(data.useShield) shield.Collision_Reset();
+    }
+    public void Equipment_HitScan()
+    {
+        if (_animator.IsInTransition(0) || _currentTrailData == null) return;
+        _sensor.transform.SetLocalPositionAndRotation(
+            _currentTrailData.hitscan_pos,Quaternion.Euler(_currentTrailData.hitscan_rot));
+        _sensor.Box.HalfExtents = _currentTrailData.hitscan_scale;
+        _sensor.Pulse();
+        foreach (var signal in _sensor.GetSignals())
+        {
+            signal.Object.TryGetComponent<Monster>(out var monster);
+            monster.Core_Hit_Strong(transform);
+        }
     }
     
 }

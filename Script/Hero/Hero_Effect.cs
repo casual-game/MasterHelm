@@ -25,21 +25,21 @@ public partial class Hero : MonoBehaviour
             .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_evade_fin, 0.45f).SetEase(Ease.InQuad));
         s_punch_up = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = Vector3.one; })
+            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(-0.15f,-0.15f,0.15f), 0.75f,7)
                 .SetEase(Ease.InOutBack));
         
         s_punch_down = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = Vector3.one; })
+            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(0.15f,0.15f,-0.15f), 0.75f,7)
                 .SetEase(Ease.InOutBack));
         s_punch_up_compact = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = Vector3.one; })
+            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(-0.125f,-0.125f,0.125f), 0.45f,7)
                 .SetEase(Ease.InOutBack));
         
         s_punch_down_compact = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = Vector3.one; })
+            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(0.125f,0.125f,-0.125f), 0.45f,7)
                 .SetEase(Ease.InOutBack));
         var trailModule = p_charge.trails;

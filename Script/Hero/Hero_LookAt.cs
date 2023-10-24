@@ -17,7 +17,7 @@ public partial class Hero : MonoBehaviour
         _lookIcon = _lookDisplayT.GetChild(0);
         
         _lookScale = 0;
-        _lookIcon.localScale = Vector3.zero;
+        _lookIcon.localScale = GameManager.V3_Zero;
         _lookAtIK.solver.SetLookAtWeight(0);
         _lookDisplayT.rotation = Quaternion.Euler(0,transform.rotation.eulerAngles.y,0);
     }
@@ -30,6 +30,10 @@ public partial class Hero : MonoBehaviour
     private float _lookScale = 0;
     private float _chargeBeginTime = -100;
     private bool _charged = false;
+    private float? _lookDeg;
+    private float _lookF;
+    private Transform _lookT;
+    private Quaternion _lookRot;
     
     //Event
     private void E_BTN_Attack_Pressed()
@@ -40,6 +44,7 @@ public partial class Hero : MonoBehaviour
         p_charge_begin.Play();
         _charged = false;
         _chargeBeginTime = Time.time;
+        _lookDeg = null;
         E_BTN_Attack_RemoveListner();
         GameManager.Instance.E_LateUpdate.AddListener(E_BTN_Attack_PressedUpdate);
     }
@@ -52,7 +57,7 @@ public partial class Hero : MonoBehaviour
         //공격 설정. 상황 판단은 해당 함수 내부에서 체크한다.
         if (!_charged)
         {
-            p_charge_Impact.transform.localScale = Vector3.one * 0.35f;
+            p_charge_Impact.transform.localScale = GameManager.V3_One * 0.35f;
             p_charge_Impact.Play();
             Core_NormalAttack();
         }
@@ -64,11 +69,12 @@ public partial class Hero : MonoBehaviour
     private void E_BTN_Attack_PressedUpdate()
     {
         bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
+        Quaternion myRot = transform.rotation;
         //공격 조이스틱 각도 계산,Display 회전
         float jsDeg;
         if (!GameManager.Bool_Attack)
         {
-            jsDeg = transform.rotation.eulerAngles.y;
+            jsDeg = myRot.eulerAngles.y;
         }
         else
         {
@@ -85,39 +91,45 @@ public partial class Hero : MonoBehaviour
         if (!GameManager.Bool_Attack)
         {
             degDiff = 0;
+            _lookDeg = null;
         }
         else
         {
-            degDiff = -transform.rotation.eulerAngles.y+jsDeg;
+            degDiff = -myRot.eulerAngles.y+jsDeg;
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
+            _lookDeg = myRot.eulerAngles.y + degDiff;
             if (heroData.lookRangeDeadZone.x > degDiff || degDiff > heroData.lookRangeDeadZone.y)
             {
-                if (Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.rotation.eulerAngles.y) > 0)
+                if (Mathf.DeltaAngle(myRot.eulerAngles.y, _lookTargetT.rotation.eulerAngles.y) > 0)
                     degDiff = heroData.lookRange.y;
                 else degDiff = heroData.lookRange.x;
             }
+            
             degDiff = Mathf.Clamp(degDiff,heroData.lookRange.x, heroData.lookRange.y);
-        } 
-        float currentDiff = Mathf.DeltaAngle(transform.rotation.eulerAngles.y, _lookTargetT.eulerAngles.y);
-        float targetTargetDeg = Mathf.SmoothDamp(transform.rotation.eulerAngles.y + currentDiff, 
-            transform.rotation.eulerAngles.y + degDiff, ref _lookTargetRefDeg, heroData.lookTargetDuration);
+            
+        }
+        float currentDiff = Mathf.DeltaAngle(myRot.eulerAngles.y, _lookTargetT.eulerAngles.y);
+        float targetTargetDeg = Mathf.SmoothDamp(myRot.eulerAngles.y + currentDiff, 
+            myRot.eulerAngles.y + degDiff, ref _lookTargetRefDeg, heroData.lookTargetDuration);
+        
         _lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
         //크기 조정
         if (_lookScale < 1)
         {
             _lookScale += 5 * Time.deltaTime;
             _lookScale = Mathf.Clamp01(_lookScale);
-            _lookIcon.localScale = Vector3.one * _lookScale;
+            _lookIcon.localScale = GameManager.V3_One * _lookScale;
             if(canChargeMotion) _lookAtIK.solver.SetLookAtWeight(_lookScale);
             else _lookAtIK.solver.SetLookAtWeight(0);
         }
+        else if(!canChargeMotion) _lookAtIK.solver.SetLookAtWeight(0);
         //차지
         if (!_charged && Time.time > _chargeBeginTime + heroData.chargeDuration)
         {
             _charged = true;
             p_charge_fin.Play();
-            p_charge_Impact.transform.localScale = Vector3.one * 0.5f;
+            p_charge_Impact.transform.localScale = GameManager.V3_One * 0.5f;
             p_charge_Impact.Play();
             Tween_Punch_Down_Compact(1.2f);
             Tween_Blink_Evade(1.0f);
@@ -142,7 +154,7 @@ public partial class Hero : MonoBehaviour
         if (_lookScale < 0.01f && correctDeg)
         {
             _lookScale = 0;
-            _lookIcon.localScale = Vector3.zero;
+            _lookIcon.localScale = GameManager.V3_Zero;
             _lookAtIK.solver.SetLookAtWeight(0);
             _lookDisplayT.rotation = Quaternion.Euler(0,eulery,0);
             _lookTargetT.rotation = Quaternion.Euler(0,eulery,0);
@@ -150,7 +162,7 @@ public partial class Hero : MonoBehaviour
         }
         else
         {
-            _lookIcon.localScale = Vector3.one * _lookScale;
+            _lookIcon.localScale = GameManager.V3_One * _lookScale;
             _lookDisplayT.rotation = Quaternion.Euler(0,targetDeg,0);
             _lookTargetT.rotation = Quaternion.Euler(0,targetTargetDeg,0);
             if(canChargeMotion) _lookAtIK.solver.SetLookAtWeight(_lookScale);
@@ -167,5 +179,21 @@ public partial class Hero : MonoBehaviour
     public bool Get_Charged()
     {
         return _charged;
+    }
+    public float? Get_LookDeg()
+    {
+        return _lookDeg;
+    }
+    public ref float Get_LookF()
+    {
+        return ref _lookF;
+    }
+    public ref Transform Get_LookT()
+    {
+        return ref _lookT;
+    }
+    public ref Quaternion Get_LookRot()
+    {
+        return ref _lookRot;
     }
 }

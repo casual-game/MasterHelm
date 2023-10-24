@@ -31,17 +31,17 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 inner.color = Color.clear;
                 bgT.anchoredPosition = innerT.anchoredPosition;
             })
-            .Append(innerT.DOPunchScale(Vector3.one*0.1f,tween_FadeDuration,1))
+            .Append(innerT.DOPunchScale(GameManager.V3_One*0.1f,tween_FadeDuration,1))
             .Join(inner.DOColor(Color.white,tween_FadeDuration));
         s_Released = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
             .OnStart(() =>
             {
                 bg.color = Color.clear;
-                bgT.localScale = Vector3.one * 0.75f;
+                bgT.localScale = GameManager.V3_One * 0.75f;
                 bgT.anchoredPosition = innerT.anchoredPosition;
             })
-            .Append(innerT.DOPunchScale(Vector3.one*0.1f,tween_FadeDuration,1))
-            .Join(bgT.DOScale(Vector3.one,tween_ScaleDuration).SetEase(Ease.OutBack))
+            .Append(innerT.DOPunchScale(GameManager.V3_One*0.1f,tween_FadeDuration,1))
+            .Join(bgT.DOScale(GameManager.V3_One,tween_ScaleDuration).SetEase(Ease.OutBack))
             .Join(bg.DOColor(Color.white,tween_FadeDuration));
     }
     public void OnPointerUp(PointerEventData eventData)
