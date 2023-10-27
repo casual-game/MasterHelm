@@ -10,7 +10,7 @@ public class HeroAnim_Hit_Falldown_Fin : HeroAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         animator.SetBool(GameManager.s_hit,false);
-        movement.Core_ResetRollInput();
+        _hero.Core_ResetRollInput();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -21,6 +21,6 @@ public class HeroAnim_Hit_Falldown_Fin : HeroAnim_Base
         Vector3 relativePos = animator.deltaPosition*motionSpeed;
         Quaternion nextRot = animator.rootRotation;
 
-        movement.Move_Nav(relativePos, nextRot);
+        _hero.Move_Nav(relativePos, nextRot);
     }
 }

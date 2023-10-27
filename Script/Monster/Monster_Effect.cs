@@ -113,7 +113,7 @@ public partial class Monster : MonoBehaviour
     {
         if(!s_blink_hit_strong.IsInitialized()) s_blink_hit_strong.Play();
         else s_blink_hit_strong.Restart();
-        
+        CamArm.instance.Tween_ShakeNormal();
         
         
         Transform t = transform;
@@ -140,5 +140,6 @@ public partial class Monster : MonoBehaviour
     {
         p_smoke.Play();
         Punch_Up_Compact(1.5f);
+        _hitState = HitState.Extra;
     }
 }

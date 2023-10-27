@@ -21,6 +21,7 @@ public partial class GameManager : MonoBehaviour
     public AnimationCurve curve_inout,curve_in,curve_out;
     public void Awake()
     {
+        Application.targetFrameRate = 60;
         Instance = this;
         Setting_Resource();
     }
@@ -30,4 +31,5 @@ public partial class GameManager : MonoBehaviour
     }
 }
 public enum AttackMotionType {Center=0,LeftSlash=60,RightSlash=-60}
-public enum PlayerSmashedType {None =-1,Bound=2,Screw=3,Flip=4,Center=5,Stun=6}
+public enum AttackType {Normal = 0,Stun=1,Smash=2,Combo=3}
+public enum HitType {Normal =-1,Bound=2,Screw=3,Flip=4,Smash=5,Stun=6}

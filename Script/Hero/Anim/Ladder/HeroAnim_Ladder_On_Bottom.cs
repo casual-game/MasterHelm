@@ -11,9 +11,9 @@ public class HeroAnim_Ladder_On_Bottom : HeroAnim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        _ladder = movement.CurrentLadder;
+        _ladder = _hero.CurrentLadder;
         animator.SetFloat(GameManager.s_ladder_speed,0);
-        Transform mt = movement.transform;
+        Transform mt = _hero.transform;
         Transform lt = _ladder.transform;
         _startRot = mt.rotation;
         _endRot = Quaternion.Euler(0,180 + lt.rotation.eulerAngles.y,0);
@@ -32,11 +32,11 @@ public class HeroAnim_Ladder_On_Bottom : HeroAnim_Base
             float ratio = GameManager.Instance.curve_inout.Evaluate((stateInfo.normalizedTime-_startRatio)/(0.5f-_startRatio));
             Vector3 nextPos = Vector3.Lerp(_startPos, _endPos, ratio);
             Quaternion nextRot = Quaternion.Lerp(_startRot, _endRot, ratio);
-            movement.Move_Normal(nextPos, nextRot);
+            _hero.Move_Normal(nextPos, nextRot);
         }
         else
         {
-            movement.Move_Normal(_endPos,_endRot);
+            _hero.Move_Normal(_endPos,_endRot);
             isFinished = true;
             return;
         }

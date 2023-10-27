@@ -7,8 +7,8 @@ public class HeroAnim_Turn : HeroAnim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        movement.Set_SpeedRatio(0.35f);
-        animator.SetFloat(GameManager.s_speed,movement.Get_SpeedRatio());
+        _hero.Set_SpeedRatio(0.35f);
+        animator.SetFloat(GameManager.s_speed,_hero.Get_SpeedRatio());
         animator.SetBool(GameManager.s_leftstate,false);
     }
 
@@ -16,7 +16,7 @@ public class HeroAnim_Turn : HeroAnim_Base
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator,stateInfo)) return;
-        movement.Move_Nav(animator.deltaPosition * hero.moveMotionSpeed_normal * 0.5f,
+        _hero.Move_Nav(animator.deltaPosition * _heroData.moveMotionSpeed_normal * 0.5f,
             animator.rootRotation);
     }
 }

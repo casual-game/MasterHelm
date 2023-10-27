@@ -8,5 +8,6 @@ public class MonsterAnim_Idle : MonsterAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         _monster.Equip();
+        _monster.Core_ResetHitState();
     }
 }

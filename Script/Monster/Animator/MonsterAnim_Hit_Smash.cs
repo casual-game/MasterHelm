@@ -15,7 +15,7 @@ public class MonsterAnim_Hit_Smash : MonsterAnim_Base
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator, stateInfo)) return;
         //이동
-        Vector3 relativePos = animator.deltaPosition * motionSpeed*0;
+        Vector3 relativePos = animator.deltaPosition * motionSpeed;
         Quaternion nextRot = animator.rootRotation;
 
         _monster.Move_Nav(relativePos, nextRot);

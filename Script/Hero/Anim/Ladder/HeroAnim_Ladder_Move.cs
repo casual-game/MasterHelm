@@ -11,7 +11,7 @@ public class HeroAnim_Ladder_Move : HeroAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         _refSpeed = 0;
-        _ladder = movement.CurrentLadder;
+        _ladder = _hero.CurrentLadder;
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -37,8 +37,8 @@ public class HeroAnim_Ladder_Move : HeroAnim_Base
         float nextSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref _refSpeed, LadderSpeedSmoothTime);
         animator.SetFloat(GameManager.s_ladder_speed,nextSpeed);
 
-        Transform mt = movement.transform;
-        Vector3 nextPos = mt.position + new Vector3(0,animator.deltaPosition.y*hero.ladderClimbMotionSpeed,0);
+        Transform mt = _hero.transform;
+        Vector3 nextPos = mt.position + new Vector3(0,animator.deltaPosition.y*_heroData.ladderClimbMotionSpeed,0);
         float pos_y = Mathf.Clamp(nextPos.y, _ladder.range.x, _ladder.range.y);
         float ratio = (pos_y - _ladder.range.x) / (_ladder.range.y - _ladder.range.x);
         nextPos.y = pos_y;
@@ -57,6 +57,6 @@ public class HeroAnim_Ladder_Move : HeroAnim_Base
             return;
         }
         Quaternion nextRot = mt.rotation;
-        movement.Move_Normal(nextPos,nextRot);
+        _hero.Move_Normal(nextPos,nextRot);
     }
 }

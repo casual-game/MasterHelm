@@ -60,6 +60,8 @@ public partial class Hero : MonoBehaviour
     private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
     private RangeSensor _sensor;
     private TrailData _currentTrailData;
+
+    
     //Getter
     public Data_WeaponPack Get_LastWeaponPack()
     {
@@ -142,13 +144,16 @@ public partial class Hero : MonoBehaviour
             //if(shield) this.shield.Collision_Interact();
         }
     }
-
-    public void Equipment_Collision_Interact(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
+    
+    public void Equipment_Collision_Interact(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool useShield)
     {
         var data = weapondata[weaponPack];
-        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact();
-        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact();
-        if(shield && data.useShield) this.shield.Collision_Interact();
+        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact(_currentTrailData.attackType_ground,
+            _currentTrailData.isAirSmash,_currentTrailData.attackType_extra);
+        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact(_currentTrailData.attackType_ground,
+            _currentTrailData.isAirSmash,_currentTrailData.attackType_extra);
+        if(useShield && data.useShield) shield.Collision_Interact(_currentTrailData.attackType_ground,
+            _currentTrailData.isAirSmash,_currentTrailData.attackType_extra);
     }
     public void Equipment_Collision_Reset(Data_WeaponPack weaponPack)
     {
@@ -167,7 +172,8 @@ public partial class Hero : MonoBehaviour
         foreach (var signal in _sensor.GetSignals())
         {
             signal.Object.TryGetComponent<Monster>(out var monster);
-            monster.Core_Hit_Strong(transform);
+            monster.Core_Hit_Strong(transform,_currentTrailData.attackType_ground,
+                _currentTrailData.isAirSmash,_currentTrailData.attackType_extra);
         }
     }
     

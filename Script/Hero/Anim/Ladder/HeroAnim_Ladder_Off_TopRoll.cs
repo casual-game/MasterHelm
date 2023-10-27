@@ -12,8 +12,8 @@ public class HeroAnim_Ladder_Off_TopRoll : HeroAnim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        _ladder = movement.CurrentLadder;
-        Transform mt = movement.transform;
+        _ladder = _hero.CurrentLadder;
+        Transform mt = _hero.transform;
         _startPos = mt.position;
         _startRot = mt.rotation;
 
@@ -31,13 +31,13 @@ public class HeroAnim_Ladder_Off_TopRoll : HeroAnim_Base
             float ratio = moveCurve.Evaluate((stateInfo.normalizedTime-_startRatio) / (0.6f-_startRatio));
             Vector3 nextPos = Vector3.Lerp(_startPos,_endPos,ratio);
             Quaternion nextRot = Quaternion.Lerp(_startRot,_endRot,ratio);
-            movement.Move_Normal(nextPos, nextRot);
+            _hero.Move_Normal(nextPos, nextRot);
         }
         else
         {
-            movement.Move_Normal(_endPos, _endRot);
+            _hero.Move_Normal(_endPos, _endRot);
             animator.SetBool(GameManager.s_ladder,false);
-            movement.Get_NavMeshAgent().Warp(_endPos);
+            _hero.Get_NavMeshAgent().Warp(_endPos);
             isFinished = true;
             return;
         }

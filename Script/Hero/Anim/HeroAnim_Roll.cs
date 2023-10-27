@@ -11,7 +11,7 @@ public class HeroAnim_Roll : HeroAnim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        startDeg = movement.transform.rotation.eulerAngles.y;
+        startDeg = _hero.transform.rotation.eulerAngles.y;
         if (GameManager.Bool_Move)
         {
             endDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
@@ -22,14 +22,14 @@ public class HeroAnim_Roll : HeroAnim_Base
         pattern = 0;
         animator.SetBool(GameManager.s_leftstate,false);
         
-        movement.Tween_Punch_Up_Compact(0.4f);
+        _hero.Tween_Punch_Up_Compact(0.4f);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator,stateInfo)) return;
-        Transform mt = movement.transform;
+        Transform mt = _hero.transform;
         
         //조이스틱 각도 계산
         float jsDeg;
@@ -59,17 +59,17 @@ public class HeroAnim_Roll : HeroAnim_Base
             //값들을 변환하여 회전 애니메이션에 반영, 실제 회전 각도 계산
             degDiff = Mathf.Clamp(degDiff, -60, 60) / 60.0f;
             targetDeg = Mathf.SmoothDampAngle(mt.eulerAngles.y, jsDeg,
-                ref movement.rotateCurrentVelocity, hero.turnDuration_roll * Mathf.Abs(degDiff));
+                ref _hero.rotateCurrentVelocity, _heroData.turnDuration_roll * Mathf.Abs(degDiff));
         }
         //최종 이동 설정
-        Vector3 targetPos = animator.deltaPosition * hero.moveMotionSpeed_roll;
+        Vector3 targetPos = animator.deltaPosition * _heroData.moveMotionSpeed_roll;
         Quaternion targetRot = Quaternion.Euler(0,targetDeg,0);
-        movement.Move_Nav(targetPos,targetRot);
+        _hero.Move_Nav(targetPos,targetRot);
 
         if (stateInfo.normalizedTime > 0.63f)
         {
             isFinished = true;
-            movement.Set_AnimationState(Hero.AnimationState.Locomotion);
+            _hero.Set_AnimationState(Hero.AnimationState.Locomotion);
         }
     }
 }

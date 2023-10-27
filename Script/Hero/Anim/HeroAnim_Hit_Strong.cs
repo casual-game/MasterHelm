@@ -24,10 +24,10 @@ public class HeroAnim_Hit_Strong : HeroAnim_Base
         float ratio = Mathf.Clamp(normalizedTime / endRatio,0,endRatio);
 
         float moveMagnitude = (moveFlowCurve.Evaluate(ratio) - moveFlowCurve.Evaluate(lastRatio)) 
-                              * hero.hit_Strong_MoveDistance;
+                              * _heroData.hit_Strong_MoveDistance;
         Vector3 relativePos = animator.deltaPosition.normalized * moveMagnitude * motionSpeed;
         Quaternion nextRot = animator.rootRotation;
-        movement.Move_Nav(relativePos, nextRot);
+        _hero.Move_Nav(relativePos, nextRot);
         lastRatio = ratio;
 
         if (normalizedTime > endRatio)

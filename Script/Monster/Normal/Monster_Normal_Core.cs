@@ -48,10 +48,75 @@ public partial class Monster_Normal : Monster
         Effect_Hit_Normal();
     }
     [Button]
-    public override void Core_Hit_Strong(Transform attacker,PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    public override void Core_Hit_Strong(Transform attacker,AttackType at_ground,bool isAirSmash,AttackType at_extra)
     {
         if (Time.time < _hitStrongTime + HitStrongDelay) return;
-//
+        HitType hitType;
+        if (_hitState == HitState.Ground)
+        {
+            switch (at_ground)
+            {
+                case AttackType.Normal:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Normal;
+                    break;
+                case AttackType.Stun:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Stun;
+                    break;
+                case AttackType.Smash:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Smash;
+                    break;
+                case AttackType.Combo:
+                    _hitState = HitState.Air;
+                    hitType = HitType.Bound;
+                    break;
+                default:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Normal;
+                    break;
+            }
+        }
+        else if(_hitState == HitState.Air)
+        {
+            if (isAirSmash)
+            {
+                _hitState = HitState.Extra;
+                hitType = HitType.Screw;
+            }
+            else
+            {
+                _hitState = HitState.Air;
+                hitType = HitType.Bound;
+            }
+        }
+        else
+        {
+            switch (at_extra)
+            {
+                case AttackType.Normal:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Normal;
+                    break;
+                case AttackType.Stun:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Stun;
+                    break;
+                case AttackType.Smash:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Smash;
+                    break;
+                case AttackType.Combo:
+                    _hitState = HitState.Air;
+                    hitType = HitType.Bound;
+                    break;
+                default:
+                    _hitState = HitState.Ground;
+                    hitType = HitType.Normal;
+                    break;
+            }
+        }
         Vector3 lookVec = attacker.position-transform.position;
         lookVec.y = 0;
         transform.rotation = Quaternion.LookRotation(lookVec);
@@ -63,7 +128,7 @@ public partial class Monster_Normal : Monster
         
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
-        if (playerSmashedType == PlayerSmashedType.None)
+        if (hitType == HitType.Normal)
         {
             Punch_Down(1.0f);
             _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
@@ -71,10 +136,10 @@ public partial class Monster_Normal : Monster
         else
         {
             Punch_Down(1.1f);
-            _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+            _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
         }
         
-        bool isBloodBottom = playerSmashedType is PlayerSmashedType.None or PlayerSmashedType.Bound or PlayerSmashedType.Stun;
+        bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);
     }
 }

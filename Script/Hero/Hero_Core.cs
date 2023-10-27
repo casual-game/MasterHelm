@@ -129,7 +129,7 @@ public partial class Hero : MonoBehaviour
         Effect_Hit_Normal();
     }
     [Button]
-    public void Core_Hit_Strong(AttackMotionType attackMotionType,PlayerSmashedType playerSmashedType)
+    public void Core_Hit_Strong(AttackMotionType attackMotionType,HitType hitType)
     {
         if (HeroMoveState == MoveState.Roll)
         {
@@ -150,14 +150,14 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         //_animator.SetFloat(GameManager.s_hit_rot,1);
-        if (playerSmashedType == PlayerSmashedType.None)
+        if (hitType == HitType.Normal)
         {
             _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
             Tween_Punch_Down(1.05f);
         }
         else
         {
-            _animator.SetInteger(GameManager.s_hit_type,(int)playerSmashedType);
+            _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
             Tween_Punch_Down(1.1f);
         }
         //타겟 벡터
@@ -175,7 +175,7 @@ public partial class Hero : MonoBehaviour
         _animator.SetFloat(GameManager.s_hit_rot,degDiff);
         _animator.SetTrigger(GameManager.s_hit_additive);
         
-        bool isBloodBottom = playerSmashedType is PlayerSmashedType.None or PlayerSmashedType.Bound or PlayerSmashedType.Stun;
+        bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);
     }
     

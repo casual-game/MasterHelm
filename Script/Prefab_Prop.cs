@@ -24,8 +24,9 @@ public class Prefab_Prop : MonoBehaviour
     private bool _canKeep = false;
     private TrailEffect[] _trails;
     private ParticleSystem _p_spawn;
-    private List<Collider> _interact_currentTargets,_interact_interactedTargets;
+    public List<Collider> _interact_currentTargets,_interact_savedTargets,_interact_interactedTargets;
     private bool _isHero;
+    private int _syncInt = 0,_syncedInt=0;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -60,22 +61,33 @@ public class Prefab_Prop : MonoBehaviour
         UT_DeactivateProp_CantKeep(false).Forget();
     }
     //Collision
-    public void Collision_Interact()//공격 판정 계산할때 호출
+    
+    public void Collision_Interact(AttackType at_ground,bool isAirSmash,AttackType at_extra)//공격 판정 계산할때 호출한다.
     {
-        if (_isHero)
+        foreach (var coll in _interact_savedTargets) Interact(coll);
+        foreach (var coll in _interact_currentTargets) Interact(coll);
+        void Interact(Collider coll)
         {
-            foreach (var coll in _interact_currentTargets)
+            if (!_interact_interactedTargets.Contains(coll))
             {
-                if(_interact_interactedTargets.Contains(coll)) continue;
-                coll.TryGetComponent<Monster>(out var monster);
-                monster.Core_Hit_Strong(transform);
-                _interact_interactedTargets.Add(coll);
+                if (_isHero)
+                {
+                    coll.TryGetComponent<Monster>(out var monster);
+                    monster.Core_Hit_Strong(transform,at_ground,isAirSmash,at_extra);
+                    _interact_interactedTargets.Add(coll);
+                }
             }
         }
+        _interact_savedTargets.Clear();
     }
-    public void Collision_Reset()//공격 가능 대상 초기화할때 호출
+    public void Collision_Reset()//공격 모션에서 물리계산 타이밍이 아닌 경우, 매 프레임 호출한다.
     {
-        if(_isHero) _interact_interactedTargets.Clear();
+        _interact_interactedTargets.Clear();
+        for(int i = _interact_savedTargets.Count-1; i>=0; i--)
+        {
+            bool canRemove = !_interact_currentTargets.Contains(_interact_savedTargets[i]);
+            if(canRemove)_interact_savedTargets.RemoveAt(i);
+        }
     }
     //Setting
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
@@ -131,7 +143,7 @@ public class Prefab_Prop : MonoBehaviour
         _outlineTarget.CutoutTextureName = "_AdvancedDissolveCutoutStandardMap1";
         _trails = GetComponents<TrailEffect>();
         _p_spawn = GetComponentInChildren<ParticleSystem>();
-        _interact_currentTargets = new List<Collider>(14);
+        _interact_savedTargets = new List<Collider>(14);
         _interact_interactedTargets = new List<Collider>(14);
         foreach (var trail in _trails)
         {
@@ -144,6 +156,7 @@ public class Prefab_Prop : MonoBehaviour
         if (_isHero)
         {
             if (!other.CompareTag(GameManager.s_monster)) return;
+            if(!_interact_savedTargets.Contains(other))_interact_savedTargets.Add(other);
             if(!_interact_currentTargets.Contains(other))_interact_currentTargets.Add(other);
         }
         else

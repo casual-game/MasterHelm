@@ -49,7 +49,8 @@ public partial class Monster : MonoBehaviour
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
-    
+    protected enum HitState {Ground=0,Air=1,Extra=2}
+    protected HitState _hitState = HitState.Ground;
     
     //Editor
     #if UNITY_EDITOR
@@ -166,8 +167,13 @@ public partial class Monster : MonoBehaviour
         
     }
 
-    public virtual void Core_Hit_Strong(Transform attacker,PlayerSmashedType playerSmashedType = PlayerSmashedType.None)
+    public virtual void Core_Hit_Strong(Transform attacker,AttackType at_ground,bool isAirSmash,AttackType at_extra)
     {
         
+    }
+
+    public void Core_ResetHitState()
+    {
+        _hitState = HitState.Ground;
     }
 }

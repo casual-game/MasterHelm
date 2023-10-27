@@ -16,9 +16,9 @@ public class HeroAnim_Hit_Smash : HeroAnim_Base
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator, stateInfo)) return;
         //이동
-        Vector3 relativePos = animator.deltaPosition * motionSpeed * hero.hit_Smash_MotionSpeed;
+        Vector3 relativePos = animator.deltaPosition * motionSpeed * _heroData.hit_Smash_MotionSpeed;
         Quaternion nextRot = animator.rootRotation;
 
-        movement.Move_Nav(relativePos, nextRot);
+        _hero.Move_Nav(relativePos, nextRot);
     }
 }
