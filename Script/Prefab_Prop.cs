@@ -62,7 +62,7 @@ public class Prefab_Prop : MonoBehaviour
     }
     //Collision
     
-    public void Collision_Interact(AttackType at_ground,bool isAirSmash,AttackType at_extra)//공격 판정 계산할때 호출한다.
+    public void Collision_Interact(TrailData trailData)//공격 판정 계산할때 호출한다.
     {
         foreach (var coll in _interact_savedTargets) Interact(coll);
         foreach (var coll in _interact_currentTargets) Interact(coll);
@@ -73,7 +73,7 @@ public class Prefab_Prop : MonoBehaviour
                 if (_isHero)
                 {
                     coll.TryGetComponent<Monster>(out var monster);
-                    monster.Core_Hit_Strong(transform,at_ground,isAirSmash,at_extra);
+                    monster.Core_Hit_Strong(transform,trailData);
                     _interact_interactedTargets.Add(coll);
                 }
             }

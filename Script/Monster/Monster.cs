@@ -36,6 +36,8 @@ public partial class Monster : MonoBehaviour
     }
     //Static
     public static List<Monster> Monsters = new List<Monster>();
+    [FoldoutGroup("MainData")] public float hp = 100;
+    
     //Private
     private bool _isAlive = false;
     private float _dissolveRatio = 1.0f;
@@ -49,8 +51,9 @@ public partial class Monster : MonoBehaviour
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
-    protected enum HitState {Ground=0,Air=1,Extra=2}
+    protected enum HitState {Ground=0,Air=1,Recovery=2}
     protected HitState _hitState = HitState.Ground;
+    protected float currenthp;
     
     //Editor
     #if UNITY_EDITOR
@@ -162,12 +165,13 @@ public partial class Monster : MonoBehaviour
     }
     
     //Core
+    
     public virtual void Core_Hit_Normal()
     {
         
     }
 
-    public virtual void Core_Hit_Strong(Transform attacker,AttackType at_ground,bool isAirSmash,AttackType at_extra)
+    public virtual void Core_Hit_Strong(Transform attacker,TrailData trailData)
     {
         
     }

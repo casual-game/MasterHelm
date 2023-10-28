@@ -27,7 +27,6 @@ public partial class Monster_Normal : Monster
         _animator.SetInteger(GameManager.s_state_type, (int)animationState);
         _animator.SetTrigger(GameManager.s_state_change);
     }
-    [Button]
     public override void Core_Hit_Normal()
     {
         //타겟 벡터
@@ -47,14 +46,16 @@ public partial class Monster_Normal : Monster
         Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
     }
-    [Button]
-    public override void Core_Hit_Strong(Transform attacker,AttackType at_ground,bool isAirSmash,AttackType at_extra)
+    public override void Core_Hit_Strong(Transform attacker,TrailData trailData)
     {
         if (Time.time < _hitStrongTime + HitStrongDelay) return;
+        //현 상태에 따른 히트 타입 설정
+        AttackType attackType = trailData.attackType_ground;
+        bool isAirSmash = trailData.isAirSmash;
         HitType hitType;
         if (_hitState == HitState.Ground)
         {
-            switch (at_ground)
+            switch (attackType)
             {
                 case AttackType.Normal:
                     _hitState = HitState.Ground;
@@ -78,54 +79,30 @@ public partial class Monster_Normal : Monster
                     break;
             }
         }
-        else if(_hitState == HitState.Air)
+        else if (_hitState == HitState.Air)
         {
             if (isAirSmash)
             {
-                _hitState = HitState.Extra;
-                hitType = HitType.Screw;
+                _hitState = HitState.Recovery;
+                hitType = HitType.Flip;
             }
             else
             {
                 _hitState = HitState.Air;
-                hitType = HitType.Bound;
+                hitType = HitType.Screw;
             }
         }
-        else
-        {
-            switch (at_extra)
-            {
-                case AttackType.Normal:
-                    _hitState = HitState.Ground;
-                    hitType = HitType.Normal;
-                    break;
-                case AttackType.Stun:
-                    _hitState = HitState.Ground;
-                    hitType = HitType.Stun;
-                    break;
-                case AttackType.Smash:
-                    _hitState = HitState.Ground;
-                    hitType = HitType.Smash;
-                    break;
-                case AttackType.Combo:
-                    _hitState = HitState.Air;
-                    hitType = HitType.Bound;
-                    break;
-                default:
-                    _hitState = HitState.Ground;
-                    hitType = HitType.Normal;
-                    break;
-            }
-        }
+        else return;
+        
+        //회전
         Vector3 lookVec = attacker.position-transform.position;
         lookVec.y = 0;
         transform.rotation = Quaternion.LookRotation(lookVec);
         
+        //애니메이터 설정
         _animBase.isFinished = true;
         _hitStrongTime = Time.time;
         _hitStrongType = (_hitStrongType + 1) % 2;
-        
-        
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         if (hitType == HitType.Normal)
@@ -139,7 +116,17 @@ public partial class Monster_Normal : Monster
             _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
         }
         
+        //이펙트 생성
         bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
-        Effect_Hit_Strong(isBloodBottom);
+        bool isCombo = (attackType != AttackType.Normal && _hitState == HitState.Ground) 
+                       || _hitState == HitState.Air || isAirSmash;
+        if (isCombo) p_blood_combo.transform.rotation = attacker.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0);
+        Effect_Hit_Strong(isBloodBottom,isCombo);
+    }
+
+    protected override void Core_Damage(float damage)
+    {
+        base.Core_Damage(damage);
+        
     }
 }

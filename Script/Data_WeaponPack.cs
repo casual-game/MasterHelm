@@ -49,8 +49,8 @@ public class PlayerAttackMotionData
 public class TrailData
 {
     [TitleGroup("AttackData")] public AttackType attackType_ground;
-    [TitleGroup("AttackData")] public AttackType attackType_extra;
     [TitleGroup("AttackData")] public bool isAirSmash;
+    [TitleGroup("AttackData")] public float damage = 10;
     [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
     [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
     public Vector2 trailRange = new Vector2(0,1);

@@ -6,7 +6,6 @@ using UnityEngine;
 
 public partial class Monster : MonoBehaviour
 {
-    public float timescale = 1.0f;
     private void Setting_Effect()
     {
         s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false)
@@ -39,7 +38,7 @@ public partial class Monster : MonoBehaviour
     }
     
     //Public
-    [FoldoutGroup("Effect")] public ParticleSystem p_spawn, p_smoke,p_blood_normal,p_blood_strong;
+    [FoldoutGroup("Effect")] public ParticleSystem p_spawn, p_smoke,p_blood_normal,p_blood_strong,p_blood_combo;
     [FoldoutGroup("Effect")][ColorUsage(true,true)]  public Color c_hit_begin, c_hit_fin;
     
     //Private
@@ -109,7 +108,7 @@ public partial class Monster : MonoBehaviour
         Quaternion bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
         BloodManager.instance.Blood_Normal(ref bloodPos,ref bloodRot);
     }
-    public void Effect_Hit_Strong(bool isBloodBottom)
+    public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo)
     {
         if(!s_blink_hit_strong.IsInitialized()) s_blink_hit_strong.Play();
         else s_blink_hit_strong.Restart();
@@ -119,7 +118,8 @@ public partial class Monster : MonoBehaviour
         Transform t = transform;
         Vector3 currentPos = t.position;
         p_blood_normal.Play();
-        p_blood_strong.Play();
+        if(!isCombo) p_blood_strong.Play();
+        else p_blood_combo.Play();
         //Blood
         Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
         Quaternion bloodRot;
@@ -140,6 +140,6 @@ public partial class Monster : MonoBehaviour
     {
         p_smoke.Play();
         Punch_Up_Compact(1.5f);
-        _hitState = HitState.Extra;
+        _hitState = HitState.Recovery;
     }
 }
