@@ -87,7 +87,7 @@ public partial class GameManager : MonoBehaviour
         }
     }
     //디버그
-    public UnityEvent E_Debug1_Begin, E_Debug1_Fin,E_Debug2_Begin, E_Debug2_Fin,E_Debug3_Begin, E_Debug3_Fin;
+    [HideInInspector] public UnityEvent E_Debug1_Begin, E_Debug1_Fin,E_Debug2_Begin, E_Debug2_Fin,E_Debug3_Begin, E_Debug3_Fin;
     public void Input_BTN_Debug1(InputAction.CallbackContext inputValue)
     {
         if (inputValue.started)

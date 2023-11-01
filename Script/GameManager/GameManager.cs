@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DamageNumbersPro;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,21 +10,33 @@ using UnityEngine.Serialization;
 
 public partial class GameManager : MonoBehaviour
 {
+    //Static
     public static GameManager Instance;
     public static readonly Vector3 V3_Zero = new Vector3(0, 0, 0), V3_One = new Vector3(1, 1, 1);
     public static readonly Quaternion Q_Identity = Quaternion.identity;
     
     public static string s_speed = "Speed",s_rot = "Rot",s_crouch = "Crouch",s_state_change = "State_Change",s_state_type = "State_Type"
         ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player",s_monster = "Monster"
-        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition",s_death = "Death"
+        ,s_ladder = "Ladder",s_ladder_speed = "Ladder_Speed",s_transition = "Transition",s_death = "Death",s_isair = "IsAir"
         ,s_hit = "Hit",s_hit_additive = "Hit_Additive",s_hit_rot = "Hit_Rot",s_hit_type = "Hit_Type",s_turn = "Turn"
-        ,s_publiccolor = "_PublicColor",s_leftstate = "LeftState",s_chargeenterindex = "ChargeEnterIndex",s_spawn = "Spawn",s_shadow = "Shadow";
+        ,s_publiccolor = "_PublicColor",s_leftstate = "LeftState",s_chargeenterindex = "ChargeEnterIndex",s_spawn = "Spawn",s_shadow = "Shadow"
+        ,s_fadeamount = "_FadeAmount",s_shinelocation = "_ShineLocation",s_chromaberramount = "_ChromAberrAmount"
+        ,s_radius = "_radius",s_size = "_size",s_wavesize = "_wavesize",s_position = "_position"
+        ,s_action = "Action",s_combobegin = "콤보 시작",s_truecombo = "확정 콤보",s_finalattack = "마무리 일격"
+        ,s_normalattack = "첫번째 공격",s_continuousattack = "연속 공격";
+    
+    //Public
     public AnimationCurve curve_inout,curve_in,curve_out;
+    public DamageNumber dmp_normal, dmp_strong;
+    
+    //기본 함수
     public void Awake()
     {
         Application.targetFrameRate = 60;
         Instance = this;
         Setting_Resource();
+        Setting_UI();
+        Setting_Shockwave();
     }
     public void LateUpdate()
     {

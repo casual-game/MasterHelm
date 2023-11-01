@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
 {
-    private bool _isLastAttack,_trailFinished,_strongFinished;
+    private bool _isLastAttack,_strongFinished;
     private float _enteredTime;
     
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -15,7 +15,6 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         _hero.Set_CurrentAttackMotionData(_hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal[_hero.AttackIndex]);
         _isLastAttack = _hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count - 1 == _hero.AttackIndex;
         _enteredTime = Time.time;
-        _trailFinished = false;
         _strongFinished = false;
         animator.speed = _hero.CurrentAttackMotionData.playSpeed;
         animator.ResetTrigger(GameManager.s_turn);
@@ -29,8 +28,6 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         {
             _hero.Effect_Smoke();
             _hero.p_charge.Play();
-            _hero.trailEffect.active = true;
-            _hero.Tween_Blink_Evade(1.0f);
         }
         
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
@@ -42,16 +39,8 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (cleanFinished) return;
         if (_strongFinished) return;
-        //마지막 공격일때.. Trail 끄기, 필터링
-        if (_isLastAttack)
-        {
-            if (Time.time - _enteredTime > 0.3f && !_trailFinished)
-            {
-                _trailFinished = true;
-                _hero.trailEffect.active = false;
-            }
-            if (IsNotAvailable(animator,stateInfo)) return; 
-        }
+        //마지막 공격일때..필터링
+        if (_isLastAttack && IsNotAvailable(animator, stateInfo)) return;
         //isFinished 가 False여도 동작한다.
         float normalizedTime = stateInfo.normalizedTime;
         Update_Trail(normalizedTime,_hero.weaponPack_Normal);

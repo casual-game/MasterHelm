@@ -116,8 +116,13 @@ public partial class Monster : MonoBehaviour
     async UniTaskVoid Despawn()
     {
         _isAlive = false;
-        Unequip();
+        _animator.SetBool(GameManager.s_death,true);
+        GameManager.Instance.Shockwave_Strong(transform.position);
+        CamArm.instance.Tween_ShakeStrong(0.8f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1.25f), DelayType.DeltaTime);
         DeactivateUI();
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
+        Unequip();
         p_spawn.Play();
         while (!_isAlive && _dissolveRatio<1)
         {

@@ -48,52 +48,99 @@ public partial class Monster_Normal : Monster
     }
     public override void Core_Hit_Strong(Transform attacker,TrailData trailData)
     {
-        if (Time.time < _hitStrongTime + HitStrongDelay) return;
+        if (!Get_IsAlive() || Time.time < _hitStrongTime + HitStrongDelay) return;
+        
+        
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
         bool isAirSmash = trailData.isAirSmash;
+        string attackString;
         HitType hitType;
         if (_hitState == HitState.Ground)
         {
+            _animator.SetBool(GameManager.s_isair,false);
+            
             switch (attackType)
             {
                 case AttackType.Normal:
                     _hitState = HitState.Ground;
                     hitType = HitType.Normal;
+                    Core_Damage(20,false);
+                    if(Get_IsAlive()) CamArm.instance.Tween_ShakeNormal();
+                    attackString =GameManager.s_normalattack;
                     break;
                 case AttackType.Stun:
                     _hitState = HitState.Ground;
                     hitType = HitType.Stun;
+                    Core_Damage(20,true);
+                    if (Get_IsAlive())
+                    {
+                        GameManager.Instance.Shockwave_Normal(transform.position);
+                        CamArm.instance.Tween_ShakeStrong();
+                    }
+                    attackString = GameManager.s_combobegin;
                     break;
                 case AttackType.Smash:
                     _hitState = HitState.Ground;
                     hitType = HitType.Smash;
+                    Core_Damage(20,true);
+                    if (Get_IsAlive())
+                    {
+                        GameManager.Instance.Shockwave_Normal(transform.position);
+                        CamArm.instance.Tween_ShakeStrong();
+                    }
+                    attackString = GameManager.s_finalattack;
                     break;
                 case AttackType.Combo:
                     _hitState = HitState.Air;
                     hitType = HitType.Bound;
+                    Core_Damage(20,true);
+                    if (Get_IsAlive())
+                    {
+                        GameManager.Instance.Shockwave_Normal(transform.position);
+                        CamArm.instance.Tween_ShakeStrong();
+                    }
+                    attackString = GameManager.s_combobegin;
                     break;
                 default:
                     _hitState = HitState.Ground;
                     hitType = HitType.Normal;
+                    Core_Damage(20,false);
+                    if(Get_IsAlive()) CamArm.instance.Tween_ShakeNormal();
+                    attackString = GameManager.s_normalattack;
                     break;
             }
         }
         else if (_hitState == HitState.Air)
         {
+            _animator.SetBool(GameManager.s_isair,true);
+            
+            
             if (isAirSmash)
             {
                 _hitState = HitState.Recovery;
                 hitType = HitType.Flip;
+                Core_Damage(20,true);
+                if (Get_IsAlive())
+                {
+                    GameManager.Instance.Shockwave_Normal(transform.position);
+                    CamArm.instance.Tween_ShakeStrong();
+                }
+                attackString = GameManager.s_finalattack;
             }
             else
             {
                 _hitState = HitState.Air;
                 hitType = HitType.Screw;
+                Core_Damage(20,false);
+                if(Get_IsAlive()) CamArm.instance.Tween_ShakeNormal();
+                attackString = GameManager.s_truecombo;
             }
         }
         else return;
-        
+
+        if (!Get_IsAlive()) attackString = GameManager.s_finalattack;
+        GameManager.Instance.Combo(attackString);
         //회전
         Vector3 lookVec = attacker.position-transform.position;
         lookVec.y = 0;
@@ -124,9 +171,9 @@ public partial class Monster_Normal : Monster
         Effect_Hit_Strong(isBloodBottom,isCombo);
     }
 
-    protected override void Core_Damage(float damage)
+    protected override void Core_Damage(float damage,bool isStrong)
     {
-        base.Core_Damage(damage);
+        base.Core_Damage(damage,isStrong);
         
     }
 }
