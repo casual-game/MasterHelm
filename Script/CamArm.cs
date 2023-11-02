@@ -73,15 +73,10 @@ public class CamArm : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.deltaTime);
     }
 
-    public void Tween_ShakeStrong(float speed = 1.0f)
+    public void Tween_ShakeStrong()
     {
         if(s_shake_normal.IsPlaying()) s_shake_normal.Pause();
         if(s_stop_normal.IsPlaying()) s_stop_normal.Pause();
-
-        s_zoom.timeScale = speed;
-        s_chromatic.timeScale = speed;
-        s_shake_strong.timeScale = speed;
-        s_stop_strong.timeScale = speed;
         
         if(!s_zoom.IsInitialized()) s_zoom.Play();
         else s_zoom.Restart();
@@ -96,10 +91,18 @@ public class CamArm : MonoBehaviour
     {
         if(s_shake_strong.IsPlaying()) s_shake_strong.Pause();
         if(s_stop_strong.IsPlaying()) s_stop_strong.Pause();
-        
-        
+
+        s_stop_normal.timeScale = 1.0f;
         if(!s_shake_normal.IsInitialized()) s_shake_normal.Play();
         else s_shake_normal.Restart();
+        if(!s_stop_normal.IsInitialized()) s_stop_normal.Play();
+        else s_stop_normal.Restart();
+    }
+    public void Tween_ShakeWeak()
+    {
+        if(s_stop_strong.IsPlaying()) s_stop_strong.Pause();
+        
+        s_stop_normal.timeScale = 1.5f;
         if(!s_stop_normal.IsInitialized()) s_stop_normal.Play();
         else s_stop_normal.Restart();
     }

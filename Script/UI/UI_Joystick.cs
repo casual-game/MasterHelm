@@ -26,7 +26,7 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         firstAnchoredPosition = bgT.anchoredPosition;
         
         s_Pressed = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() =>
+            .PrependCallback(() =>
             {
                 inner.color = Color.clear;
                 bgT.anchoredPosition = innerT.anchoredPosition;
@@ -34,7 +34,7 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             .Append(innerT.DOPunchScale(GameManager.V3_One*0.1f,tween_FadeDuration,1))
             .Join(inner.DOColor(Color.white,tween_FadeDuration));
         s_Released = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .OnStart(() =>
+            .PrependCallback(() =>
             {
                 bg.color = Color.clear;
                 bgT.localScale = GameManager.V3_One * 0.75f;

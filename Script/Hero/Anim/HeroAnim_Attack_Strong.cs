@@ -18,6 +18,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         _weaponPack = isLeft? _hero.weaponPack_StrongL: _hero.weaponPack_StrongR;
         _hero.Set_AttackIndex(_hero.AttackIndex+1);
         _hero.Set_CurrentAttackMotionData(_weaponPack.playerAttackMotionData_Strong);
+        
         _weaponOff = false;
         animator.speed = _hero.CurrentAttackMotionData.playSpeed;
         animator.ResetTrigger(GameManager.s_turn);

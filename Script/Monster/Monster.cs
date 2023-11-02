@@ -36,10 +36,10 @@ public partial class Monster : MonoBehaviour
     }
     //Static
     public static List<Monster> Monsters = new List<Monster>();
-    [FoldoutGroup("MainData")] public float hp = 100;
+    [FoldoutGroup("MainData")] public int hp = 100;
     
     //Private
-    private bool _isAlive = false;
+    private bool _isAlive = false, _isReady = false;
     private float _dissolveRatio = 1.0f;
     private float _dissolveSpeed = 1.3f;
     private Material _material;
@@ -51,9 +51,13 @@ public partial class Monster : MonoBehaviour
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
-    protected enum HitState {Ground=0,Air=1,Recovery=2}
-    protected HitState _hitState = HitState.Ground;
-    protected float currenthp;
+    public enum HitState {Ground=0,Air=1,Recovery=2}
+    public HitState _hitState
+    {
+        get;
+        private set;
+    }
+    protected int currenthp;
     
     //Editor
     #if UNITY_EDITOR
@@ -87,6 +91,7 @@ public partial class Monster : MonoBehaviour
     //Unitask
     async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
     {
+        _isReady = false;
         gameObject.SetActive(true);
         _animator.Rebind();
         _animator.SetBool(GameManager.s_spawn,Random.Range(0,2)==1);
@@ -115,10 +120,9 @@ public partial class Monster : MonoBehaviour
     }
     async UniTaskVoid Despawn()
     {
+        _isReady = false;
         _isAlive = false;
         _animator.SetBool(GameManager.s_death,true);
-        GameManager.Instance.Shockwave_Strong(transform.position);
-        CamArm.instance.Tween_ShakeStrong(0.8f);
         await UniTask.Delay(TimeSpan.FromSeconds(1.25f), DelayType.DeltaTime);
         DeactivateUI();
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
@@ -153,10 +157,19 @@ public partial class Monster : MonoBehaviour
     {
         _animBase = animBase;
     }
+
+    public void Set_IsReadyTrue()
+    {
+        _isReady = true;
+    }
     //Getter
     public bool Get_IsAlive()
     {
         return _isAlive;
+    }
+    public bool Get_IsReady()
+    {
+        return _isReady;
     }
     //Move
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
@@ -171,18 +184,13 @@ public partial class Monster : MonoBehaviour
     
     //Core
     
-    public virtual void Core_Hit_Normal()
+    public virtual void Core_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         
     }
 
-    public virtual void Core_Hit_Strong(Transform attacker,TrailData trailData)
+    public void Core_HitState(HitState hitState)
     {
-        
-    }
-
-    public void Core_ResetHitState()
-    {
-        _hitState = HitState.Ground;
+        _hitState = hitState;
     }
 }

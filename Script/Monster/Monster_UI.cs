@@ -29,28 +29,41 @@ public partial class Monster : MonoBehaviour
     {
         
     }
-    [Button]
-    protected virtual void Core_Damage(float damage,bool isStrong)
+
+    protected void Core_Damage_Normal(int damage)
     {
-        if(!isStrong) GameManager.Instance.dmp_normal.Spawn(transform.position + Vector3.up * 1.2f, Random.Range(10, 100));
-        else GameManager.Instance.dmp_strong.Spawn(transform.position + Vector3.up * 1.2f, Random.Range(100, 200));
+        GameManager.Instance.dmp_normal.Spawn(transform.position + Vector3.up * 1.2f, damage);
+        Core_Damage(damage);
+    }
+    protected void Core_Damage_Weak(int damage)
+    {
+        GameManager.Instance.dmp_weak.Spawn(transform.position + Vector3.up * 1.2f, damage);
+        Core_Damage(damage);
+    }
+    protected void Core_Damage_Strong(int damage)
+    {
+        GameManager.Instance.dmp_strong.Spawn(transform.position + Vector3.up * 1.2f, damage);
+        Core_Damage(damage);
+    }
+    private void Core_Damage(int damage)
+    {
         currenthp -= damage;
         if (currenthp > 0)
         {
-            float ratio = currenthp / hp;
+            float ratio = (float)currenthp / (float)hp;
             if (DOTween.IsTweening(img_health_main)) img_health_main.DOKill();
             if (DOTween.IsTweening(img_health_lerp)) img_health_lerp.DOKill();
         
-            img_health_main.DOFillAmount(ratio, 0.5f).SetEase(Ease.OutQuart);
-            img_health_lerp.DOFillAmount(ratio, 0.5f).SetEase(Ease.OutQuart).SetDelay(2.0f);
+            img_health_main.DOFillAmount(ratio, 0.5f).SetEase(Ease.OutQuart).SetUpdate(true);
+            img_health_lerp.DOFillAmount(ratio, 0.5f).SetEase(Ease.OutQuart).SetDelay(2.0f).SetUpdate(true);
         }
         else if(_isAlive)
         {
             _isAlive = false;
             if (DOTween.IsTweening(img_health_main)) img_health_main.DOKill();
             if (DOTween.IsTweening(img_health_lerp)) img_health_lerp.DOKill();
-            img_health_main.DOFillAmount(0, 0.5f).SetEase(Ease.OutQuart);
-            img_health_lerp.DOFillAmount(0, 1.5f).SetEase(Ease.InOutSine);
+            img_health_main.DOFillAmount(0, 0.5f).SetEase(Ease.OutQuart).SetUpdate(true);
+            img_health_lerp.DOFillAmount(0, 1.5f).SetEase(Ease.InOutSine).SetUpdate(true);
             Despawn().Forget();
         }
         

@@ -9,30 +9,30 @@ public partial class Monster : MonoBehaviour
     private void Setting_Effect()
     {
         s_blink_hit_normal = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .PrependCallback(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
             .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.2f).SetEase(Ease.Linear));
         s_blink_hit_strong = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
+            .PrependCallback(() => { _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, c_hit_begin); })
             .Append(_outlinable.FrontParameters.FillPass
                 .DOColor(GameManager.s_publiccolor, c_hit_fin, 0.3f).SetEase(Ease.InQuad));
         
         s_punch_up = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
+            .PrependCallback(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(-0.15f,0.15f,-0.15f), 0.75f,7)
                 .SetEase(Ease.InOutBack));
         
         s_punch_down = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
+            .PrependCallback(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(0.15f,-0.15f,0.15f), 0.75f,7)
                 .SetEase(Ease.InOutBack));
         s_punch_up_compact = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
+            .PrependCallback(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(-0.125f,0.125f,-0.125f), 0.45f,7)
                 .SetEase(Ease.InOutBack));
         
         s_punch_down_compact = DOTween.Sequence().SetAutoKill(false)
-            .OnStart(() => { _meshRoot.localScale = GameManager.V3_One; })
+            .PrependCallback(() => { _meshRoot.localScale = GameManager.V3_One; })
             .Append(_meshRoot.DOPunchScale(new Vector3(0.125f,-0.125f,0.125f), 0.45f,7)
                 .SetEase(Ease.InOutBack));
     }
@@ -139,6 +139,6 @@ public partial class Monster : MonoBehaviour
     {
         p_smoke.Play();
         Punch_Up_Compact(1.5f);
-        _hitState = HitState.Recovery;
+        Core_HitState(HitState.Recovery);
     }
 }

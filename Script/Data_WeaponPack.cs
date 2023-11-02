@@ -50,7 +50,7 @@ public class TrailData
 {
     [TitleGroup("AttackData")] public AttackType attackType_ground;
     [TitleGroup("AttackData")] public bool isAirSmash;
-    [TitleGroup("AttackData")] public float damage = 10;
+    [TitleGroup("AttackData")] public Vector2Int damage = new Vector2Int(10,15);
     [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
     [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
     public Vector2 trailRange = new Vector2(0,1);

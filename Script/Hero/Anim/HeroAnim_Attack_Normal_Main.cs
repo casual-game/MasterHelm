@@ -13,6 +13,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         GameManager.AttackReleasedTime = -100;
         _hero.Set_AttackIndex(_hero.AttackIndex+1);
         _hero.Set_CurrentAttackMotionData(_hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal[_hero.AttackIndex]);
+        
         _isLastAttack = _hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count - 1 == _hero.AttackIndex;
         _enteredTime = Time.time;
         _strongFinished = false;

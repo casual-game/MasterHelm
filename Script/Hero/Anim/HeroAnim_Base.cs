@@ -60,12 +60,16 @@ public class HeroAnim_Base : StateMachineBehaviour
                 {
                     //trail 정보가 바뀌는 순간에 만약 이전 trail에서 한번도 충돌계산이 없었다면, 1회 진행.
                     if (_hero.CurrentAttackMotionData.TrailDatas.IndexOf(trailData) != 0 && !_collisionChecked)
+                    {
                         _hero.Equipment_Collision_Interact(weaponPack,trailData.weaponL,trailData.weaponR,trailData.shield);
+                    }
                     //기타 정보들 갱신
                     _collisionChecked = false;
+                    _hero.Equipment_Collision_Reset(weaponPack);
                     _staticTrailData = trailData;
                     _hero.Set_CurrentTrail(trailData);
-                    _hero.Equipment_Collision_Reset(weaponPack);
+                    
+                    
                 }
             }
             //충돌했으면 충돌계산
@@ -81,10 +85,7 @@ public class HeroAnim_Base : StateMachineBehaviour
                 _collisionChecked = true;
                 collided = true;
                 _hero.Equipment_Collision_Interact(weaponPack,trailData.weaponL,trailData.weaponR,trailData.shield);
-                _hero.Equipment_Collision_Reset(weaponPack);
             }
-            //충돌범위 밖이고, 정상적인 충돌이 진행되었으면 그대로 데이터를 리셋시켜준다.
-            else _hero.Equipment_Collision_Reset(weaponPack);
         }
         if(!trailed) _hero.Equipment_UpdateTrail(weaponPack,false,false,false);
         if(!collided) _hero.Equipment_Collision_Interact(weaponPack,false,false,false);

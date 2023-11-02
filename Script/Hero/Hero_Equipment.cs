@@ -126,31 +126,18 @@ public partial class Hero : MonoBehaviour
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
         var data = weapondata[weaponPack];
-        if (data.weaponL != null)
-        {
-            data.weaponL.SetTrail(weaponL);
-            //if(weaponL) data.weaponL.Collision_Interact();
-        }
-
-        if (data.weaponR != null)
-        {
-            data.weaponR.SetTrail(weaponR);
-            //if(weaponR) data.weaponR.Collision_Interact();
-        }
-
-        if (this.shield != null)
-        {
-            this.shield.SetTrail(shield);
-            //if(shield) this.shield.Collision_Interact();
-        }
+        if (data.weaponL != null) data.weaponL.SetTrail(weaponL);
+        if (data.weaponR != null) data.weaponR.SetTrail(weaponR);
+        if (this.shield != null) this.shield.SetTrail(shield);
     }
     
     public void Equipment_Collision_Interact(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool useShield)
     {
         var data = weapondata[weaponPack];
-        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact(_currentTrailData);
-        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact(_currentTrailData);
-        if(useShield && data.useShield) shield.Collision_Interact(_currentTrailData);
+        Transform t = transform;
+        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact(_currentTrailData,t);
+        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact(_currentTrailData,t);
+        if(useShield && data.useShield) shield.Collision_Interact(_currentTrailData,t);
     }
     public void Equipment_Collision_Reset(Data_WeaponPack weaponPack)
     {
@@ -166,10 +153,11 @@ public partial class Hero : MonoBehaviour
             _currentTrailData.hitscan_pos,Quaternion.Euler(_currentTrailData.hitscan_rot));
         _sensor.Box.HalfExtents = _currentTrailData.hitscan_scale;
         _sensor.Pulse();
+        Transform t = transform;
         foreach (var signal in _sensor.GetSignals())
         {
             signal.Object.TryGetComponent<Monster>(out var monster);
-            monster.Core_Hit_Strong(transform,_currentTrailData);
+            monster.Core_Hit(t,t,_currentTrailData);
         }
     }
     
