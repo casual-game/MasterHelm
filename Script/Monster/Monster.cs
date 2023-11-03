@@ -58,7 +58,11 @@ public partial class Monster : MonoBehaviour
         private set;
     }
     protected int currenthp;
-    
+    //Public
+    public enum AnimationState
+    {
+        Locomotion = 0
+    }
     //Editor
     #if UNITY_EDITOR
     [FoldoutGroup("Debug")] public Prefab_Prop debugWepaonL, debugWaeponR, debugShield;
@@ -91,6 +95,7 @@ public partial class Monster : MonoBehaviour
     //Unitask
     async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
     {
+        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
         _isReady = false;
         gameObject.SetActive(true);
         _animator.Rebind();
@@ -113,13 +118,15 @@ public partial class Monster : MonoBehaviour
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
+        _outlineTarget.CutoutTextureName = GameManager.s_basemap;
+        _outlineTarget.CutoutThreshold = 0.5f;
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
-        _outlineTarget.CutoutThreshold = 0;
         _shadow.localScale = _shadowScale;
     }
     async UniTaskVoid Despawn()
     {
+        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
         _isReady = false;
         _isAlive = false;
         _animator.SetBool(GameManager.s_death,true);
@@ -157,7 +164,11 @@ public partial class Monster : MonoBehaviour
     {
         _animBase = animBase;
     }
-
+    public void Set_AnimationState(AnimationState animationState)
+    {
+        _animator.SetInteger(GameManager.s_state_type, (int)animationState);
+        _animator.SetTrigger(GameManager.s_state_change);
+    }
     public void Set_IsReadyTrue()
     {
         _isReady = true;

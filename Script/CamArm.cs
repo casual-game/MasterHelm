@@ -50,7 +50,7 @@ public class CamArm : MonoBehaviour
         
         s_stop_strong = DOTween.Sequence().SetAutoKill(false)
             .Append(DOTween.To(() => 0.05f, x => Time.timeScale = x, 
-                1f, 0.3f).SetEase(Ease.InExpo)).SetUpdate(true);
+                1f, 0.30f).SetEase(Ease.InSine)).SetUpdate(true);
 
         s_chromatic = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
             .PrependCallback(() =>

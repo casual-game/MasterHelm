@@ -5,6 +5,7 @@ using UnityEngine;
 public class MonsterAnim_Hit_Falldown_Fin : MonsterAnim_Base
 {
     public float motionSpeed = 1.0f;
+    public float endRatio = 0.52f;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -20,5 +21,13 @@ public class MonsterAnim_Hit_Falldown_Fin : MonsterAnim_Base
         Quaternion nextRot = animator.rootRotation;
 
         _monster.Move_Nav(relativePos, nextRot);
+
+        if (stateInfo.normalizedTime > endRatio)
+        {
+            isFinished = true;
+            animator.SetBool(GameManager.s_hit,false);
+            _monster.Set_AnimationState(Monster.AnimationState.Locomotion);
+            return;
+        }
     }
 }

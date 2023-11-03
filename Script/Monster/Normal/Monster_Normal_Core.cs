@@ -8,25 +8,14 @@ public partial class Monster_Normal : Monster
     //Const, ReadOnly
     private const float HitStrongDelay = 0.3f;
     
-    //Public
-    public enum AnimationState
-    {
-        Locomotion = 0,
-        Roll = 1,
-        Attack_Normal = 2,
-        Attack_Strong = 3
-    }
+    
     
     //Private
     private int _hitStrongType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     
     //Setter
-    public void Set_AnimationState(AnimationState animationState)
-    {
-        _animator.SetInteger(GameManager.s_state_type, (int)animationState);
-        _animator.SetTrigger(GameManager.s_state_change);
-    }
+    
     public override void Core_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return;

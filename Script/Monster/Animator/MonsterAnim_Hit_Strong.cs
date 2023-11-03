@@ -32,6 +32,7 @@ public class MonsterAnim_Hit_Strong : MonsterAnim_Base
         {
             isFinished = true;
             animator.SetBool(GameManager.s_hit,false);
+            _monster.Set_AnimationState(Monster.AnimationState.Locomotion);
             return;
         }
     }

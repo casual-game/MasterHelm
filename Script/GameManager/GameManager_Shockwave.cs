@@ -16,11 +16,11 @@ public partial class GameManager : MonoBehaviour
             
             .PrependCallback(() =>
             {
-                mat_shockwave.SetFloat(s_size, 0.6f);
+                mat_shockwave.SetFloat(s_size, 0.75f);
                 mat_shockwave.SetFloat(s_radius, 0.225f);
                 mat_shockwave.SetFloat(s_wavesize, 0.25f);
             })
-            .Append(mat_shockwave.DOFloat(1, s_radius, 4.0f).SetEase(Ease.OutExpo));
+            .Append(mat_shockwave.DOFloat(1, s_radius, 4.5f).SetEase(Ease.OutExpo).SetUpdate(true));
     }
     public void Shockwave(Vector3 pos)
     {
