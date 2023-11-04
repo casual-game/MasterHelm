@@ -9,7 +9,6 @@ public class MonsterAnim_Hit_Falldown_Fin : MonsterAnim_Base
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
-        animator.SetBool(GameManager.s_hit,false);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -26,7 +25,7 @@ public class MonsterAnim_Hit_Falldown_Fin : MonsterAnim_Base
         {
             isFinished = true;
             animator.SetBool(GameManager.s_hit,false);
-            _monster.Set_AnimationState(Monster.AnimationState.Locomotion);
+            animator.SetInteger(GameManager.s_state_type,0);
             return;
         }
     }

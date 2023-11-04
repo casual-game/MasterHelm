@@ -127,6 +127,7 @@ public partial class Monster : MonoBehaviour
     async UniTaskVoid Despawn()
     {
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
+        _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
         _isAlive = false;
         _animator.SetBool(GameManager.s_death,true);
