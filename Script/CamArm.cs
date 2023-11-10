@@ -2,10 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Beautify.Universal;
-using DG.Tweening;
+using PrimeTween;
 using Sirenix.OdinInspector;
 using UnityEngine;
-
 public class CamArm : MonoBehaviour
 {
     public float test_strength, test_duration;
@@ -20,7 +19,8 @@ public class CamArm : MonoBehaviour
     //Private
     private Transform _camT;
     private Camera[] _cams;
-    private Sequence s_stop_normal,s_shake_normal,s_stop_strong,s_shake_strong,s_chromatic,s_zoom;
+    private Tween t_stop,t_shake,t_chromatic;
+    private Sequence s_zoom;
     private void Awake()
     {
         instance = this;
@@ -28,44 +28,6 @@ public class CamArm : MonoBehaviour
         mainCam = GetComponentInChildren<Camera>();
         _cams = GetComponentsInChildren<Camera>();
         transform.position = target.position + addVec;
-        
-        s_shake_normal = DOTween.Sequence().SetAutoKill(false)
-            .PrependCallback(() =>
-            {
-                _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
-            })
-            .Append(_camT.DOShakePosition(0.25f,0.375f,25).SetEase(Ease.OutQuint)).SetUpdate(true);
-        
-        s_stop_normal = DOTween.Sequence().SetAutoKill(false)
-            .Append(DOTween.To(() => 0.05f, x => Time.timeScale = x, 
-                1f, 0.3f).SetEase(Ease.OutQuad)).SetUpdate(true);
-        
-        s_shake_strong = DOTween.Sequence().SetAutoKill(false)
-            .PrependCallback(() =>
-            {
-                _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
-                BeautifySettings.settings.chromaticAberrationIntensity.value = 0.025f;
-            })
-            .Append(_camT.DOShakePosition(0.25f,0.6f,45).SetEase(Ease.OutQuint)).SetUpdate(true);
-        
-        s_stop_strong = DOTween.Sequence().SetAutoKill(false)
-            .Append(DOTween.To(() => 0.05f, x => Time.timeScale = x, 
-                1f, 0.30f).SetEase(Ease.InSine)).SetUpdate(true);
-
-        s_chromatic = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .PrependCallback(() =>
-            {
-                BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
-            })
-            .Join(DOTween.To(() => 0.02f, x => BeautifySettings.settings.chromaticAberrationIntensity.value = x,
-                0.001f, 1.5f).SetEase(Ease.OutCirc));
-
-        s_zoom = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .Append(_cams[0].DOOrthoSize(3.25f, 0.15f))
-            .Join(_cams[0].DOOrthoSize(3.25f, 0.15f))
-            .AppendInterval(0.15f)
-            .Append(_cams[0].DOOrthoSize(4.0f, 1.0f).SetEase(Ease.OutCirc))
-            .Join(_cams[0].DOOrthoSize(4.0f, 1.0f).SetEase(Ease.OutCirc));
     }
     
     void Update()
@@ -75,35 +37,43 @@ public class CamArm : MonoBehaviour
 
     public void Tween_ShakeStrong()
     {
-        if(s_shake_normal.IsPlaying()) s_shake_normal.Pause();
-        if(s_stop_normal.IsPlaying()) s_stop_normal.Pause();
-        
-        if(!s_zoom.IsInitialized()) s_zoom.Play();
-        else s_zoom.Restart();
-        if(!s_chromatic.IsInitialized()) s_chromatic.Play();
-        else s_chromatic.Restart();
-        if(!s_shake_strong.IsInitialized()) s_shake_strong.Play();
-        else s_shake_strong.Restart();
-        if(!s_stop_strong.IsInitialized()) s_stop_strong.Play();
-        else s_stop_strong.Restart();
+        t_shake.Complete();
+        t_stop.Complete();
+        t_chromatic.Stop();
+        s_zoom.Complete();
+        //Zoom
+        s_zoom = Sequence.Create()
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.15f, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 3.25f, 0.15f, useUnscaledTime: true))
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true));
+        //Chromatic
+        BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
+        t_chromatic = Tween.Custom(0.02f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        //Shake Strong
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.25f, 0.375f, 45
+            , easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
+        //Stop
+        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.3f, ease: Ease.InSine);
     }
     public void Tween_ShakeNormal()
     {
-        if(s_shake_strong.IsPlaying()) s_shake_strong.Pause();
-        if(s_stop_strong.IsPlaying()) s_stop_strong.Pause();
-
-        s_stop_normal.timeScale = 1.0f;
-        if(!s_shake_normal.IsInitialized()) s_shake_normal.Play();
-        else s_shake_normal.Restart();
-        if(!s_stop_normal.IsInitialized()) s_stop_normal.Play();
-        else s_stop_normal.Restart();
+        t_shake.Complete();
+        t_stop.Complete();
+        //Shake Normal
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, 0.3f, 25,
+            easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
+        
+        //Stop Normal
+        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.3f, ease: Ease.OutQuad);
     }
     public void Tween_ShakeWeak()
     {
-        if(s_stop_strong.IsPlaying()) s_stop_strong.Pause();
+        t_stop.Complete();
         
-        s_stop_normal.timeScale = 1.5f;
-        if(!s_stop_normal.IsInitialized()) s_stop_normal.Play();
-        else s_stop_normal.Restart();
+        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.2f, ease: Ease.OutQuad);
     }
 }

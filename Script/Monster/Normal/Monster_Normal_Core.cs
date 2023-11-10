@@ -94,7 +94,7 @@ public partial class Monster_Normal : Monster
         else
         {
             _hitStrongTime = Time.time;
-            Core_Damage_Weak(Mathf.CeilToInt(damage*GameManager.recoveryDamage));
+            Core_Damage_Weak(damage);
             Punch_Down(1.5f);
             Effect_Hit_Normal();
             CamArm.instance.Tween_ShakeWeak();

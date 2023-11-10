@@ -1,15 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using DamageNumbersPro;
-using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-
+using PrimeTween;
 public partial class GameManager : MonoBehaviour
 {
-    public static float recoveryDamage = 0.3f;
+    public static float recoveryDamage = 0.33f;
     
     [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
     public Image image_Combo;
@@ -21,61 +19,21 @@ public partial class GameManager : MonoBehaviour
     public DamageNumber dmp_Main, dmp_Sub;
     [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
     public float comboDelay = 2.5f;
-    private Sequence s_combo_first,s_combo_continuous,s_combo;
+    private Sequence s_combo;
     private DamageNumber dmp_created_main, dmp_created_sub;
     private float comboBeginTime = -100;
     private int comboAction = 0;
     private string subTest;
-    
+    private int id_fadeamount, id_chromaaberramount;
+    private Vector2 comboAnchoredPos;
     private void Setting_UI()
     {
         image_Combo.material.SetFloat(s_fadeamount, 0.5f);
         image_Combo.material.SetFloat(s_chromaberramount, 0.05f);
+        id_fadeamount = Shader.PropertyToID(s_fadeamount);
+        id_chromaaberramount = Shader.PropertyToID(s_chromaberramount);
+        comboAnchoredPos = image_Combo.rectTransform.anchoredPosition;
         
-        s_combo_first = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .Append(image_Combo.material.DOFloat(-0.1f, s_fadeamount, 0.2f))
-            .Join(image_Combo.rectTransform.DOShakeAnchorPos(0.5f, 15f, 30))
-            .Join(image_Combo.material.DOFloat(0.3f, s_chromaberramount, 0.1f))
-            .Insert(0.25f, image_Combo.material.DOFloat(0.05f, s_chromaberramount, 0.15f))
-            .Insert(comboDelay, image_Combo.material.DOFloat(0.5f, s_fadeamount, 0.5f))
-            .PrependCallback(() =>
-            {
-                image_Combo.material.SetFloat(s_fadeamount, 0.5f);
-                image_Combo.material.SetFloat(s_chromaberramount, 0.05f);
-                image_Combo.rectTransform.anchoredPosition = new Vector2(15, 0);
-                
-                if(dmp_created_main!=null) dmp_created_main.FadeOut();
-                if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
-                
-                ComboText();
-            })
-            .InsertCallback(comboDelay,() =>
-            {
-                if(dmp_created_main!=null) dmp_created_main.FadeOut();
-                if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
-            });
-
-        s_combo_continuous = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .Append(image_Combo.rectTransform.DOShakeAnchorPos(0.5f, 15f, 30))
-            .Join(image_Combo.material.DOFloat(0.3f, s_chromaberramount, 0.1f))
-            .Insert(0.25f, image_Combo.material.DOFloat(0.05f, s_chromaberramount, 0.15f))
-            .Insert(comboDelay, image_Combo.material.DOFloat(0.5f, s_fadeamount, 0.5f))
-            .PrependCallback(() =>
-            {
-                image_Combo.material.SetFloat(s_chromaberramount, 0.05f);
-                image_Combo.rectTransform.anchoredPosition = new Vector2(15, 0);
-                
-                if(dmp_created_main!=null) dmp_created_main.FadeOut();
-                if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
-                
-                ComboText();
-            })
-            .InsertCallback(comboDelay,() =>
-            {
-                if(dmp_created_main!=null) dmp_created_main.FadeOut();
-                if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
-            });
-
 
     }
     private void ComboText()
@@ -95,9 +53,31 @@ public partial class GameManager : MonoBehaviour
             subTest = subComboText;
             
             
-            if (s_combo_continuous.IsPlaying()) s_combo_continuous.Pause();
-            if (!s_combo_first.IsInitialized()) s_combo_first.Play();
-            else s_combo_first.Restart();
+            s_combo.Stop();
+            
+            image_Combo.material.SetFloat(s_fadeamount, 0.5f);
+            image_Combo.material.SetFloat(s_chromaberramount, 0.3f);
+            image_Combo.rectTransform.anchoredPosition = comboAnchoredPos;
+                
+            if(dmp_created_main!=null) dmp_created_main.FadeOut();
+            if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
+            ComboText();
+
+            s_combo = Sequence.Create()
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, -0.1f, 0.2f, useUnscaledTime: true))
+                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+                {
+                    Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
+                    image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
+                } ))
+                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
+                .ChainDelay(2.25f)
+                .ChainCallback(() =>
+                {
+                    if (dmp_created_main != null) dmp_created_main.FadeOut();
+                    if (dmp_created_sub != null) dmp_created_sub.FadeOut();
+                })
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f, useUnscaledTime: true));
         }
         else
         {
@@ -107,9 +87,29 @@ public partial class GameManager : MonoBehaviour
             subTest = subComboText;
             
             
-            if (s_combo_first.IsPlaying()) s_combo_first.Pause();
-            if (!s_combo_continuous.IsInitialized()) s_combo_continuous.Play();
-            else s_combo_continuous.Restart();
+            s_combo.Stop();
+            
+            image_Combo.material.SetFloat(s_chromaberramount, 0.3f);
+            image_Combo.rectTransform.anchoredPosition = comboAnchoredPos;
+                
+            if(dmp_created_main!=null) dmp_created_main.FadeOut();
+            if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
+            ComboText();
+            
+            s_combo = Sequence.Create()
+                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+                {
+                    Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
+                    image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
+                } ))
+                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
+                .ChainDelay(2.25f)
+                .ChainCallback(() =>
+                {
+                    if (dmp_created_main != null) dmp_created_main.FadeOut();
+                    if (dmp_created_sub != null) dmp_created_sub.FadeOut();
+                })
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f, useUnscaledTime: true));
         }
     }
 }

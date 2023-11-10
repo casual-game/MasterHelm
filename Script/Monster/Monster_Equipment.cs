@@ -9,7 +9,7 @@ public partial class Monster : MonoBehaviour
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield;
     
     //Private
-    private Prefab_Prop _weaponL, _weaponR, _shield;
+    protected Prefab_Prop _weaponL, _weaponR, _shield;
     
     //Equipment
     public void Equip()

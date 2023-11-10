@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using AmazingAssets.AdvancedDissolve;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using EPOOutline;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -12,12 +11,12 @@ using Random = UnityEngine.Random;
 
 public partial class Monster : MonoBehaviour
 {
-    public void Setting_Monster()
+    public void Setting_Monster(Prefab_Prop _weaponl,Prefab_Prop _weaponr,Prefab_Prop _shield)
     {
         _shadow = transform.Find(GameManager.s_shadow);
         _shadowScale = _shadow.localScale;
         _agent = GetComponent<NavMeshAgent>();
-        var smr = GetComponentInChildren<SkinnedMeshRenderer>();
+        smr = GetComponentInChildren<SkinnedMeshRenderer>();
         _material = smr.material;
         _meshRoot = smr.rootBone;
         _outlinable = GetComponent<Outlinable>();
@@ -29,6 +28,17 @@ public partial class Monster : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;
         
+        
+        Prefab_Prop l = _weaponl==null?null:Instantiate(_weaponl), 
+            r = _weaponr==null?null:Instantiate(_weaponr), 
+            s = _shield==null?null:Instantiate(_shield);
+        if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,GameManager.Folder_MonsterProp);
+        if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,GameManager.Folder_MonsterProp);
+        if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,GameManager.Folder_MonsterProp);
+        
+        Transform t = transform;
+        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
+        
         Setting_UI();
         Setting_Effect();
         
@@ -38,10 +48,8 @@ public partial class Monster : MonoBehaviour
     public static List<Monster> Monsters = new List<Monster>();
     [FoldoutGroup("MainData")] public int hp = 100;
     
-    //Private
-    private bool _isAlive = false, _isReady = false;
+    //Private,Protected
     private float _dissolveRatio = 1.0f;
-    private float _dissolveSpeed = 1.3f;
     private Material _material;
     private NavMeshAgent _agent;
     private Outlinable _outlinable;
@@ -51,32 +59,29 @@ public partial class Monster : MonoBehaviour
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
+    
+    protected bool _isAlive = false, _isReady = false;
+    protected int currenthp;
+    protected float deathDealy = 0.5f;
+    protected float dissolveSpeed = 1.3f;
+    protected SkinnedMeshRenderer smr;
+    //Public
+    public enum AnimationState
+    {
+        Locomotion = 0
+    }
     public enum HitState {Ground=0,Air=1,Recovery=2}
     public HitState _hitState
     {
         get;
         private set;
     }
-    protected int currenthp;
-    //Public
-    public enum AnimationState
-    {
-        Locomotion = 0
-    }
     //Editor
     #if UNITY_EDITOR
     [FoldoutGroup("Debug")] public Prefab_Prop debugWepaonL, debugWaeponR, debugShield;
     public void Start()
     {
-        Setting_Monster();
-        Transform t = transform;
-        Prefab_Prop l = debugWepaonL==null?null:Instantiate(debugWepaonL), 
-                    r = debugWaeponR==null?null:Instantiate(debugWaeponR), 
-                    s = debugShield==null?null:Instantiate(debugShield);
-        if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,GameManager.Folder_MonsterProp);
-        if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,GameManager.Folder_MonsterProp);
-        if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,GameManager.Folder_MonsterProp);
-        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
+        Setting_Monster(debugWepaonL,debugWaeponR,debugShield);
     }
 
     [Button]
@@ -93,8 +98,9 @@ public partial class Monster : MonoBehaviour
     #endif
     
     //Unitask
-    async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
+    protected async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
     {
+        _agent.enabled = true;
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
         _isReady = false;
         gameObject.SetActive(true);
@@ -110,7 +116,7 @@ public partial class Monster : MonoBehaviour
         Equip();
         while (_isAlive && _dissolveRatio>0)
         {
-            _dissolveRatio -= Time.deltaTime*_dissolveSpeed;
+            _dissolveRatio -= Time.deltaTime*dissolveSpeed;
             float ratio = Mathf.Clamp01(_dissolveRatio);
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -124,8 +130,9 @@ public partial class Monster : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
         _shadow.localScale = _shadowScale;
     }
-    async UniTaskVoid Despawn()
+    protected async UniTaskVoid Despawn()
     {
+        _agent.enabled = false;
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
@@ -133,12 +140,12 @@ public partial class Monster : MonoBehaviour
         _animator.SetBool(GameManager.s_death,true);
         await UniTask.Delay(TimeSpan.FromSeconds(1.25f), DelayType.DeltaTime);
         DeactivateUI();
-        await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
+        await UniTask.Delay(TimeSpan.FromSeconds(deathDealy), DelayType.DeltaTime);
         Unequip();
         p_spawn.Play();
         while (!_isAlive && _dissolveRatio<1)
         {
-            _dissolveRatio += Time.deltaTime*_dissolveSpeed;
+            _dissolveRatio += Time.deltaTime*dissolveSpeed;
             float ratio = Mathf.Clamp01(_dissolveRatio);
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -151,11 +158,9 @@ public partial class Monster : MonoBehaviour
         _outlineTarget.CutoutThreshold = 1;
         _shadow.localScale = GameManager.V3_Zero;
 
-        if (!ui_Sequence_Deactivated.IsComplete()) await ui_Sequence_Deactivated.AwaitForComplete();
-        if(s_punch_up.IsPlaying()) s_punch_up.Pause();
-        if(s_punch_down.IsPlaying()) s_punch_down.Pause();
-        if(s_punch_up_compact.IsPlaying()) s_punch_up_compact.Pause();
-        if(s_punch_down_compact.IsPlaying()) s_punch_down_compact.Pause();
+        seq_ui.Complete();
+        t_punch.Complete();
+        t_blink.Complete();
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
         gameObject.SetActive(false);
     }

@@ -11,8 +11,14 @@ public class Debug_ShadowUpdater : MonoBehaviour
     [Button]
     public void Execution()
     {
-        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-        foreach (var r in renderers)
+        MeshRenderer[] mrs = GetComponentsInChildren<MeshRenderer>(true);
+        foreach (var r in mrs)
+        {
+            r.shadowCastingMode = mode;
+            r.receiveShadows = receiveShadows;
+        }
+        SkinnedMeshRenderer[] smrs = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        foreach (var r in smrs)
         {
             r.shadowCastingMode = mode;
             r.receiveShadows = receiveShadows;

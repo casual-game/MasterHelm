@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
+using PrimeTween;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.OnScreen;
@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     private bool moveBG;
-    private Sequence s_Pressed,s_Released;
+    private Sequence s_interact;
     private Image inner,bg;
     private RectTransform canvasRect;
     private Vector2 firstAnchoredPosition;
@@ -22,34 +22,25 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         var parent = transform.parent;
         bg = parent.GetChild(0).GetComponent<Image>();
         canvasRect = parent.GetComponentInParent<RectTransform>();
-        RectTransform innerT = inner.rectTransform, bgT = bg.rectTransform;
-        firstAnchoredPosition = bgT.anchoredPosition;
         
-        s_Pressed = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .PrependCallback(() =>
-            {
-                inner.color = Color.clear;
-                bgT.anchoredPosition = innerT.anchoredPosition;
-            })
-            .Append(innerT.DOPunchScale(GameManager.V3_One*0.1f,tween_FadeDuration,1))
-            .Join(inner.DOColor(Color.white,tween_FadeDuration));
-        s_Released = DOTween.Sequence().SetAutoKill(false).SetUpdate(true)
-            .PrependCallback(() =>
-            {
-                bg.color = Color.clear;
-                bgT.localScale = GameManager.V3_One * 0.75f;
-                bgT.anchoredPosition = innerT.anchoredPosition;
-            })
-            .Append(innerT.DOPunchScale(GameManager.V3_One*0.1f,tween_FadeDuration,1))
-            .Join(bgT.DOScale(GameManager.V3_One,tween_ScaleDuration).SetEase(Ease.OutBack))
-            .Join(bg.DOColor(Color.white,tween_FadeDuration));
+        firstAnchoredPosition = bg.rectTransform.anchoredPosition;
+        
+        
     }
     public void OnPointerUp(PointerEventData eventData)
     {
         if(moveBG) bg.rectTransform.anchoredPosition = firstAnchoredPosition;
         
-        if(!s_Released.IsInitialized()) s_Released.Play();
-        else s_Released.Restart();
+        s_interact.Complete();
+        bg.color = Color.clear;
+        bg.rectTransform.localScale = GameManager.V3_One * 0.75f;
+        bg.rectTransform.anchoredPosition = inner.rectTransform.anchoredPosition;
+
+        s_interact = Sequence.Create()
+            .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * 0.1f, 
+                tween_FadeDuration, 1, useUnscaledTime: true))
+            .Group(Tween.Scale(bg.transform,GameManager.V3_One,tween_ScaleDuration,Ease.OutBack, useUnscaledTime: true))
+            .Group(Tween.Color(bg, Color.white, tween_FadeDuration, useUnscaledTime: true));
     }
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -59,14 +50,14 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 eventData.position, eventData.pressEventCamera, out var position);
             bg.rectTransform.anchoredPosition = position;
         }
-
-        if (!s_Pressed.IsInitialized()) s_Pressed.Play();
-        else s_Pressed.Restart();
+        s_interact.Complete();
+        inner.color = Color.clear;
+        bg.rectTransform.anchoredPosition = inner.rectTransform.anchoredPosition;
+        
+        s_interact = Sequence.Create()
+            .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * 0.1f, 
+                tween_FadeDuration, 1, useUnscaledTime: true))
+            .Group(Tween.Color(inner, Color.white, tween_FadeDuration, useUnscaledTime: true));
     }
 
-    public void OnDestroy()
-    {
-        s_Pressed.Kill();
-        s_Released.Kill();
-    }
 }
