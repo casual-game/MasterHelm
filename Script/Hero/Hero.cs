@@ -11,6 +11,7 @@ using Random = UnityEngine.Random;
 
 public partial class Hero : MonoBehaviour
 {
+    private static Hero instance;
     private void Start()
     {
         Setting();
@@ -30,6 +31,8 @@ public partial class Hero : MonoBehaviour
         Setting_LookAt();
         Setting_Equipment();
         Setting_Spawn();
+
+        instance = this;
     }
     
     //Public

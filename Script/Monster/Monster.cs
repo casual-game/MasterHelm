@@ -52,10 +52,11 @@ public partial class Monster : MonoBehaviour
     private float _dissolveRatio = 1.0f;
     private Material _material;
     private NavMeshAgent _agent;
-    private Outlinable _outlinable;
+    
     private OutlineTarget _outlineTarget;
     private Transform _shadow;
     private Vector3 _shadowScale;
+    protected Outlinable _outlinable;
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;

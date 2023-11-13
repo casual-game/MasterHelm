@@ -42,9 +42,9 @@ public partial class Monster : MonoBehaviour
         GameManager.Instance.dmp_weak.Spawn(transform.position + Vector3.up * 1.2f, damage);
         Core_Damage(damage);
     }
-    protected void Core_Damage_Strong(int damage)
+    protected void Core_Damage_Strong(int damage,bool spawn = true)
     {
-        GameManager.Instance.dmp_strong.Spawn(transform.position + Vector3.up * 1.2f, damage);
+        if(spawn) GameManager.Instance.dmp_strong.Spawn(transform.position + Vector3.up * 1.2f, damage);
         Core_Damage(damage);
     }
     protected virtual void Core_Damage(int damage)

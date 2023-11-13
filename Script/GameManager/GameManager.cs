@@ -12,7 +12,8 @@ public partial class GameManager : MonoBehaviour
 {
     //Static
     public static GameManager Instance;
-    public static readonly Vector3 V3_Zero = new Vector3(0, 0, 0), V3_One = new Vector3(1, 1, 1);
+    public static readonly Vector3 V3_Zero = new Vector3(0, 0, 0), 
+        V3_One = new Vector3(1, 1, 1),V3_Up= new Vector3(0, 10, 0);
     public static readonly Quaternion Q_Identity = Quaternion.identity;
     public static string s_speed = "Speed",s_rot = "Rot",s_crouch = "Crouch",s_state_change = "State_Change",s_state_type = "State_Type"
         ,s_footstep = "Footstep",s_charge_normal = "Charge_Normal",s_player = "Player",s_monster = "Monster"

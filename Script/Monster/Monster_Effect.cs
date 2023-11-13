@@ -138,6 +138,24 @@ public partial class Monster : MonoBehaviour
             p_submat.Stop(true,ParticleSystemStopBehavior.StopEmitting);
         }
     }
+    public void Effect_Hit_Counter()
+    {
+        t_blink.Complete();
+        t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.5f,
+            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
+            ,ease: Ease.InQuad);
+        
+        
+        Transform t = transform;
+        Vector3 currentPos = t.position;
+        p_blood_normal.Play();
+        p_blood_combo.Play();
+        //Blood
+        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
+        Quaternion bloodRot;
+        bloodRot = t.rotation;
+        BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
+    }
     //Animation Event
     public void FallDown()
     {

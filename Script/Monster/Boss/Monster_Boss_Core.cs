@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using PrimeTween;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -17,7 +18,7 @@ public partial class Monster_Boss : Monster
         Normal = 0, AttackReady = 1, CanCounter = 2,Groggy = 3
     }
     [ReadOnly] public BossInteractionState interactionState;
-    
+    [FoldoutGroup("Effect")] public ParticleSystem p_groundimpact,p_countable;
     //Private
     private int _hitStrongType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
@@ -64,8 +65,8 @@ public partial class Monster_Boss : Monster
                 else
                 {
                     Core_HitState(HitState.Ground);
-                    Core_Damage_Strong(damage);
-                    Effect_Strong_Counter();
+                    Core_Damage_Strong(damage,false);
+                    Effect_Strong_Counter(damage);
                     attackString =GameManager.s_counter;
                 }
                 break;
@@ -114,16 +115,17 @@ public partial class Monster_Boss : Monster
             Effect_Hit_Strong(false,true);
             Punch_Down(1.0f);
         }
-        void Effect_Strong_Counter()
+        void Effect_Strong_Counter(int damage)
         {
             _hitStrongTime = Time.time;
             
             Vector3 pos = transform.position;
-            CamArm.instance.Tween_ShakeStrong();
-            GameManager.Instance.Shockwave(pos);
-            Effect_Hit_Strong(false,true);
+            CamArm.instance.Tween_Impact(p_smoke,damage);
+            //GameManager.Instance.Shockwave(pos);
+            Effect_Hit_Counter();
+            Hero.Blink(0.5f);
             Punch_Down(1.0f);
-                
+            Core_InteractionState(BossInteractionState.Groggy);
             _animBase.isFinished = true;
                 
             _animator.SetBool(GameManager.s_hit,true);
@@ -173,15 +175,35 @@ public partial class Monster_Boss : Monster
     public void Core_InteractionState(BossInteractionState state)
     {
         if (state == interactionState) return;
-        if (interactionState == BossInteractionState.AttackReady && state != BossInteractionState.AttackReady)
+        switch (state)
         {
-            Effect_Submat(false);
-        }
-        else if(state == BossInteractionState.AttackReady)
-        {
-            Effect_Submat(true);
+            case BossInteractionState.Groggy:
+            case BossInteractionState.Normal:
+            default:
+                Effect_Submat(false);
+                if(p_countable.isPlaying) p_countable.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                break;
+            case BossInteractionState.CanCounter:
+                t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.75f,
+                    onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
+                    ,ease: Ease.InQuad);
+                Effect_Submat(true);
+                p_countable.Play();
+                break;
+            case BossInteractionState.AttackReady:
+                Effect_Submat(true);
+                if(p_countable.isPlaying) p_countable.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                break;
         }
         interactionState = state;
     }
-    
+    //AnimationEvent
+    public void GroggyDown()
+    {
+        CamArm.instance.Tween_ShakeDown();
+        p_groundimpact.Play();
+        p_spawn.Play();
+        p_smoke.Play();
+        Punch_Down(1.0f);
+    }
 }

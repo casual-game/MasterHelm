@@ -81,6 +81,14 @@ public partial class Hero : MonoBehaviour
             duration: 0.45f, frequency: 7, easeBetweenShakes: Ease.OutSine,useUnscaledTime:true);
         s_punch.timeScale = speed;
     }
+
+    public static void Blink(float duration)
+    {
+        instance.s_blink.Complete();
+        instance.s_blink = Tween.Custom(instance.c_evade_begin, instance.c_evade_fin,duration,
+            onValueChange: newVal => instance._outlinable.FrontParameters.FillPass
+                .SetColor(GameManager.s_publiccolor, newVal),ease: Ease.InQuad);
+    }
     //Effect
     public void Effect_AttackParticle(int index)
     {
