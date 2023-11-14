@@ -21,6 +21,13 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         if (cleanFinished) return;
         if (animator.IsInTransition(0) || isFinished || 
             Time.time - _enteredTime < _hero.CurrentAttackMotionData.chargeComboDelay) return;
+        //구르기 필터링 
+        if (_hero.Get_IsRollTiming())
+        {
+            Set_Roll(animator,false);
+            cleanFinished = true;
+            return;
+        }
         //트렌지션 끝나고 한번 실행
         if (!_realEntered)
         {
@@ -40,13 +47,6 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
                 }
             }
             _hero.Equipment_Equip(_hero.weaponPack_Normal);
-        }
-        //구르기 입력 확인, 구르기
-        if (_hero.Get_CurrentRollDelay() < _heroData.preinput_roll)
-        {
-            _hero.Core_Roll();
-            isFinished = true;
-            return;
         }
         //공격 입력이 확인되면 다음 모션으로 이동
         if (GameManager.DelayCheck_Attack() < _heroData.preinput_attack)

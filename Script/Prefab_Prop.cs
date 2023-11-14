@@ -190,7 +190,7 @@ public class Prefab_Prop : MonoBehaviour
         }
         while (_activateRatio<1 && _targetActivation)
         {
-            _activateRatio += Time.deltaTime*_activateSpeed;
+            _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -213,7 +213,7 @@ public class Prefab_Prop : MonoBehaviour
         if(useParticle) _p_spawn.Play();
         while (_activateRatio>0 &&!_targetActivation)
         {
-            _activateRatio -= Time.deltaTime*_deactivateSpeed;
+            _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
             float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -249,7 +249,7 @@ public class Prefab_Prop : MonoBehaviour
         //다시 생성
         while (_activateRatio<1 && _targetActivation)
         {
-            _activateRatio += Time.deltaTime*_activateSpeed;
+            _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -272,7 +272,7 @@ public class Prefab_Prop : MonoBehaviour
         //일단 사라짐
         while (_activateRatio>0 &&!_targetActivation)
         {
-            _activateRatio -= Time.deltaTime*_deactivateSpeed;
+            _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
             float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -291,7 +291,7 @@ public class Prefab_Prop : MonoBehaviour
         //다시 생성
         while (_activateRatio<1 && !_targetActivation)
         {
-            _activateRatio += Time.deltaTime*_activateSpeed;
+            _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);

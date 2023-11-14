@@ -39,7 +39,7 @@ public class CamArm : MonoBehaviour
     
     void Update()
     {
-        transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.unscaledDeltaTime);
     }
 
     public void Tween_ShakeStrong()
@@ -90,11 +90,11 @@ public class CamArm : MonoBehaviour
         t_stop.Complete();
         t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.2f, ease: Ease.OutQuad);
     }
-    public void Tween_Radial(float duration)
+    public void Tween_Radial(float duration,float bluramount =0.1f)
     {
         t_radial.Stop();
         cp_radial.Activate();
-        m_radialblur.SetFloat(GameManager.s_bluramount,0.1f);
+        m_radialblur.SetFloat(GameManager.s_bluramount,bluramount);
         t_radial = Tween.MaterialProperty(m_radialblur, id_radial, 0.0f, duration,useUnscaledTime: true)
             .OnComplete(target:this, target=> target.cp_radial.Deactivate());
     }
@@ -145,6 +145,24 @@ public class CamArm : MonoBehaviour
             .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true));
         
         
+    }
+
+    public void Tween_Slomo(float duration)
+    {
+        Tween_Radial(duration,0.05f);
+        //Stop
+        t_stop.Stop();
+        t_stop = Tween.GlobalTimeScale(0.1f, 1.0f, duration, ease: Ease.InExpo);
+        //Shake Normal
+        t_shake.Stop();
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.15f, duration, duration*20,
+            easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
+        
+        //Chromatic
+        t_chromatic.Stop();
+        t_chromatic = Tween.Custom(0.02f, 0.001f, duration, ease: Ease.OutCirc, useUnscaledTime: true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
     }
 
 }

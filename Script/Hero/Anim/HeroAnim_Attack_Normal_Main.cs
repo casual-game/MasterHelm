@@ -40,6 +40,14 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (cleanFinished) return;
         if (_strongFinished) return;
+        //구르기 필터링 
+        if (_hero.Get_IsRollTiming())
+        {
+            Set_Roll(animator,false);
+            cleanFinished = true;
+            _strongFinished = true;
+            return;
+        }
         //마지막 공격일때..필터링
         if (_isLastAttack && IsNotAvailable(animator, stateInfo)) return;
         //isFinished 가 False여도 동작한다.
@@ -55,15 +63,6 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
             _hero.Set_AnimationState(Hero.AnimationState.Attack_Strong);
             isFinished = true;
             _strongFinished = true;
-        }
-        //구르기 입력 확인, 구르기
-        if (_isLastAttack && Time.time - _enteredTime > _hero.CurrentAttackMotionData.chargeWaitDuration 
-                          && _hero.Get_CurrentRollDelay() < _heroData.preinput_roll)
-        {
-            _hero.Core_Roll();
-            isFinished = true;
-            _strongFinished = true;
-            return;
         }
         //isFinished 가 False이면 안함
         if (isFinished) return;

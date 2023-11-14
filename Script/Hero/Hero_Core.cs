@@ -19,14 +19,13 @@ public partial class Hero : MonoBehaviour
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     private int _fastRoll = 0; //빠른 구르기는 한번에 눌러야 한다. 입력 횟수 카운트용.
     private float _falledTime = -100;//빠른 구르기를 위한 낙하 타이밍 저장.
-    
+    private float _rolledTime;
     //Public
     public enum AnimationState
     {
         Locomotion = 0,
-        Roll = 1,
-        Attack_Normal = 2,
-        Attack_Strong = 3
+        Attack_Normal = 1,
+        Attack_Strong = 2
     }
     public PlayerAttackMotionData CurrentAttackMotionData
     {
@@ -44,7 +43,11 @@ public partial class Hero : MonoBehaviour
     {
         return Time.time - _inputTimeAction;
     }
-    
+    public bool Get_IsRollTiming()
+    {
+        return Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay
+                         && Time.unscaledTime - _rolledTime > heroData.roll_delay;
+    }
     //Setter
     public void Set_AnimationState(AnimationState animationState)
     {
@@ -59,6 +62,10 @@ public partial class Hero : MonoBehaviour
     {
         AttackIndex = attackIndex;
     }
+    public void Set_RolledTime()
+    {
+        _rolledTime = Time.unscaledTime;
+    }
     
     //Core
     public void Core_PreInput()
@@ -67,10 +74,6 @@ public partial class Hero : MonoBehaviour
         if (GameManager.DelayCheck_Attack() < heroData.preinput_attack)
         {
             Core_NormalAttack();
-        }
-        else if (Get_CurrentRollDelay() < heroData.preinput_roll)
-        {
-            Core_Roll();
         }
         else
         {
@@ -96,21 +99,10 @@ public partial class Hero : MonoBehaviour
             Set_AnimationState(AnimationState.Attack_Strong);
         else Core_NormalAttack();
     }
-    public void Core_Roll()
-    {
-        AttackIndex = -1;
-        if(_currentWeaponPack!=null) Equipment_UpdateTrail(_currentWeaponPack,false,false,false);
-        Equipment_Equip(null);
-        Set_AnimationState(AnimationState.Roll);
-        _actionBeginTime = -100;
-        return;
-    }
-    [Button]
     public void Core_Hit_Normal()
     {
         //감속시킨다.
         _speedRatio *=0.35f;
-        _animator.SetFloat(GameManager.s_crouch,0.6f);
         //타겟 벡터
         Vector3 hitpoint = GameManager.V3_Zero;
         Vector3 targetHitVec = hitpoint-transform.position;
@@ -128,7 +120,6 @@ public partial class Hero : MonoBehaviour
         Tween_Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
     }
-    [Button]
     public void Core_Hit_Strong(AttackMotionType attackMotionType,HitType hitType)
     {
         if (HeroMoveState == MoveState.Roll)
@@ -188,7 +179,8 @@ public partial class Hero : MonoBehaviour
     {
         _fastRoll = Mathf.Clamp(_fastRoll-1, 0, 3);
        Vector3 currentPos= transform.position;
-        bool isTimting = Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay;
+        bool isTimting = Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay
+            && Time.unscaledTime - _rolledTime > heroData.roll_delay;
         //인터렉션
         if (Interactable.currentInteractable != null)
         {
@@ -212,12 +204,17 @@ public partial class Hero : MonoBehaviour
         }
 
         //구르기
-        bool canRoll = HeroMoveState == MoveState.Locomotion;
+        bool canRoll = HeroMoveState != MoveState.Hit && HeroMoveState != MoveState.Roll
+                                                      && !_animator.GetBool(GameManager.s_hit)
+                                                      && !_animator.GetBool(GameManager.s_death);
+        /*
         if (isTimting)
         {
             if (canRoll) Core_Roll();
             else _inputTimeAction = Time.time;
         }
+        */
+
         //Smashed이후 빠른 기상
         bool canSpeedRoll = Time.time < _falledTime + heroData.hit_Smash_RecoveryInputDelay 
                             && HeroMoveState == MoveState.Hit && _fastRoll>0;
@@ -230,7 +227,6 @@ public partial class Hero : MonoBehaviour
             return;
         }
     }
-    
     //애니메이션 이벤트
     public void FallDown()
     {

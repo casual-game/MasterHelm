@@ -16,6 +16,12 @@ public class HeroAnim_Turn : HeroAnim_Base
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator,stateInfo)) return;
+        //구르기
+        if (_hero.Get_IsRollTiming())
+        {
+            Set_Roll(animator,true);
+            return;
+        }
         _hero.Move_Nav(animator.deltaPosition * _heroData.moveMotionSpeed_normal * 0.5f,
             animator.rootRotation);
     }

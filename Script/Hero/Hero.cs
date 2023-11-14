@@ -87,6 +87,13 @@ public partial class Hero : MonoBehaviour
     {
         _speedRatio = f;
     }
+    public void Set_AnimatorUnscaledTime(bool useUnscaledTime)
+    {
+        if (_animator.updateMode == AnimatorUpdateMode.UnscaledTime && !useUnscaledTime)
+            _animator.updateMode = AnimatorUpdateMode.Normal;
+        else if (_animator.updateMode == AnimatorUpdateMode.Normal && useUnscaledTime)
+            _animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
     
     //Getter
     public NavMeshAgent Get_NavMeshAgent()

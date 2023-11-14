@@ -16,17 +16,22 @@ public class HeroAnim_Move : HeroAnim_Base
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (IsNotAvailable(animator,stateInfo)) return;
+        //구르기
+        if (_hero.Get_IsRollTiming())
+        {
+            Set_Roll(animator,true);
+            return;
+        }
         //변수 선언
         Transform mt = _hero.transform;
         float currentSpeed = _hero.Get_SpeedRatio();
         float currentAnimDeg = animator.GetFloat(GameManager.s_rot);
         float targetSpeed, targetDeg = mt.rotation.eulerAngles.y;
         //데이터 확정
-        bool isCrouching = GameManager.BTN_Action;
-        float acceleraton = isCrouching?_heroData.acceleration_crouch:_heroData.acceleration_normal;
-        float deceleration = isCrouching?_heroData.deceleration_crouch:_heroData.deceleration_normal;
-        float turnDuration = isCrouching?_heroData.turnDuration_crouch:_heroData.turnDuration_normal;
-        float moveMotionSpeed = isCrouching?_heroData.moveMotionSpeed_crouch:_heroData.moveMotionSpeed_normal;
+        float acceleraton = _heroData.acceleration_normal;
+        float deceleration = _heroData.deceleration_normal;
+        float turnDuration = _heroData.turnDuration_normal;
+        float moveMotionSpeed = _heroData.moveMotionSpeed_normal;
         //계산,동작
         if (GameManager.Bool_Move)
         {
@@ -43,8 +48,7 @@ public class HeroAnim_Move : HeroAnim_Base
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
             //Turn 애니메이션 전환 가능 여부 확인,전환
-            bool canTurn = !isCrouching
-                           &&_hero.Get_SpeedRatio() > 0.95f
+            bool canTurn = _hero.Get_SpeedRatio() > 0.95f
                            && 145 < Mathf.Abs(degDiff)
                            && Mathf.Abs(currentAnimDeg)<0.175f
                            && !animator.IsInTransition(0);
@@ -73,10 +77,7 @@ public class HeroAnim_Move : HeroAnim_Base
                 ref _hero.rotAnimCurrentVelocity, 0.25f);
             animator.SetFloat(GameManager.s_rot,animDeg);
         }
-        //웅크리기 처리
-        float currentCrouching = animator.GetFloat(GameManager.s_crouch);
-        float nextCrouching = Mathf.Lerp(currentCrouching, isCrouching ? 1 : 0, _heroData.crouchingSpeed * Time.deltaTime);
-        animator.SetFloat(GameManager.s_crouch,nextCrouching);
+        
         //최종 움직임 처리
         _hero.Move_Nav(animator.deltaPosition*moveMotionSpeed
             ,Quaternion.Euler(0,targetDeg,0));

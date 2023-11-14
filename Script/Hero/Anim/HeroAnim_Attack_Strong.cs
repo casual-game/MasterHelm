@@ -37,6 +37,13 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
         if (cleanFinished) return;
+        //구르기 필터링 
+        if (_hero.Get_IsRollTiming())
+        {
+            Set_Roll(animator,false);
+            cleanFinished = true;
+            return;
+        }
         //강공격으로 캔슬할 경우 처리
         if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < _heroData.preinput_attack && _hero.Get_Charged())
         {

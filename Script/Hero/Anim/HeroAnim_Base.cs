@@ -6,7 +6,9 @@ public class HeroAnim_Base : StateMachineBehaviour
 {
     public Hero.MoveState moveState;
     public bool useNavPosition = true;
+    public bool useUnscaledTime = false;
     public bool useTrail = false;
+    public float trailDuration = 0.5f;
     [HideInInspector] public bool isFinished = false;
     [HideInInspector] public bool cleanFinished = false; //isFinished상태에서도 작동하는 일부 사례에서만 쓰입니다. (히트 시 attack계열 작업 종료)
     
@@ -32,7 +34,8 @@ public class HeroAnim_Base : StateMachineBehaviour
         _hero.Set_AnimBase(this);
         _hero.Set_HeroMoveState(moveState);
         _hero.Get_NavMeshAgent().updatePosition = useNavPosition;
-        _hero.trailEffect.active = useTrail;
+        _hero.Set_AnimatorUnscaledTime(useUnscaledTime);
+        if(useTrail) _hero.Tween_Trail(trailDuration);
         animator.speed = 1.0f;
     }
 
@@ -182,5 +185,46 @@ public class HeroAnim_Base : StateMachineBehaviour
         }
     }
 
+    protected void Set_Roll(Animator animator,bool islocomotion)
+    {
+        if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
+        _hero.Set_HeroMoveState(Hero.MoveState.Roll);
+        animator.SetBool(GameManager.s_roll,true);
+        if(islocomotion || true) animator.SetInteger(GameManager.s_state_type,0);
+        else
+        {
+            _hero.Effect_CancelRoll();
+            float targetDeg,currentDeg;
+            currentDeg = animator.transform.rotation.eulerAngles.y;
+            if (!GameManager.Bool_Move)
+            {
+                targetDeg = currentDeg;
+            }
+            else
+            {
+                targetDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                        CamArm.instance.transform.rotation.eulerAngles.y;
+                targetDeg = -targetDeg + 180;
+            }
+
+            int rollState;
+            float degDiff = targetDeg - currentDeg;
+            while (degDiff < -180) degDiff += 360;
+            while (degDiff > 180) degDiff -= 360;
+            if (-135 < degDiff && degDiff < -45) rollState = 1;
+            else if (45 < degDiff && degDiff < 135) rollState = 2;
+            else rollState = 3;
+            animator.SetInteger(GameManager.s_state_type,rollState);
+        }
+        animator.SetBool(GameManager.s_leftstate,false);
+        animator.SetBool(GameManager.s_hit,false);
+        animator.ResetTrigger(GameManager.s_state_change);
+        _hero.Set_AttackIndex(-1);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongL,false,false,false);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongR,false,false,false);
+        _hero.Equipment_Equip(null);
+        isFinished = true;
+    }
     
 }

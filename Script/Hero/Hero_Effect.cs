@@ -21,8 +21,7 @@ public partial class Hero : MonoBehaviour
     }
     
     //Public
-    [HideInInspector]
-    public TrailEffect trailEffect;
+    private TrailEffect trailEffect;
     [FoldoutGroup("Particle")] 
     public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge,p_spawn,p_despawn
         ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
@@ -30,62 +29,70 @@ public partial class Hero : MonoBehaviour
     public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
     
     //Private
-    private Tween s_blink,s_punch;
+    private Tween t_blink,t_punch;
+    private Sequence s_trail;
     private Transform _meshRoot;
     //Tween
     public void Tween_Blink_Hit(float timeScale)
     {
-        s_blink.Complete();
-        s_blink = Tween.Custom(c_hit_begin, c_hit_fin, duration: 0.5f,
+        t_blink.Complete();
+        t_blink = Tween.Custom(c_hit_begin, c_hit_fin, duration: 0.5f,
                 onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
                 ,ease: Ease.InCirc);
-        s_blink.timeScale = timescale;
+        t_blink.timeScale = timescale;
     }
     public void Tween_Blink_Evade(float timeScale)
     {
-        s_blink.Complete();
-        s_blink = Tween.Custom(c_evade_begin, c_evade_fin, duration: 0.45f,
+        t_blink.Complete();
+        t_blink = Tween.Custom(c_evade_begin, c_evade_fin, duration: 0.45f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        s_blink.timeScale = timescale;
+        t_blink.timeScale = timescale;
     }
     public void Tween_Punch_Down(float speed)
     {
-        s_punch.Complete();
+        t_punch.Complete();
         _meshRoot.localScale = GameManager.V3_One;
-        s_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(0.15f, 0.15f, -0.15f),
+        t_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(0.15f, 0.15f, -0.15f),
             duration: 0.75f, frequency: 7, easeBetweenShakes: Ease.OutQuad,useUnscaledTime:true);
-        s_punch.timeScale = speed;
+        t_punch.timeScale = speed;
     }
     public void Tween_Punch_Up(float speed)
     {
-        s_punch.Complete();
+        t_punch.Complete();
         _meshRoot.localScale = GameManager.V3_One;
-        s_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(-0.15f, -0.15f, 0.15f),
+        t_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(-0.15f, -0.15f, 0.15f),
             duration: 0.75f, frequency: 7, easeBetweenShakes: Ease.OutQuad,useUnscaledTime:true);
-        s_punch.timeScale = speed;
+        t_punch.timeScale = speed;
     }
     public void Tween_Punch_Down_Compact(float speed)
     {
-        s_punch.Complete();
+        t_punch.Complete();
         _meshRoot.localScale = GameManager.V3_One;
-        s_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(0.125f,0.125f,-0.125f),
+        t_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(0.125f,0.125f,-0.125f),
             duration: 0.45f, frequency: 7, easeBetweenShakes: Ease.OutSine,useUnscaledTime:true);
-        s_punch.timeScale = speed;
+        t_punch.timeScale = speed;
     }
     public void Tween_Punch_Up_Compact(float speed)
     {
-        s_punch.Complete();
+        t_punch.Complete();
         _meshRoot.localScale = GameManager.V3_One;
-        s_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(-0.125f,-0.125f,0.125f),
+        t_punch = Tween.PunchScale(_meshRoot, strength: new Vector3(-0.125f,-0.125f,0.125f),
             duration: 0.45f, frequency: 7, easeBetweenShakes: Ease.OutSine,useUnscaledTime:true);
-        s_punch.timeScale = speed;
+        t_punch.timeScale = speed;
     }
 
+    public void Tween_Trail(float duration)
+    {
+        s_trail.Stop();
+        trailEffect.active = true;
+        s_trail = Sequence.Create().ChainDelay(duration, true)
+            .ChainCallback(target: this, target => target.trailEffect.active = false);
+    }
     public static void Blink(float duration)
     {
-        instance.s_blink.Complete();
-        instance.s_blink = Tween.Custom(instance.c_evade_begin, instance.c_evade_fin,duration,
+        instance.t_blink.Complete();
+        instance.t_blink = Tween.Custom(instance.c_evade_begin, instance.c_evade_fin,duration,
             onValueChange: newVal => instance._outlinable.FrontParameters.FillPass
                 .SetColor(GameManager.s_publiccolor, newVal),ease: Ease.InQuad);
     }
@@ -119,6 +126,14 @@ public partial class Hero : MonoBehaviour
         Transform t = transform;
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
+    }
+    public void Effect_CancelRoll()
+    {
+        Transform t = transform;
+        p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
+        p_change.Play();
+        Tween_Blink_Evade(1.0f);
+        CamArm.instance.Tween_Slomo(0.5f);
     }
     public void Effect_Smoke(float fwd = 0)
     {
