@@ -8,19 +8,23 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public partial class Monster_Boss : Monster
 {
     //Public
     [FoldoutGroup("UI")] public Image img_health_root,img_nameplate;
-
+    [FoldoutGroup("UI")] public RectTransform rect_shake;
+    private Vector2 _shakeAnchoredPos;
+    private Tween t_shake;
+     
     private readonly float _uiDuration = 0.6f;
     protected override void Setting_UI()
     {
         base.Setting_UI();
         deathDealy = 1.0f;
         dissolveSpeed = 1.0f;
-        
+        _shakeAnchoredPos = rect_shake.anchoredPosition;
     }
     protected override void ActivateUI()
     {
@@ -103,5 +107,11 @@ public partial class Monster_Boss : Monster
             Despawn().Forget();
         }
         
+        t_shake.Stop();
+        t_shake = Tween.Custom(0, 1, 0.5f, useUnscaledTime: true, onValueChange: newVal =>
+        {
+            Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2 - 2 * newVal) * 6;
+            rect_shake.anchoredPosition = _shakeAnchoredPos + RandomVec;
+        });
     }
 }
