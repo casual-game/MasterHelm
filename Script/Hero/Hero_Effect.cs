@@ -8,23 +8,35 @@ using UnityEngine.Serialization;
 
 public partial class Hero : MonoBehaviour
 {
-    public float timescale=1.0f;
-    public bool testbool = true;
-    public bool isUp = false;
     private void Setting_Effect()
     {
         _meshRoot = transform.GetChild(0);
         trailEffect = GetComponentInChildren<SkinnedMeshRenderer>().GetComponent<TrailEffect>();
         trailEffect.active = false;
-        var trailModule = p_charge.trails;
-        trailModule.colorOverTrail = weaponPack_Normal.mainGradient;
+        var trailModuleM = p_charge_main.trails;
+        trailModuleM.colorOverTrail = weaponPack_Normal.colorOverTrail;
+        trailModuleM.colorOverLifetime = weaponPack_Normal.colorOverLifetime;
+        var trailModuleL = p_charge_strongL.trails;
+        trailModuleL.colorOverTrail = weaponPack_StrongL.colorOverTrail;
+        trailModuleL.colorOverLifetime = weaponPack_StrongL.colorOverLifetime;
+        var trailModuleR = p_charge_strongR.trails;
+        trailModuleR.colorOverTrail = weaponPack_StrongR.colorOverTrail;
+        trailModuleR.colorOverLifetime = weaponPack_StrongR.colorOverLifetime;
     }
     
     //Public
     private TrailEffect trailEffect;
+
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_charge,p_spawn,p_despawn
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
+
+    [FoldoutGroup("Particle")][SerializeField]
+    private ParticleSystem p_charge_main,p_charge_strongL,p_charge_strongR;
+
+    [FoldoutGroup("Particle")] 
+    public ParticleSystem p_spawn,p_despawn
         ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
+
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
     public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
     
@@ -39,7 +51,7 @@ public partial class Hero : MonoBehaviour
         t_blink = Tween.Custom(c_hit_begin, c_hit_fin, duration: 0.5f,
                 onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
                 ,ease: Ease.InCirc);
-        t_blink.timeScale = timescale;
+        t_blink.timeScale = 1.2f;
     }
     public void Tween_Blink_Evade(float timeScale)
     {
@@ -47,7 +59,7 @@ public partial class Hero : MonoBehaviour
         t_blink = Tween.Custom(c_evade_begin, c_evade_fin, duration: 0.45f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        t_blink.timeScale = timescale;
+        t_blink.timeScale = 1.2f;
     }
     public void Tween_Punch_Down(float speed)
     {
@@ -99,7 +111,7 @@ public partial class Hero : MonoBehaviour
     //Effect
     public void Effect_AttackParticle(int index)
     {
-        if (_animator.IsInTransition(0)) return;
+        if (_animator.IsInTransition(0) || !(HeroMoveState is MoveState.NormalAttack or MoveState.StrongAttack)) return;
         var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
         if (mainParticle == null) return;
 
@@ -133,7 +145,7 @@ public partial class Hero : MonoBehaviour
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
         Tween_Blink_Evade(1.0f);
-        CamArm.instance.Tween_Slomo(0.5f);
+        CamArm.instance.Tween_JustEvade(0.5f);
     }
     public void Effect_Smoke(float fwd = 0)
     {
@@ -180,20 +192,24 @@ public partial class Hero : MonoBehaviour
         Tween_Punch_Up(1.25f);
         Effect_Smoke();
     }
-    
-    #if UNITY_EDITOR
-    public void TestPunch()
+    //Particle
+    public void Particle_Charge_Main()
     {
-        if (isUp)
-        {
-            if(testbool) Tween_Punch_Up(timescale);
-            else Tween_Punch_Up_Compact(timescale);
-        }
-        else
-        {
-            if(testbool) Tween_Punch_Down(timescale);
-            else Tween_Punch_Down_Compact(timescale);
-        }
+        if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        p_charge_main.Play();
     }
-    #endif
+    public void Particle_Charge_L()
+    {
+        if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        p_charge_strongL.Play();
+    }
+    public void Particle_Charge_R()
+    {
+        if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        p_charge_strongR.Play();
+    }
+    
 }

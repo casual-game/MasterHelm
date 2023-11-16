@@ -7,6 +7,10 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "HeroData", menuName = "Data/HeroData", order = 1)]
 public class HeroData : ScriptableObject
 {
+    //---------------------------------------------------------------------------------------------------------------
+    [TitleGroup("메인")] public int HP = 100;
+    [TitleGroup("메인")] public int MP_Slot_Capacity=7;
+    //---------------------------------------------------------------------------------------------------------------
     [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float ladderClimbMotionSpeed = 2.0f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public AnimationCurve moveCurve;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public float moveMotionSpeed_normal = 0.75f;

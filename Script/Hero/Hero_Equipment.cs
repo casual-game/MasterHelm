@@ -125,6 +125,7 @@ public partial class Hero : MonoBehaviour
     }
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
+        if (weaponPack == null) return;
         var data = weapondata[weaponPack];
         if (data.weaponL != null) data.weaponL.SetTrail(weaponL);
         if (data.weaponR != null) data.weaponR.SetTrail(weaponR);
@@ -135,9 +136,22 @@ public partial class Hero : MonoBehaviour
     {
         var data = weapondata[weaponPack];
         Transform t = transform;
-        if(weaponL && data.weaponL!=null) data.weaponL.Collision_Interact(_currentTrailData,t);
-        if(weaponR && data.weaponR!=null) data.weaponR.Collision_Interact(_currentTrailData,t);
-        if(useShield && data.useShield) shield.Collision_Interact(_currentTrailData,t);
+        bool collided = false;
+        if (weaponL && data.weaponL != null)
+        {
+            if (data.weaponL.Collision_Interact(_currentTrailData, t)) collided = true;
+        }
+
+        if (weaponR && data.weaponR != null)
+        {
+            if (data.weaponR.Collision_Interact(_currentTrailData, t)) collided = true;
+        }
+
+        if (useShield && data.useShield)
+        {
+            if(shield.Collision_Interact(_currentTrailData,t)) collided = true;
+        }
+        if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
     }
     public void Equipment_Collision_Reset(Data_WeaponPack weaponPack)
     {
@@ -154,11 +168,23 @@ public partial class Hero : MonoBehaviour
         _sensor.Box.HalfExtents = _currentTrailData.hitscan_scale;
         _sensor.Pulse();
         Transform t = transform;
+        bool collided = false;
         foreach (var signal in _sensor.GetSignals())
         {
             signal.Object.TryGetComponent<Monster>(out var monster);
-            monster.Core_Hit(t,t,_currentTrailData);
+            if(monster.Core_Hit(t,t,_currentTrailData)) collided = true;
         }
+        if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
+    }
+
+    public void Equipment_CancelEffect()
+    {
+        foreach (var p in weapondata[weaponPack_Normal].attackParticles)
+            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+        foreach (var p in weapondata[weaponPack_StrongL].attackParticles)
+            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+        foreach (var p in weapondata[weaponPack_StrongR].attackParticles)
+            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
     }
     
 }

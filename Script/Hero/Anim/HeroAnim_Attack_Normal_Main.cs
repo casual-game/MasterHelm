@@ -28,7 +28,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         if (_isLastAttack)
         {
             _hero.Effect_Smoke();
-            _hero.p_charge.Play();
+            _hero.Particle_Charge_Main();
         }
         
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);

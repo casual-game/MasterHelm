@@ -10,8 +10,7 @@ public class Data_WeaponPack : ScriptableObject
     //기본 설정
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public Prefab_Prop wepaon_L, weapon_R;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public bool useShield = false;
-    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] [LabelText("이펙트 적용 그라디언트")]
-    public Gradient mainGradient;
+    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public Gradient colorOverTrail,colorOverLifetime;
 
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")]
     public List<ParticleSystem> attackEffects = new List<ParticleSystem>();
@@ -51,6 +50,7 @@ public class TrailData
     [TitleGroup("AttackData")] public AttackType attackType_ground;
     [TitleGroup("AttackData")] public bool isAirSmash;
     [TitleGroup("AttackData")] public Vector2Int damage = new Vector2Int(10,15);
+    [FormerlySerializedAs("mp_charge")] [FormerlySerializedAs("manaCharge")] [TitleGroup("AttackData")] public int charge_mp = 1;
     [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
     [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
     public Vector2 trailRange = new Vector2(0,1);

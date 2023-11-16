@@ -125,7 +125,7 @@ public partial class Hero : MonoBehaviour
         }
         else if(!canChargeMotion) _lookAtIK.solver.SetLookAtWeight(0);
         //차지
-        if (!_charged && Time.time > _chargeBeginTime + heroData.chargeDuration)
+        if (!_charged && Time.time > _chargeBeginTime + heroData.chargeDuration && frameMain.MP_CanUse())
         {
             _charged = true;
             p_charge_fin.Play();

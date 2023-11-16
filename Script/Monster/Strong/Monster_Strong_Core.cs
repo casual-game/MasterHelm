@@ -16,9 +16,9 @@ public partial class Monster_Strong : Monster
     
     //Setter
     
-    public override void Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
-        if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return;
+        if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return false;
         
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
@@ -42,7 +42,7 @@ public partial class Monster_Strong : Monster
 
         if (!Get_IsAlive()) attackString = GameManager.s_kill;
         GameManager.Instance.Combo(attackString);
-        
+        return true;
         void Effect(bool isStrong)
         {
             _hitStrongTime = Time.time;

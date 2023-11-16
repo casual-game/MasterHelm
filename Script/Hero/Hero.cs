@@ -31,6 +31,8 @@ public partial class Hero : MonoBehaviour
         Setting_LookAt();
         Setting_Equipment();
         Setting_Spawn();
+        frameMain = FindObjectOfType<Frame_Main>();
+        frameMain.Setting(heroData.HP,heroData.MP_Slot_Capacity);
 
         instance = this;
     }
@@ -48,6 +50,7 @@ public partial class Hero : MonoBehaviour
         private set;
     }
     public HeroData heroData;
+    [HideInInspector] public Frame_Main frameMain;
     [HideInInspector] public float rotateCurrentVelocity,rotAnimCurrentVelocity; //회전 계산 시, ref로 사용됨.
     
     //Private

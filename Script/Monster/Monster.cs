@@ -202,9 +202,9 @@ public partial class Monster : MonoBehaviour
     
     //Core
     
-    public virtual void Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public virtual bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
-        
+        return false;
     }
 
     public void Core_HitState(HitState hitState)

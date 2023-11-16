@@ -11,6 +11,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
     private float _lookF;
     private Transform _lookT;
     private Quaternion _lookRot;
+    private bool _usedMP = false;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -20,16 +21,19 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         _hero.Set_CurrentAttackMotionData(_weaponPack.playerAttackMotionData_Strong);
         
         _weaponOff = false;
+        _usedMP = false;
         animator.speed = _hero.CurrentAttackMotionData.playSpeed;
         animator.ResetTrigger(GameManager.s_turn);
         animator.SetBool(GameManager.s_charge_normal,false);
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
-        _hero.Effect_Smoke(0.25f);
+        //_hero.Effect_Smoke(0.25f);
         _hero.Equipment_Equip(_weaponPack);
         _hero.Effect_Change();
         _hero.Equipment_Collision_Reset(_weaponPack);
-        
-
+        _hero.frameMain.MP_Use();
+        if(isLeft) _hero.Particle_Charge_L();
+        else _hero.Particle_Charge_R();
+        CamArm.instance.Tween_Skill();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
     }
 

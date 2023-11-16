@@ -16,9 +16,9 @@ public partial class Monster_Normal : Monster
     
     //Setter
     
-    public override void Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
-        if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return;
+        if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
         
         
         //현 상태에 따른 히트 타입 설정
@@ -98,7 +98,7 @@ public partial class Monster_Normal : Monster
             Punch_Down(1.5f);
             Effect_Hit_Normal();
             CamArm.instance.Tween_ShakeWeak();
-            return;
+            return true;
         }
 
         if (!Get_IsAlive()) attackString = GameManager.s_kill;
@@ -131,7 +131,7 @@ public partial class Monster_Normal : Monster
                        || _hitState == HitState.Air || isAirSmash;
         if (isCombo) p_blood_combo.transform.rotation = prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0);
         Effect_Hit_Strong(isBloodBottom,isCombo);
-
+        return true;
         void Effect(bool isStrong)
         {
             if (isStrong || !Get_IsAlive())

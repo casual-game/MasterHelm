@@ -44,7 +44,6 @@ public partial class GameManager : MonoBehaviour
         dmp_created_sub.SetAnchoredPosition(rectT_Combo_Sub, new Vector2(0, 0));
     }
     public void Combo(string subComboText)
-
     {
         if (Time.time - comboBeginTime > comboDelay)
         {
@@ -71,7 +70,7 @@ public partial class GameManager : MonoBehaviour
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
                 } ))
                 .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
-                .ChainDelay(2.25f)
+                .ChainDelay(2.25f,true)
                 .ChainCallback(() =>
                 {
                     if (dmp_created_main != null) dmp_created_main.FadeOut();
@@ -103,7 +102,7 @@ public partial class GameManager : MonoBehaviour
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
                 } ))
                 .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
-                .ChainDelay(2.25f)
+                .ChainDelay(2.25f,true)
                 .ChainCallback(() =>
                 {
                     if (dmp_created_main != null) dmp_created_main.FadeOut();

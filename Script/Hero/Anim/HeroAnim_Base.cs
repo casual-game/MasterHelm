@@ -184,7 +184,6 @@ public class HeroAnim_Base : StateMachineBehaviour
             }
         }
     }
-
     protected void Set_Roll(Animator animator,bool islocomotion)
     {
         if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
@@ -224,6 +223,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongL,false,false,false);
         _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongR,false,false,false);
         _hero.Equipment_Equip(null);
+        _hero.Equipment_CancelEffect();
         isFinished = true;
     }
     

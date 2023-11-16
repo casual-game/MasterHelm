@@ -24,7 +24,7 @@ public class CamArm : MonoBehaviour
     private Transform _camT;
     private Camera[] _cams;
     private Tween t_stop,t_shake,t_chromatic,t_radial;
-    private Sequence s_zoom,s_impact,s_bloom;
+    private Sequence s_zoom,s_impact,s_bloom,s_vignette,s_speedline;
     private int id_radial,id_speedline;
     private void Awake()
     {
@@ -102,17 +102,21 @@ public class CamArm : MonoBehaviour
     {
         Tween_Radial(0.5f);
         s_impact.Stop();
-        s_bloom.Stop();
         t_stop.Stop();
         
         t_chromatic.Stop();
-        //Impact
+        //Speedline
+        s_speedline.Stop();
         m_speedline.SetColor(GameManager.s_colour, Color.white);
+        s_speedline = Sequence.Create().ChainDelay(0.1f,true).ChainCallback(() =>
+        {
+            m_speedline.SetColor(GameManager.s_colour, Color.clear);
+        });
+        //Impact
         cp_invert.Activate();
         s_impact = Sequence.Create()
             .ChainDelay(0.1f,useUnscaledTime: true).ChainCallback(() =>
             {
-                m_speedline.SetColor(GameManager.s_colour, Color.clear);
                 cp_invert.Deactivate();
                 particle.Play();
                 Vector3 pos = particle.transform.position;
@@ -146,8 +150,7 @@ public class CamArm : MonoBehaviour
         
         
     }
-
-    public void Tween_Slomo(float duration)
+    public void Tween_JustEvade(float duration)
     {
         Tween_Radial(duration,0.05f);
         //Stop
@@ -164,5 +167,59 @@ public class CamArm : MonoBehaviour
         t_chromatic = Tween.Custom(0.02f, 0.001f, duration, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
     }
+    public void Tween_Skill()
+    {
+        float duration = 0.5f;
+        Tween_Radial(duration,0.075f);
+        //Stop
+        t_stop.Complete();
+        t_stop = Tween.GlobalTimeScale(0.2f, 1.0f, duration, ease: Ease.InExpo);
+        //Shake Normal
+        t_shake.Complete();
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.15f, 0.75f, 25,
+            easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
+        
+        //Chromatic
+        t_chromatic.Complete();
+        t_chromatic = Tween.Custom(0.035f, 0.001f, duration, ease: Ease.OutCirc, useUnscaledTime: true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
 
+        float begin = 0.25f, delay = 0.4f, fin = 0.5f;
+        //Vignette
+        s_vignette.Complete();
+        s_vignette = Sequence.Create()
+            .Chain(Tween.Custom(0.75f,1.0f,begin,ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange:newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .ChainDelay(delay,true)
+            .Chain(Tween.Custom(1.0f,0.75f,fin,ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange:newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal));
+        //Zoom
+        s_zoom.Complete();
+        s_zoom = Sequence.Create()
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.5f, begin, useUnscaledTime: true,ease: Ease.OutCirc))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 3.5f, begin, useUnscaledTime: true,ease: Ease.OutCirc))
+            .ChainDelay(delay,true)
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true));
+        /*
+         //Speedline
+        s_speedline.Stop();
+        s_speedline = Sequence.Create()
+            .Chain(Tween.Custom(Color.clear, Color.white*0.65f, 0.2f,
+                useUnscaledTime: true, ease: Ease.OutQuad, onValueChange: newVal =>
+                {
+                    m_speedline.SetColor(GameManager.s_colour, newVal);
+                    m_speedline.SetFloat(GameManager.s_unscaledtime, Time.unscaledTime);
+                }))
+            .Chain(Tween.Custom(0.0f,1.0f,0.3f,useUnscaledTime:true,onValueChange:val
+                => m_speedline.SetFloat(GameManager.s_unscaledtime, Time.unscaledTime)))
+            .Chain(Tween.Custom(Color.white*0.65f, Color.clear, 0.5f,
+                useUnscaledTime: true, ease: Ease.InCirc, onValueChange: newVal =>
+                {
+                    m_speedline.SetColor(GameManager.s_colour, newVal);
+                    m_speedline.SetFloat(GameManager.s_unscaledtime, Time.unscaledTime);
+                }));
+         */
+    }
 }
