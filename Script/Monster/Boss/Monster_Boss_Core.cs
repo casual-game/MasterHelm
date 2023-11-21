@@ -24,10 +24,10 @@ public partial class Monster_Boss : Monster
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     private Material[] ms_groggy;
     //Core
-    public override bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return false;
-        
+        Equipment_UpdateTrail(false,false,false);
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
         string attackString;
@@ -44,7 +44,7 @@ public partial class Monster_Boss : Monster
                 }
                 else
                 {
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     Core_Damage_Strong(damage);
                     Effect_Strong();
                     attackString =GameManager.s_smash;
@@ -64,7 +64,7 @@ public partial class Monster_Boss : Monster
                 }
                 else
                 {
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     Core_Damage_Strong(damage,false);
                     Effect_Strong_Counter(damage);
                     attackString =GameManager.s_counter;
@@ -79,7 +79,7 @@ public partial class Monster_Boss : Monster
                 }
                 else
                 {
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     Core_Damage_Strong(damage);
                     Effect_Strong_Groggy();
                     attackString =GameManager.s_smash;

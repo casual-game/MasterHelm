@@ -10,16 +10,20 @@ public partial class Monster : MonoBehaviour
     
     //Private
     protected Prefab_Prop _weaponL, _weaponR, _shield;
-    
+    private TrailData _currentTrailData;
+    //Get,Set
+    public void Set_CurrentTrail(TrailData traildata)
+    {
+        _currentTrailData = traildata;
+    }
     //Equipment
-    public void Equip()
+    public void Equipment_Equip()
     {
         if(_weaponL!=null) _weaponL.Attach();
         if(_weaponR!=null) _weaponR.Attach();
         if(_shield!=null) _shield.Attach();
     }
-
-    public void Unequip()
+    public void Equipment_Unequip()
     {
         if (_weaponL != null)
         {
@@ -38,5 +42,24 @@ public partial class Monster : MonoBehaviour
             _shield.SetTrail(false);
             _shield.Detach();
         }
+    }
+    public void Equipment_UpdateTrail(bool weaponL,bool weaponR,bool shield)
+    {
+        if (_weaponL != null) _weaponL.SetTrail(weaponL);
+        if (_weaponR != null) _weaponR.SetTrail(weaponR);
+        if (_shield != null) _shield.SetTrail(shield);
+    }
+    public void Equipment_Collision_Interact(bool weaponL,bool weaponR,bool useShield)
+    {
+        Transform t = transform;
+        if (weaponL && _weaponL != null) _weaponL.Collision_Interact(_currentTrailData, t);
+        if (weaponR && _weaponR != null) _weaponR.Collision_Interact(_currentTrailData, t);
+        if (useShield && _shield != null) _shield.Collision_Interact(_currentTrailData, t);
+    }
+    public void Equipment_Collision_Reset()
+    {
+        if(_weaponL!=null) _weaponL.Collision_Reset();
+        if (_weaponR != null) _weaponR.Collision_Reset();
+        if(_shield != null) _shield.Collision_Reset();
     }
 }

@@ -85,7 +85,7 @@ public partial class Monster_Boss : Monster
         currenthp -= damage;
         if (currenthp > 0)
         {
-            float ratio = (float)currenthp / (float)hp;
+            float ratio = (float)currenthp / (float)monsterInfo.hp;
             Vector2 targetVec = new Vector2(512 * ratio, 58);
             t_dmg_main.Stop();
             t_dmg_lerp.Stop();

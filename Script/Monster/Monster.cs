@@ -11,11 +11,11 @@ using Random = UnityEngine.Random;
 
 public partial class Monster : MonoBehaviour
 {
-    public void Setting_Monster(Prefab_Prop _weaponl,Prefab_Prop _weaponr,Prefab_Prop _shield)
+    public virtual void Setting_Monster(Prefab_Prop _weaponl,Prefab_Prop _weaponr,Prefab_Prop _shield)
     {
         _shadow = transform.Find(GameManager.s_shadow);
         _shadowScale = _shadow.localScale;
-        _agent = GetComponent<NavMeshAgent>();
+        
         smr = GetComponentInChildren<SkinnedMeshRenderer>();
         _material = smr.material;
         _meshRoot = smr.rootBone;
@@ -28,31 +28,29 @@ public partial class Monster : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;
         
-        
+        //장비 설정
         Prefab_Prop l = _weaponl==null?null:Instantiate(_weaponl), 
             r = _weaponr==null?null:Instantiate(_weaponr), 
             s = _shield==null?null:Instantiate(_shield);
-        if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,GameManager.Folder_MonsterProp);
-        if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,GameManager.Folder_MonsterProp);
-        if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,GameManager.Folder_MonsterProp);
-        
-        Transform t = transform;
-        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
-        
+        if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,this,GameManager.Folder_MonsterProp);
+        if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,this,GameManager.Folder_MonsterProp);
+        if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,this,GameManager.Folder_MonsterProp);
+        //세팅
         Setting_UI();
         Setting_Effect();
-        
+        Setting_AI();
+        //생성
+        Transform t = transform;
+        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
         Monsters.Add(this);
     }
-    //Static
+    //Static,Public
     public static List<Monster> Monsters = new List<Monster>();
-    [FoldoutGroup("MainData")] public int hp = 100;
+    [FoldoutGroup("MainData")] public Data_MonsterInfo monsterInfo;
     
     //Private,Protected
     private float _dissolveRatio = 1.0f;
     private Material _material;
-    private NavMeshAgent _agent;
-    
     private OutlineTarget _outlineTarget;
     private Transform _shadow;
     private Vector3 _shadowScale;
@@ -66,17 +64,7 @@ public partial class Monster : MonoBehaviour
     protected float deathDealy = 0.5f;
     protected float dissolveSpeed = 1.3f;
     protected SkinnedMeshRenderer smr;
-    //Public
-    public enum AnimationState
-    {
-        Locomotion = 0
-    }
-    public enum HitState {Ground=0,Air=1,Recovery=2}
-    public HitState _hitState
-    {
-        get;
-        private set;
-    }
+    
     //Editor
     #if UNITY_EDITOR
     [FoldoutGroup("Debug")] public Prefab_Prop debugWepaonL, debugWaeponR, debugShield;
@@ -114,7 +102,7 @@ public partial class Monster : MonoBehaviour
         _weaponL = weaponL;
         _weaponR = weaponR;
         _shield = shield;
-        Equip();
+        Equipment_Equip();
         while (_isAlive && _dissolveRatio>0)
         {
             _dissolveRatio -= Time.deltaTime*dissolveSpeed;
@@ -142,7 +130,7 @@ public partial class Monster : MonoBehaviour
         await UniTask.Delay(TimeSpan.FromSeconds(1.25f), DelayType.DeltaTime);
         DeactivateUI();
         await UniTask.Delay(TimeSpan.FromSeconds(deathDealy), DelayType.DeltaTime);
-        Unequip();
+        Equipment_Unequip();
         p_spawn.Play();
         while (!_isAlive && _dissolveRatio<1)
         {
@@ -171,11 +159,6 @@ public partial class Monster : MonoBehaviour
     {
         _animBase = animBase;
     }
-    public void Set_AnimationState(AnimationState animationState)
-    {
-        _animator.SetInteger(GameManager.s_state_type, (int)animationState);
-        _animator.SetTrigger(GameManager.s_state_change);
-    }
     public void Set_IsReadyTrue()
     {
         _isReady = true;
@@ -200,15 +183,4 @@ public partial class Monster : MonoBehaviour
         transform.SetPositionAndRotation(nextPos, nextRot);
     }
     
-    //Core
-    
-    public virtual bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
-    {
-        return false;
-    }
-
-    public void Core_HitState(HitState hitState)
-    {
-        _hitState = hitState;
-    }
 }

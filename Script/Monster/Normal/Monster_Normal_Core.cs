@@ -15,11 +15,10 @@ public partial class Monster_Normal : Monster
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     
     //Setter
-    
-    public override bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
-        
+        Equipment_UpdateTrail(false,false,false);
         
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
@@ -34,7 +33,7 @@ public partial class Monster_Normal : Monster
             switch (attackType)
             {
                 case AttackType.Normal:
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     hitType = HitType.Normal;
                     Core_Damage_Normal(damage);
                     Effect(false);
@@ -42,28 +41,28 @@ public partial class Monster_Normal : Monster
                     attackString =GameManager.s_normalattack;
                     break;
                 case AttackType.Stun:
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     hitType = HitType.Stun;
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_combobegin;
                     break;
                 case AttackType.Smash:
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     hitType = HitType.Smash;
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_smash;
                     break;
                 case AttackType.Combo:
-                    Core_HitState(HitState.Air);
+                    Set_HitState(HitState.Air);
                     hitType = HitType.Bound;
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_combobegin;
                     break;
                 default:
-                    Core_HitState(HitState.Ground);
+                    Set_HitState(HitState.Ground);
                     hitType = HitType.Normal;
                     Core_Damage_Normal(damage);
                     Effect(false);
@@ -76,7 +75,7 @@ public partial class Monster_Normal : Monster
             _animator.SetBool(GameManager.s_isair,true);
             if (isAirSmash)
             {
-                Core_HitState(HitState.Recovery);
+                Set_HitState(HitState.Recovery);
                 hitType = HitType.Flip;
                 Core_Damage_Strong(damage);
                 Effect(true);
@@ -84,7 +83,7 @@ public partial class Monster_Normal : Monster
             }
             else
             {
-                Core_HitState(HitState.Air);
+                Set_HitState(HitState.Air);
                 hitType = HitType.Screw;
                 Core_Damage_Normal(damage);
                 Effect(false);
@@ -145,4 +144,6 @@ public partial class Monster_Normal : Monster
             }
         }
     }
+
+    
 }

@@ -33,7 +33,6 @@ public partial class Monster : MonoBehaviour
     }
     //Public
     [FoldoutGroup("Effect")] public ParticleSystem p_spawn, p_smoke,p_blood_normal,p_blood_strong,p_blood_combo;
-    [FoldoutGroup("Effect")][ColorUsage(true,true)]  public Color c_hit_begin, c_hit_fin;
     [FoldoutGroup("Effect")][PropertySpace(16)] public bool subMat = false;
     [FoldoutGroup("Effect")][ShowIf("subMat")] public ParticleSystem p_submat;
     [FoldoutGroup("Effect")][ColorUsage(true,true)][ShowIf("subMat")] public Color c_submatbegin,c_submatfin;
@@ -83,7 +82,7 @@ public partial class Monster : MonoBehaviour
     public void Effect_Hit_Normal()
     {
         t_blink.Complete();
-        t_blink = Tween.Custom(c_hit_begin, c_hit_fin, duration: 0.2f,
+        t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.2f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.Linear);
         
@@ -100,7 +99,7 @@ public partial class Monster : MonoBehaviour
     public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo)
     {
         t_blink.Complete();
-        t_blink = Tween.Custom(c_hit_begin, c_hit_fin, duration: 0.3f,
+        t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.3f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
         
@@ -161,6 +160,6 @@ public partial class Monster : MonoBehaviour
     {
         p_smoke.Play();
         Punch_Up_Compact(1.5f);
-        Core_HitState(HitState.Recovery);
+        Set_HitState(HitState.Recovery);
     }
 }

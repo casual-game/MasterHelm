@@ -189,7 +189,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
         animator.SetBool(GameManager.s_roll,true);
-        if(islocomotion || true) animator.SetInteger(GameManager.s_state_type,0);
+        if(islocomotion && false) animator.SetInteger(GameManager.s_state_type,0);
         else
         {
             _hero.Effect_CancelRoll();

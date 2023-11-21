@@ -24,9 +24,10 @@ public class Prefab_Prop : MonoBehaviour
     private bool _canKeep = false;
     private TrailEffect[] _trails;
     private ParticleSystem _p_spawn;
-    public List<Collider> _interact_currentTargets,_interact_savedTargets,_interact_interactedTargets;
+    public List<Collider> _interact_currentTargets,_interact_interactedTargets,_interact_savedTargets;
     private bool _isHero;
     private int _syncInt = 0,_syncedInt=0;
+    private Monster _monster;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -74,8 +75,15 @@ public class Prefab_Prop : MonoBehaviour
                 if (_isHero)
                 {
                     coll.TryGetComponent<Monster>(out var monster);
-                    if (monster.Core_Hit(attacker, transform, trailData)) collided = true;
+                    if (monster.AI_Hit(attacker, transform, trailData)) collided = true;
                     _interact_interactedTargets.Add(coll);
+                }
+                else
+                {
+                    coll.TryGetComponent<Hero>(out var hero);
+                    if (hero.Core_Hit_Strong(AttackMotionType.Center,HitType.Normal,_monster.transform.position)) collided = true;
+                    _interact_interactedTargets.Add(coll);
+                    print("OP");
                 }
             }
         }
@@ -89,7 +97,6 @@ public class Prefab_Prop : MonoBehaviour
         {
             bool canRemove = !_interact_currentTargets.Contains(_interact_savedTargets[i]);
             if(canRemove)_interact_savedTargets.RemoveAt(i);
-            
         }
     }
     //Setting
@@ -116,7 +123,7 @@ public class Prefab_Prop : MonoBehaviour
             transform.SetParent(detachT);
         }
     }
-    public void Setting_Monster(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
+    public void Setting_Monster(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Monster _monster,Transform nullFolder = null)
     {
         Setting();
         _attachCopyT = transform.Find("AttachCopyT_Monster");
@@ -127,6 +134,7 @@ public class Prefab_Prop : MonoBehaviour
         _outlinable = outlinable;
         _canKeep = canKeep;
         _isHero = false;
+        this._monster = _monster;
         if (canKeep)
         {
             outlinable.TryAddTarget(_outlineTarget);
@@ -164,7 +172,9 @@ public class Prefab_Prop : MonoBehaviour
         }
         else
         {
-            
+            if (!other.CompareTag(GameManager.s_player)) return;
+            if(!_interact_savedTargets.Contains(other))_interact_savedTargets.Add(other);
+            if(!_interact_currentTargets.Contains(other))_interact_currentTargets.Add(other);
         }
     }
     private void OnTriggerExit(Collider other)
@@ -176,7 +186,8 @@ public class Prefab_Prop : MonoBehaviour
         }
         else
         {
-            
+            if (!other.CompareTag(GameManager.s_player)) return;
+            if(_interact_currentTargets.Contains(other))_interact_currentTargets.Remove(other);
         }
     }
     //UniTask - Keep불가능

@@ -16,7 +16,7 @@ public partial class Monster_Strong : Monster
     
     //Setter
     
-    public override bool Core_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return false;
         
@@ -32,7 +32,7 @@ public partial class Monster_Strong : Monster
                 attackString =GameManager.s_normalattack;
                 break;
             default:
-                Core_HitState(HitState.Ground);
+                Set_HitState(HitState.Ground);
                 Core_Damage_Normal(damage);
                 Effect(true);
                 attackString =GameManager.s_smash;

@@ -25,7 +25,7 @@ public partial class GameManager : MonoBehaviour
         ,s_action = "Action",s_combobegin = "콤보 시작",s_truecombo = "확정 콤보",s_smash = "강력한 공격",s_combofinish = "콤보 마무리",s_kill = "적 처치"
         ,s_normalattack = "첫번째 공격",s_continuousattack = "연속 공격",s_counter = "카운터 성공"
         ,s_advanceddissolvecutoutstandardmap1 = "_AdvancedDissolveCutoutStandardMap1",s_basemap = "_BaseMap",s_maincolor = "_MainColor"
-        ,s_bluramount = "_BlurAmount",s_colour = "_Colour",s_roll = "Roll",s_unscaledtime = "_UnscaledTime";
+        ,s_bluramount = "_BlurAmount",s_colour = "_Colour",s_roll = "Roll",s_unscaledtime = "_UnscaledTime",s_pattern = "Pattern";
     
     //Public
     public AnimationCurve curve_inout,curve_in,curve_out;

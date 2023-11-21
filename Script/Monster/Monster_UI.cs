@@ -21,7 +21,7 @@ public partial class Monster : MonoBehaviour
     protected virtual void ActivateUI()
     {
         _isAlive = true;
-        currenthp = hp;
+        currenthp = monsterInfo.hp;
         img_health_main.fillAmount = 1;
         img_health_lerp.fillAmount = 1;
     }
@@ -52,7 +52,7 @@ public partial class Monster : MonoBehaviour
         currenthp -= damage;
         if (currenthp > 0)
         {
-            float ratio = (float)currenthp / (float)hp;
+            float ratio = (float)currenthp / (float)monsterInfo.hp;
             t_dmg_main.Stop();
             t_dmg_lerp.Stop();
             t_dmg_main = Tween.UIFillAmount(img_health_main, ratio, 0.5f, Ease.OutQuart, useUnscaledTime: true);

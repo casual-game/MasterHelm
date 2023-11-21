@@ -17,10 +17,6 @@ public partial class Monster_Normal : Monster
     [FoldoutGroup("UI")] public float ui_Height;
     [FoldoutGroup("UI")] public Image img_health_root;
 
-    protected override void Setting_UI()
-    {
-        base.Setting_UI();
-    }
     protected override void ActivateUI()
     {
         base.ActivateUI();

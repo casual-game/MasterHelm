@@ -27,6 +27,7 @@ public class BloodManager : MonoBehaviour
 
     public void Blood_Normal(ref Vector3 pos,ref Quaternion rot)
     {
+        return;
         bn_index = (bn_index + 1) % bn_maxindex;
         Transform t = blood_norm.GetChild(bn_index);
         t.gameObject.SetActive(false);
@@ -36,6 +37,7 @@ public class BloodManager : MonoBehaviour
 
     public void Blood_Strong_Front(ref Vector3 pos,ref Quaternion rot)
     {
+        return;
         bsf_index = (bsf_index + 1) % bsf_maxindex;
         Transform t = blood_strong_front.GetChild(bsf_index);
         t.gameObject.SetActive(false);
@@ -44,6 +46,7 @@ public class BloodManager : MonoBehaviour
     }
     public void Blood_Strong_Bottom(ref Vector3 pos,ref Quaternion rot)
     {
+        return;
         bsb_index = (bsb_index + 1) % bsb_maxindex;
         Transform t = blood_strong_bottom.GetChild(bsb_index);
         t.gameObject.SetActive(false);

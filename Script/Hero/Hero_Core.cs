@@ -11,7 +11,7 @@ public partial class Hero : MonoBehaviour
     }
     //Const, ReadOnly
     private const float HitStrongDelay = 0.2f;
-
+    
     //Private 
     private float _actionBeginTime = -100;//액션 버튼 입력 시간
     private float _inputTimeAction = -100;//액션 버튼 입력~해제까지 걸린 시간
@@ -20,6 +20,7 @@ public partial class Hero : MonoBehaviour
     private int _fastRoll = 0; //빠른 구르기는 한번에 눌러야 한다. 입력 횟수 카운트용.
     private float _falledTime = -100;//빠른 구르기를 위한 낙하 타이밍 저장.
     private float _rolledTime;
+    private bool _superArmor = true;
     //Public
     public enum AnimationState
     {
@@ -99,7 +100,7 @@ public partial class Hero : MonoBehaviour
             Set_AnimationState(AnimationState.Attack_Strong);
         else Core_NormalAttack();
     }
-    public void Core_Hit_Normal()
+    public bool Core_Hit_Normal()
     {
         //감속시킨다.
         _speedRatio *=0.35f;
@@ -119,15 +120,19 @@ public partial class Hero : MonoBehaviour
         _animator.SetTrigger(GameManager.s_hit_additive);
         Tween_Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
+        return true;
     }
-    public void Core_Hit_Strong(AttackMotionType attackMotionType,HitType hitType)
+
+    public bool Core_Hit_Strong(AttackMotionType attackMotionType, HitType hitType, Vector3 hitPoint)
     {
-        if (HeroMoveState == MoveState.Roll)
+        if (_superArmor)
         {
-            Core_Hit_Normal();
-            return;
+            Tween_Punch_Down(1.0f);
+            Effect_Hit_Strong(true);
+            CamArm.instance.Tween_ShakeNormal();
+            return true;
         }
-        if (Time.time < _hitStrongTime + HitStrongDelay) return;
+        if (Time.time < _hitStrongTime + HitStrongDelay) return false;
         _fastRoll = 2;
         _animBase.cleanFinished = true;
         _animBase.isFinished = true;
@@ -137,25 +142,24 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_leftstate,false);
         if (_currentWeaponPack != null) Equipment_UpdateTrail(_currentWeaponPack,false,false,false);
         Equipment_Equip(null);
-        
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         //_animator.SetFloat(GameManager.s_hit_rot,1);
         if (hitType == HitType.Normal)
         {
             _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
-            Tween_Punch_Down(1.05f);
+            Tween_Punch_Down(1.4f);
+            CamArm.instance.Tween_ShakeNormal_Hero();
         }
         else
         {
             _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
             Tween_Punch_Down(1.1f);
+            CamArm.instance.Tween_ShakeStrong_Hero();
         }
         //타겟 벡터
-        Vector3 hitpoint = GameManager.V3_Zero;
-        Vector3 targetHitVec = hitpoint-transform.position;
+        Vector3 targetHitVec = hitPoint-transform.position;
         targetHitVec.y = 0;
-
         Vector3 myLookVec = transform.forward;
         float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
         float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
@@ -168,6 +172,7 @@ public partial class Hero : MonoBehaviour
         
         bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);
+        return true;
     }
     
     //이벤트 시스템

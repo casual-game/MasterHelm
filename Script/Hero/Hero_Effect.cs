@@ -145,7 +145,7 @@ public partial class Hero : MonoBehaviour
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
         Tween_Blink_Evade(1.0f);
-        CamArm.instance.Tween_JustEvade(0.5f);
+        CamArm.instance.Tween_JustEvade();
     }
     public void Effect_Smoke(float fwd = 0)
     {
