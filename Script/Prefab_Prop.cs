@@ -83,7 +83,6 @@ public class Prefab_Prop : MonoBehaviour
                     coll.TryGetComponent<Hero>(out var hero);
                     if (hero.Core_Hit_Strong(AttackMotionType.Center,HitType.Normal,_monster.transform.position)) collided = true;
                     _interact_interactedTargets.Add(coll);
-                    print("OP");
                 }
             }
         }

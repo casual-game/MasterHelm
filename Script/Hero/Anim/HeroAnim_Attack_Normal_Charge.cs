@@ -24,7 +24,7 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         //구르기 필터링 
         if (_hero.Get_IsRollTiming())
         {
-            Set_Roll(animator,false);
+            Set_Roll(animator);
             cleanFinished = true;
             return;
         }
@@ -42,7 +42,7 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
             {
                 if (GameManager.DelayCheck_Attack() >= _heroData.preinput_attack && !GameManager.BTN_Attack)
                 {
-                    Set_Locomotion();
+                    Set_Locomotion(animator);
                     return;
                 }
             }
@@ -54,13 +54,13 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
             //기본 공격
             if(!_hero.Get_Charged()) animator.SetTrigger(GameManager.s_transition);
             //강 공격
-            else _hero.Set_AnimationState(Hero.AnimationState.Attack_Strong);
+            else Set_Attack_Strong(animator);
             isFinished = true;
         }
         //대기시간 지나고 입력 없으면 기본 자세로 복귀
         else if (_enteredTime + _hero.CurrentAttackMotionData.chargeWaitDuration < Time.time && !GameManager.BTN_Attack)
         {
-            Set_Locomotion();
+            Set_Locomotion(animator);
         }
         
     }

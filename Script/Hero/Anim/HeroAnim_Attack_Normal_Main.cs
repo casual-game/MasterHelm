@@ -43,7 +43,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         //구르기 필터링 
         if (_hero.Get_IsRollTiming())
         {
-            Set_Roll(animator,false);
+            Set_Roll(animator);
             cleanFinished = true;
             _strongFinished = true;
             return;
@@ -60,7 +60,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         if (GameManager.DelayCheck_Attack() < _heroData.preinput_attack && _hero.Get_Charged() && !GameManager.BTN_Attack)
         {
             _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
-            _hero.Set_AnimationState(Hero.AnimationState.Attack_Strong);
+            Set_Attack_Strong(animator);
             isFinished = true;
             _strongFinished = true;
         }
@@ -74,7 +74,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         }
         else if (_isLastAttack && normalizedTime > _hero.CurrentAttackMotionData.transitionRatio)
         {
-            Set_Locomotion();
+            Set_Locomotion(animator);
         }
     }
 }

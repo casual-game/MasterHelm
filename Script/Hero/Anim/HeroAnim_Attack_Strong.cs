@@ -28,7 +28,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         //_hero.Effect_Smoke(0.25f);
         _hero.Equipment_Equip(_weaponPack);
-        _hero.Effect_Change();
+        
         _hero.Equipment_Collision_Reset(_weaponPack);
         _hero.frameMain.MP_Use();
         if(isLeft) _hero.Particle_Charge_L();
@@ -44,7 +44,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         //구르기 필터링 
         if (_hero.Get_IsRollTiming())
         {
-            Set_Roll(animator,false);
+            Set_Roll(animator);
             cleanFinished = true;
             return;
         }
@@ -52,7 +52,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < _heroData.preinput_attack && _hero.Get_Charged())
         {
             _hero.Equipment_UpdateTrail(_weaponPack,false,false,false);
-            _hero.Set_AnimationState(Hero.AnimationState.Attack_Strong);
+            Set_Attack_Strong(animator);
             isFinished = true;
             return;
         }
@@ -85,7 +85,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             if (checkLeft) targetIndex = _hero.Get_LeftEnterIndex();
             else targetIndex = _hero.Get_RightEnterIndex();
             animator.SetInteger(GameManager.s_chargeenterindex,targetIndex);
-            _hero.Set_AnimationState(Hero.AnimationState.Attack_Normal);
+            Set_Attack_Normal(animator);
             _hero.Set_AttackIndex(targetIndex);
             isFinished = true;
         }

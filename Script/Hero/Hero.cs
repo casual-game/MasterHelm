@@ -27,9 +27,9 @@ public partial class Hero : MonoBehaviour
         GameManager.Instance.E_BTN_Action_Fin.AddListener(E_BTN_Action_Fin);
         
         Setting_Core();
-        Setting_Effect();
         Setting_LookAt();
         Setting_Equipment();
+        Setting_Effect();
         Setting_Spawn();
         frameMain = FindObjectOfType<Frame_Main>();
         frameMain.Setting(heroData.HP,heroData.MP_Slot_Capacity);

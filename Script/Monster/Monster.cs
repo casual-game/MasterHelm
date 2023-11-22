@@ -172,6 +172,7 @@ public partial class Monster : MonoBehaviour
     {
         return _isReady;
     }
+
     //Move
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {

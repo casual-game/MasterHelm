@@ -20,7 +20,6 @@ public partial class Hero : MonoBehaviour
     private int _fastRoll = 0; //빠른 구르기는 한번에 눌러야 한다. 입력 횟수 카운트용.
     private float _falledTime = -100;//빠른 구르기를 위한 낙하 타이밍 저장.
     private float _rolledTime;
-    private bool _superArmor = true;
     //Public
     public enum AnimationState
     {
@@ -50,11 +49,6 @@ public partial class Hero : MonoBehaviour
                          && Time.unscaledTime - _rolledTime > heroData.roll_delay;
     }
     //Setter
-    public void Set_AnimationState(AnimationState animationState)
-    {
-        _animator.SetInteger(GameManager.s_state_type, (int)animationState);
-        _animator.SetTrigger(GameManager.s_state_change);
-    }
     public void Set_CurrentAttackMotionData(PlayerAttackMotionData data)
     {
         CurrentAttackMotionData = data;
@@ -91,13 +85,19 @@ public partial class Hero : MonoBehaviour
         if (HeroMoveState == MoveState.Locomotion)
         {
             _animator.SetInteger(GameManager.s_chargeenterindex,-1);
-            Set_AnimationState(AnimationState.Attack_Normal);
+            Effect_SuperArmor_Single(false);
+            _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Normal);
+            _animator.SetTrigger(GameManager.s_state_change);
         }
     }
     public void Core_StrongAttack()
     {
         if (HeroMoveState is MoveState.Locomotion or MoveState.Roll && Get_Charged())
-            Set_AnimationState(AnimationState.Attack_Strong);
+        {
+            Effect_SuperArmor_Single(true);
+            _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
+            _animator.SetTrigger(GameManager.s_state_change);
+        }
         else Core_NormalAttack();
     }
     public bool Core_Hit_Normal()
@@ -122,14 +122,18 @@ public partial class Hero : MonoBehaviour
         Effect_Hit_Normal();
         return true;
     }
-
     public bool Core_Hit_Strong(AttackMotionType attackMotionType, HitType hitType, Vector3 hitPoint)
     {
-        if (_superArmor)
+        //저스트 회피
+        if (_superarmor && HeroMoveState == MoveState.Roll) return false;
+        //구르기, 슈퍼아머 필터링
+        if (_superarmor || HeroMoveState == MoveState.Roll)
         {
-            Tween_Punch_Down(1.0f);
-            Effect_Hit_Strong(true);
-            CamArm.instance.Tween_ShakeNormal();
+            
+            Tween_Punch_Down(1.5f);
+            Effect_Hit_SuperArmor();
+            CamArm.instance.Tween_ShakeSuperArmor();
+            GameManager.Instance.Combo(GameManager.s_superarmor);
             return true;
         }
         if (Time.time < _hitStrongTime + HitStrongDelay) return false;

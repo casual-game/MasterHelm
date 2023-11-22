@@ -19,7 +19,7 @@ public class HeroAnim_Turn : HeroAnim_Base
         //구르기
         if (_hero.Get_IsRollTiming())
         {
-            Set_Roll(animator,true);
+            Set_Roll(animator);
             return;
         }
         _hero.Move_Nav(animator.deltaPosition * _heroData.moveMotionSpeed_normal * 0.5f,

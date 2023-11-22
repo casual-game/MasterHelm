@@ -22,13 +22,39 @@ public partial class Hero : MonoBehaviour
         var trailModuleR = p_charge_strongR.trails;
         trailModuleR.colorOverTrail = weaponPack_StrongR.colorOverTrail;
         trailModuleR.colorOverLifetime = weaponPack_StrongR.colorOverLifetime;
+
+        mat_superarmor = new Material(mat_superarmor);
+        var smr = GetComponentInChildren<SkinnedMeshRenderer>();
+        Material[] newmats = new Material[2];
+        newmats[0] = smr.material;
+        newmats[1] = mat_superarmor;
+        smr.materials = newmats;
+        UpdateWeaponMat(weaponPack_Normal,mat_superarmor);
+        UpdateWeaponMat(weaponPack_StrongL,mat_superarmor);
+        UpdateWeaponMat(weaponPack_StrongR,mat_superarmor);
+        if(shield!=null) UpdatePropMat(shield,mat_superarmor);
+        id_superarmor = Shader.PropertyToID(GameManager.s_maincolor);
+        void UpdateWeaponMat(Data_WeaponPack weaponPack,Material mat)
+        {
+            var wp = weapondata[weaponPack];
+            if (wp.weaponL != null) UpdatePropMat(wp.weaponL,mat);
+            if (wp.weaponR != null) UpdatePropMat(wp.weaponR,mat);
+        }
+        void UpdatePropMat(Prefab_Prop prop, Material mat)
+        {
+            var mr = prop.GetComponent<MeshRenderer>();
+            Material[] propmats = new Material[2];
+            propmats[0] = mr.material;
+            propmats[1] = mat;
+            mr.materials = propmats;
+        }
     }
     
     //Public
     private TrailEffect trailEffect;
-
+    [FoldoutGroup("Particle")] public Material mat_superarmor;
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_superarmor;
 
     [FoldoutGroup("Particle")][SerializeField]
     private ParticleSystem p_charge_main,p_charge_strongL,p_charge_strongR;
@@ -38,12 +64,15 @@ public partial class Hero : MonoBehaviour
         ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
 
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
-    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
-    
+    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin,c_superarmor_deactivated,c_superarmor_activated;
+
     //Private
     private Tween t_blink,t_punch;
-    private Sequence s_trail;
+    private Sequence s_trail,s_superarmor;
     private Transform _meshRoot;
+    private bool _superarmor = false,_superarmor_duration = false,_superarmor_single = false;
+
+    private int id_superarmor;
     //Tween
     public void Tween_Blink_Hit(float timeScale)
     {
@@ -58,7 +87,7 @@ public partial class Hero : MonoBehaviour
         t_blink.Complete();
         t_blink = Tween.Custom(c_evade_begin, c_evade_fin, duration: 0.45f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
-            ,ease: Ease.InQuad);
+            ,ease: Ease.InQuad,useUnscaledTime:true);
         t_blink.timeScale = 1.2f;
     }
     public void Tween_Punch_Down(float speed)
@@ -93,7 +122,6 @@ public partial class Hero : MonoBehaviour
             duration: 0.45f, frequency: 7, easeBetweenShakes: Ease.OutSine,useUnscaledTime:true);
         t_punch.timeScale = speed;
     }
-
     public void Tween_Trail(float duration)
     {
         s_trail.Stop();
@@ -133,19 +161,54 @@ public partial class Hero : MonoBehaviour
         p_roll.transform.SetPositionAndRotation(t.position + t.forward * 0.5f,t.rotation);
         p_roll.Play();
     }
-    public void Effect_Change()
+    [Button]
+    public void Effect_SuperArmor_Single(bool activate)
     {
-        Transform t = transform;
-        p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
-        p_change.Play();
+        if (!activate && !_superarmor) return;
+        _superarmor = activate;
+        
+        
+        if(activate)
+        {
+            _superarmor_single = true;
+            s_superarmor.Stop();
+            Transform t = transform;
+            p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
+            p_change.Play();
+            p_superarmor.Play();
+            s_superarmor = Sequence.Create()
+                .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_activated, 0.25f));
+        }
+        else if(_superarmor_single && !_superarmor_duration)
+        {
+            _superarmor_single = false;
+            p_superarmor.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            s_superarmor = Sequence.Create()
+                .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_deactivated, 0.25f));
+        }
     }
-    public void Effect_CancelRoll()
+    public void Effect_SuperArmor_Duration(float duration)
     {
+        s_superarmor.Stop();
+        _superarmor = true;
+        _superarmor_duration = true;
+        _superarmor_single = false;
         Transform t = transform;
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
-        Tween_Blink_Evade(1.0f);
-        CamArm.instance.Tween_JustEvade();
+        p_superarmor.Play();
+        mat_superarmor.SetColor(id_superarmor,c_superarmor_activated);
+
+        s_superarmor = Sequence.Create()
+            .ChainDelay(duration, false)
+            .ChainCallback(() =>
+            {
+                _superarmor = false;
+                _superarmor_duration = false;
+                p_superarmor.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            })
+            .Group(Tween.MaterialColor(mat_superarmor, id_superarmor, 
+                c_superarmor_deactivated, 0.75f,useUnscaledTime: false));
     }
     public void Effect_Smoke(float fwd = 0)
     {
@@ -187,6 +250,11 @@ public partial class Hero : MonoBehaviour
             BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
         }
     }
+    public void Effect_Hit_SuperArmor()
+    {
+        p_blood_normal.Play();
+        p_blood_strong.Play();
+    }
     public void Effect_Land()
     {
         Tween_Punch_Up(1.25f);
@@ -211,5 +279,7 @@ public partial class Hero : MonoBehaviour
         if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         p_charge_strongR.Play();
     }
+
+
     
 }

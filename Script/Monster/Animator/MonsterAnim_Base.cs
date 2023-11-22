@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class MonsterAnim_Base : StateMachineBehaviour
 {
+    public Monster.MoveState moveState;
+    
     [HideInInspector] public bool isFinished = false;
     protected Monster _monster;
     private bool script_entered = false;
     private bool _collisionChecked;
     private static TrailData _staticTrailData = null;
-    
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -22,6 +23,8 @@ public class MonsterAnim_Base : StateMachineBehaviour
         _collisionChecked = false;
         _monster.Set_AnimBase(this);
         isFinished = false;
+        _monster.Set_MonsterMoveState(moveState);
+        _monster.Set_ClipLength(stateInfo.length);
     }
     protected bool IsNotAvailable(Animator animator, AnimatorStateInfo stateInfo)
     {
@@ -78,4 +81,5 @@ public class MonsterAnim_Base : StateMachineBehaviour
         if(!trailed) _monster.Equipment_UpdateTrail(false,false,false);
         if(!collided) _monster.Equipment_Collision_Interact(false,false,false);
     }
+
 }

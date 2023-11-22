@@ -26,7 +26,7 @@ public class CamArm : MonoBehaviour
     private Transform _camT;
     private Camera[] _cams;
     private Tween t_stop,t_shake,t_chromatic,t_radial;
-    private Sequence s_zoom,s_impact,s_bloom,s_vignette,s_speedline;
+    private Sequence s_zoom,s_impact,s_vignette,s_speedline;
     private int id_radial,id_speedline;
     private void Awake()
     {
@@ -79,6 +79,36 @@ public class CamArm : MonoBehaviour
         
         //Stop Normal
         t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.3f, ease: Ease.OutQuad);
+    }
+    public void Tween_ShakeSuperArmor()
+    {
+        Tween_Radial(0.15f);
+        t_shake.Complete();
+        t_stop.Complete();
+        t_chromatic.Complete();
+        s_vignette.Complete();
+        //Shake Normal
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, 0.3f, 25,
+            easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
+        //Stop Normal
+        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.15f, ease: Ease.InQuad);
+        //Chromatic
+        BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
+        t_chromatic = Tween.Custom(0.015f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        //Vignette
+        float begin = 0.075f, delay = 0.125f, fin = 0.5f;
+        s_vignette = Sequence.Create()
+            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, begin, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
+            .ChainDelay(delay, true)
+            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, fin, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
     }
 
     public void Tween_ShakeStrong_Hero()
@@ -227,23 +257,23 @@ public class CamArm : MonoBehaviour
     }
     public void Tween_JustEvade()
     {
-        float duration = 0.75f;
-        Tween_Radial(duration,0.1f);
+        float duration = 0.5f;
+        Tween_Radial(duration,0.075f);
         //Stop
         t_stop.Stop();
-        t_stop = Tween.GlobalTimeScale(0.1f, 1.0f, duration, ease: Ease.InExpo);
+        t_stop = Tween.GlobalTimeScale(0.2f, 1.0f, 0.5f, ease: Ease.InExpo);
         //Shake Normal
         t_shake.Stop();
         _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
-        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, duration, duration*23,
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.25f, duration, duration*25,
             easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         //Chromatic
         t_chromatic.Stop();
-        t_chromatic = Tween.Custom(0.035f, 0.001f, duration, ease: Ease.OutCirc, useUnscaledTime: true,
+        t_chromatic = Tween.Custom(0.035f, 0.001f, 1.0f, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
         //Vignette
         s_vignette.Complete();
-        float begin = 0.075f, delay = 0.25f, fin = 0.4f;
+        float begin = 0.075f, delay = 0.5f, fin = 0.4f;
         s_vignette = Sequence.Create()
             .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))

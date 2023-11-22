@@ -104,13 +104,30 @@ public class HeroAnim_Base : StateMachineBehaviour
         }
         lookRot = Quaternion.RotateTowards(_hero.transform.rotation, Quaternion.Euler(0,lookF,0), turnSpeed);
     }
-    protected void Set_Locomotion()
+    protected void Set_Locomotion(Animator animator)
     {
         _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
-        _hero.Set_AnimationState(Hero.AnimationState.Locomotion);
+        _hero.Effect_SuperArmor_Single(false);
+        animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Locomotion);
+        animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);
         _hero.Set_AttackIndex(-1);
         isFinished = true;
+    }
+
+    protected void Set_Attack_Normal(Animator animator)
+    {
+        if(animator.GetInteger(GameManager.s_state_type) == (int)Hero.AnimationState.Attack_Strong) 
+            _hero.Effect_SuperArmor_Single(false);
+        animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Normal);
+        animator.SetTrigger(GameManager.s_state_change);
+    }
+
+    protected void Set_Attack_Strong(Animator animator)
+    {
+        _hero.Effect_SuperArmor_Single(true);
+        animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Strong);
+        animator.SetTrigger(GameManager.s_state_change);
     }
     protected void Set_LookAt(ref Transform lookT, ref float lookF, bool isFirst)
     {
@@ -184,15 +201,31 @@ public class HeroAnim_Base : StateMachineBehaviour
             }
         }
     }
-    protected void Set_Roll(Animator animator,bool islocomotion)
+    protected void Set_Roll(Animator animator)
     {
+        //기본
         if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
         animator.SetBool(GameManager.s_roll,true);
-        if(islocomotion && false) animator.SetInteger(GameManager.s_state_type,0);
+        //저스트 구르기인지 확인
+        bool isJustRoll = false;
+        foreach (var m in Monster.Monsters)
+        {
+            if (m.Get_CanEvaded(0.0f))
+            {
+                isJustRoll = true;
+                break;
+            }
+        }
+        //구르기
+        if(!isJustRoll) animator.SetInteger(GameManager.s_state_type,0);
         else
         {
-            _hero.Effect_CancelRoll();
+            GameManager.Instance.Combo(GameManager.s_evade);
+            _hero.Set_AnimatorUnscaledTime(true);
+            CamArm.instance.Tween_JustEvade();
+            _hero.Effect_SuperArmor_Duration(2.25f);
+            
             float targetDeg,currentDeg;
             currentDeg = animator.transform.rotation.eulerAngles.y;
             if (!GameManager.Bool_Move)

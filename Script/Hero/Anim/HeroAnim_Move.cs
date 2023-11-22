@@ -19,7 +19,7 @@ public class HeroAnim_Move : HeroAnim_Base
         //구르기
         if (_hero.Get_IsRollTiming())
         {
-            Set_Roll(animator,true);
+            Set_Roll(animator);
             return;
         }
         //변수 선언
