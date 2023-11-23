@@ -32,4 +32,6 @@ public class HeroData : ScriptableObject
     [TitleGroup("입력")][FoldoutGroup("입력/타이밍")] public float dash_roll_delay = 0.15f;
     [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float roll_delay = 1.5f;
     [TitleGroup("입력")][FoldoutGroup("입력/타이밍")]  public float preinput_attack = 1.0f;
+    [TitleGroup("입력")] [FoldoutGroup("입력/타이밍")] public float justEvadeFreeTime = 0.0f;
+    [TitleGroup("입력")] [FoldoutGroup("입력/타이밍")] public float justEvadeDistance = 3.25f;
 }

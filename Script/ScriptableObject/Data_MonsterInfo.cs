@@ -19,6 +19,6 @@ public class MonsterPattern
     public float endRatio = 0.75f;
     public float rotateDuration = 1.0f;
     [MinMaxSlider(0,1,true)] public Vector2 rotateRange = new Vector2(0, 1);
-    public List<TrailData> trailDatas = new List<TrailData>();
+    public List<TrailData_Monster> trailDatas = new List<TrailData_Monster>();
 }
 

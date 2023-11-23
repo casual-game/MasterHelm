@@ -63,6 +63,13 @@ public class TrailData
     [ShowIf("$isHitScan")] [TitleGroup("InteractType")]
     public Vector3 hitscan_pos, hitscan_rot, hitscan_scale;
 }
+[System.Serializable]
+public class TrailData_Monster : TrailData
+{
+    [LabelText("종료 상태")] public PlayerAttackType swingFinState;
+    public AttackMotionType attackMotionType = AttackMotionType.Center;
+    public HitType hitType = HitType.Normal;
+}
 public enum PlayerAttackType
 {
     LeftState =0, RightState =1

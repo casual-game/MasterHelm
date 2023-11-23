@@ -90,11 +90,6 @@ public partial class Monster : MonoBehaviour
         Transform t = transform;
         Vector3 currentPos = t.position;
         p_blood_normal.Play();
-        
-        //Blood
-        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
-        Quaternion bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
-        BloodManager.instance.Blood_Normal(ref bloodPos,ref bloodRot);
     }
     public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo)
     {
@@ -102,26 +97,9 @@ public partial class Monster : MonoBehaviour
         t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.3f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        
-        
-        Transform t = transform;
-        Vector3 currentPos = t.position;
         p_blood_normal.Play();
         if(!isCombo) p_blood_strong.Play();
         else p_blood_combo.Play();
-        //Blood
-        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
-        Quaternion bloodRot;
-        if (isBloodBottom)
-        {
-            bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
-            BloodManager.instance.Blood_Strong_Bottom(ref bloodPos,ref bloodRot);
-        }
-        else
-        {
-            bloodRot = t.rotation;
-            BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
-        }
     }
     public void Effect_Submat(bool activate)
     {
@@ -143,17 +121,8 @@ public partial class Monster : MonoBehaviour
         t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.5f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        
-        
-        Transform t = transform;
-        Vector3 currentPos = t.position;
         p_blood_normal.Play();
         p_blood_combo.Play();
-        //Blood
-        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
-        Quaternion bloodRot;
-        bloodRot = t.rotation;
-        BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
     }
     //Animation Event
     public void FallDown()

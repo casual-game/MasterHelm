@@ -80,12 +80,7 @@ public partial class Hero : MonoBehaviour
     }
     async UniTaskVoid Despawn()
     {
-        Transform t = transform;
         //Blood,Effect
-        Vector3 bloodPos = t.position + Vector3.up * 0.8f;
-        Quaternion bloodRot = t.rotation;
-        BloodManager.instance.Blood_Strong_Bottom(ref bloodPos,ref bloodRot);
-        BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
         Tween_Punch_Down(0.75f);
         Tween_Blink_Hit(1.0f);
         //기본 설정

@@ -10,11 +10,16 @@ public partial class Monster : MonoBehaviour
     
     //Private
     protected Prefab_Prop _weaponL, _weaponR, _shield;
-    private TrailData _currentTrailData;
+    private TrailData_Monster _currentTrailData;
     //Get,Set
-    public void Set_CurrentTrail(TrailData traildata)
+    public void Set_CurrentTrail(TrailData_Monster traildata)
     {
         _currentTrailData = traildata;
+    }
+
+    public TrailData_Monster Get_CurrentTrail()
+    {
+        return _currentTrailData;
     }
     //Equipment
     public void Equipment_Equip()
@@ -52,9 +57,16 @@ public partial class Monster : MonoBehaviour
     public void Equipment_Collision_Interact(bool weaponL,bool weaponR,bool useShield)
     {
         Transform t = transform;
-        if (weaponL && _weaponL != null) _weaponL.Collision_Interact(_currentTrailData, t);
-        if (weaponR && _weaponR != null) _weaponR.Collision_Interact(_currentTrailData, t);
-        if (useShield && _shield != null) _shield.Collision_Interact(_currentTrailData, t);
+        if (weaponL && _weaponL != null) _weaponL.Collision_Interact_Monster(_currentTrailData, t);
+        if (weaponR && _weaponR != null) _weaponR.Collision_Interact_Monster(_currentTrailData, t);
+        if (useShield && _shield != null) _shield.Collision_Interact_Monster(_currentTrailData, t);
+    }
+    public void Equipment_Collision_Skip()
+    {
+        Transform t = transform;
+        if (_weaponL != null) _weaponL.Collision_Skip();
+        if (_weaponR != null) _weaponR.Collision_Skip();
+        if (_shield != null) _shield.Collision_Skip();
     }
     public void Equipment_Collision_Reset()
     {

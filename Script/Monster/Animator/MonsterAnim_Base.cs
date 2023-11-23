@@ -32,7 +32,7 @@ public class MonsterAnim_Base : StateMachineBehaviour
                                  animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
         return isNotCurrentState || isFinished;
     }
-    protected void Update_Trail(float normalizedTime,List<TrailData> trailDatas)
+    protected void Update_Trail(float normalizedTime,List<TrailData_Monster> trailDatas)
     {
         bool trailed = false, collided = false;
 

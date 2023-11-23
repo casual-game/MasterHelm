@@ -70,7 +70,7 @@ public partial class Hero : MonoBehaviour
     private Tween t_blink,t_punch;
     private Sequence s_trail,s_superarmor;
     private Transform _meshRoot;
-    private bool _superarmor = false,_superarmor_duration = false,_superarmor_single = false;
+    private bool _superarmor = false;
 
     private int id_superarmor;
     //Tween
@@ -161,16 +161,13 @@ public partial class Hero : MonoBehaviour
         p_roll.transform.SetPositionAndRotation(t.position + t.forward * 0.5f,t.rotation);
         p_roll.Play();
     }
-    [Button]
-    public void Effect_SuperArmor_Single(bool activate)
+    public void Effect_SuperArmor(bool activate)
     {
         if (!activate && !_superarmor) return;
         _superarmor = activate;
         
-        
         if(activate)
         {
-            _superarmor_single = true;
             s_superarmor.Stop();
             Transform t = transform;
             p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
@@ -179,36 +176,12 @@ public partial class Hero : MonoBehaviour
             s_superarmor = Sequence.Create()
                 .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_activated, 0.25f));
         }
-        else if(_superarmor_single && !_superarmor_duration)
+        else
         {
-            _superarmor_single = false;
             p_superarmor.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             s_superarmor = Sequence.Create()
                 .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_deactivated, 0.25f));
         }
-    }
-    public void Effect_SuperArmor_Duration(float duration)
-    {
-        s_superarmor.Stop();
-        _superarmor = true;
-        _superarmor_duration = true;
-        _superarmor_single = false;
-        Transform t = transform;
-        p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
-        p_change.Play();
-        p_superarmor.Play();
-        mat_superarmor.SetColor(id_superarmor,c_superarmor_activated);
-
-        s_superarmor = Sequence.Create()
-            .ChainDelay(duration, false)
-            .ChainCallback(() =>
-            {
-                _superarmor = false;
-                _superarmor_duration = false;
-                p_superarmor.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            })
-            .Group(Tween.MaterialColor(mat_superarmor, id_superarmor, 
-                c_superarmor_deactivated, 0.75f,useUnscaledTime: false));
     }
     public void Effect_Smoke(float fwd = 0)
     {
@@ -219,36 +192,13 @@ public partial class Hero : MonoBehaviour
     public void Effect_Hit_Normal()
     {
         Tween_Blink_Hit(1.75f);
-        
-        Transform t = transform;
-        Vector3 currentPos = t.position;
         p_blood_normal.Play();
-        
-        //Blood
-        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
-        Quaternion bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
-        BloodManager.instance.Blood_Normal(ref bloodPos,ref bloodRot);
     }
     public void Effect_Hit_Strong(bool isBloodBottom)
     {
         Tween_Blink_Hit(1.0f);
-        Transform t = transform;
-        Vector3 currentPos = t.position;
         p_blood_normal.Play();
         p_blood_strong.Play();
-        //Blood
-        Vector3 bloodPos = currentPos + Vector3.up * 0.8f;
-        Quaternion bloodRot;
-        if (isBloodBottom)
-        {
-            bloodRot = Quaternion.Euler(0,Random.Range(0,360),0);
-            BloodManager.instance.Blood_Strong_Bottom(ref bloodPos,ref bloodRot);
-        }
-        else
-        {
-            bloodRot = t.rotation;
-            BloodManager.instance.Blood_Strong_Front(ref bloodPos,ref bloodRot);
-        }
     }
     public void Effect_Hit_SuperArmor()
     {

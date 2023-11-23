@@ -41,7 +41,7 @@ public partial class Monster : MonoBehaviour
     {
         return _currentPattern;
     }
-    public bool Get_CanEvaded(float free_time)
+    public bool Get_CanJustRoll(float free_time)
     {
         if (_monsterMoveState != MoveState.Pattern || _currentTrailData == null) return false;
 
@@ -53,6 +53,10 @@ public partial class Monster : MonoBehaviour
         float evadeMax = _clipLength * _currentTrailData.trailRange.y;
 
         return evadeMin <= currentTime && currentTime < evadeMax;
+    }
+    public bool Get_CanSideRoll()
+    {
+        return _monsterMoveState == MoveState.Pattern && _currentTrailData != null;
     }
     //Set
     public void Set_HitState(HitState hitState)

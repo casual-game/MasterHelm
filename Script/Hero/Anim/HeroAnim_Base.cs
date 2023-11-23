@@ -107,7 +107,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Locomotion(Animator animator)
     {
         _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
-        _hero.Effect_SuperArmor_Single(false);
+        _hero.Effect_SuperArmor(false);
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Locomotion);
         animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);
@@ -118,14 +118,14 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Attack_Normal(Animator animator)
     {
         if(animator.GetInteger(GameManager.s_state_type) == (int)Hero.AnimationState.Attack_Strong) 
-            _hero.Effect_SuperArmor_Single(false);
+            _hero.Effect_SuperArmor(false);
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Normal);
         animator.SetTrigger(GameManager.s_state_change);
     }
 
     protected void Set_Attack_Strong(Animator animator)
     {
-        _hero.Effect_SuperArmor_Single(true);
+        _hero.Effect_SuperArmor(true);
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Strong);
         animator.SetTrigger(GameManager.s_state_change);
     }
@@ -203,49 +203,53 @@ public class HeroAnim_Base : StateMachineBehaviour
     }
     protected void Set_Roll(Animator animator)
     {
+        
         //기본
         if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
+        _hero.Effect_SuperArmor(false);
+        CamArm.instance.Tween_ResetTimescale();
         animator.SetBool(GameManager.s_roll,true);
-        //저스트 구르기인지 확인
+        //저스트 구르기인지 확인, 저스트 관련 데이터 저장
         bool isJustRoll = false;
+        float minDist = _hero.heroData.justEvadeDistance * _hero.heroData.justEvadeDistance;
+        Vector3 lookVec = Vector3.zero;
+        Monster mtarget = null;
         foreach (var m in Monster.Monsters)
         {
-            if (m.Get_CanEvaded(0.0f))
+            if (m.Get_CanJustRoll(_hero.heroData.justEvadeFreeTime))
             {
+                Vector3 _lookvec = m.transform.position - animator.transform.position; 
+                float dist = Vector3.SqrMagnitude(_lookvec);
+                if (minDist > dist)
+                {
+                    mtarget = m;
+                    minDist = dist;
+                    lookVec = _lookvec;
+                    m.Equipment_Collision_Skip();
+                }
                 isJustRoll = true;
                 break;
             }
         }
-        //구르기
-        if(!isJustRoll) animator.SetInteger(GameManager.s_state_type,0);
+        if(mtarget!=null) _hero.Set_RoolLookT(mtarget.transform);
+        //일반 구르기
+        if(!isJustRoll || mtarget == null) animator.SetInteger(GameManager.s_state_type,0);
+        //저스트 구르기
         else
         {
+            //회전
+            lookVec.y = 0;
+            animator.transform.rotation = Quaternion.LookRotation(lookVec);
+            //기본 설정들
             GameManager.Instance.Combo(GameManager.s_evade);
             _hero.Set_AnimatorUnscaledTime(true);
             CamArm.instance.Tween_JustEvade();
-            _hero.Effect_SuperArmor_Duration(2.25f);
             
-            float targetDeg,currentDeg;
-            currentDeg = animator.transform.rotation.eulerAngles.y;
-            if (!GameManager.Bool_Move)
-            {
-                targetDeg = currentDeg;
-            }
-            else
-            {
-                targetDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                        CamArm.instance.transform.rotation.eulerAngles.y;
-                targetDeg = -targetDeg + 180;
-            }
-
+            var state = mtarget.Get_CurrentTrail().swingFinState;
             int rollState;
-            float degDiff = targetDeg - currentDeg;
-            while (degDiff < -180) degDiff += 360;
-            while (degDiff > 180) degDiff -= 360;
-            if (-135 < degDiff && degDiff < -45) rollState = 1;
-            else if (45 < degDiff && degDiff < 135) rollState = 2;
-            else rollState = 3;
+            if (state == PlayerAttackType.LeftState) rollState = 1;
+            else rollState = 2;
             animator.SetInteger(GameManager.s_state_type,rollState);
         }
         animator.SetBool(GameManager.s_leftstate,false);

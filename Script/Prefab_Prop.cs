@@ -28,6 +28,7 @@ public class Prefab_Prop : MonoBehaviour
     private bool _isHero;
     private int _syncInt = 0,_syncedInt=0;
     private Monster _monster;
+    private bool skipCurrentInteraction = false;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -63,8 +64,9 @@ public class Prefab_Prop : MonoBehaviour
     }
     //Collision
     
-    public bool Collision_Interact(TrailData trailData,Transform attacker)//공격 판정 계산할때 호출한다.
+    public bool Collision_Interact_Hero(TrailData trailData,Transform attacker)//공격 판정 계산할때 호출한다.
     {
+        if (skipCurrentInteraction) return false;
         bool collided = false;
         foreach (var coll in _interact_savedTargets) Interact(coll);
         foreach (var coll in _interact_currentTargets) Interact(coll);
@@ -72,18 +74,27 @@ public class Prefab_Prop : MonoBehaviour
         {
             if (!_interact_interactedTargets.Contains(coll))
             {
-                if (_isHero)
-                {
-                    coll.TryGetComponent<Monster>(out var monster);
-                    if (monster.AI_Hit(attacker, transform, trailData)) collided = true;
-                    _interact_interactedTargets.Add(coll);
-                }
-                else
-                {
-                    coll.TryGetComponent<Hero>(out var hero);
-                    if (hero.Core_Hit_Strong(AttackMotionType.Center,HitType.Normal,_monster.transform.position)) collided = true;
-                    _interact_interactedTargets.Add(coll);
-                }
+                coll.TryGetComponent<Monster>(out var monster);
+                if (monster.AI_Hit(attacker, transform, trailData)) collided = true;
+                _interact_interactedTargets.Add(coll);
+            }
+        }
+        _interact_savedTargets.Clear();
+        return collided;
+    }
+    public bool Collision_Interact_Monster(TrailData_Monster trailData,Transform attacker)//공격 판정 계산할때 호출한다.
+    {
+        if (skipCurrentInteraction) return false;
+        bool collided = false;
+        foreach (var coll in _interact_savedTargets) Interact(coll);
+        foreach (var coll in _interact_currentTargets) Interact(coll);
+        void Interact(Collider coll)
+        {
+            if (!_interact_interactedTargets.Contains(coll))
+            {
+                coll.TryGetComponent<Hero>(out var hero);
+                if (hero.Core_Hit_Strong(trailData,_monster.transform.position)) collided = true;
+                _interact_interactedTargets.Add(coll);
             }
         }
         _interact_savedTargets.Clear();
@@ -91,12 +102,17 @@ public class Prefab_Prop : MonoBehaviour
     }
     public void Collision_Reset()//공격 모션에서 물리계산 타이밍이 아닌 경우, 매 프레임 호출한다.
     {
+        skipCurrentInteraction = false;
         _interact_interactedTargets.Clear();
         for(int i = _interact_savedTargets.Count-1; i>=0; i--)
         {
             bool canRemove = !_interact_currentTargets.Contains(_interact_savedTargets[i]);
             if(canRemove)_interact_savedTargets.RemoveAt(i);
         }
+    }
+    public void Collision_Skip()
+    {
+        skipCurrentInteraction = true;
     }
     //Setting
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)

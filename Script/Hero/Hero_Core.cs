@@ -20,6 +20,7 @@ public partial class Hero : MonoBehaviour
     private int _fastRoll = 0; //빠른 구르기는 한번에 눌러야 한다. 입력 횟수 카운트용.
     private float _falledTime = -100;//빠른 구르기를 위한 낙하 타이밍 저장.
     private float _rolledTime;
+    private Transform _rollLookT = null;
     //Public
     public enum AnimationState
     {
@@ -48,6 +49,11 @@ public partial class Hero : MonoBehaviour
         return Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay
                          && Time.unscaledTime - _rolledTime > heroData.roll_delay;
     }
+
+    public Transform Get_RollLookT()
+    {
+        return _rollLookT;
+    }
     //Setter
     public void Set_CurrentAttackMotionData(PlayerAttackMotionData data)
     {
@@ -61,7 +67,10 @@ public partial class Hero : MonoBehaviour
     {
         _rolledTime = Time.unscaledTime;
     }
-    
+    public void Set_RoolLookT(Transform t)
+    {
+        _rollLookT = t;
+    }
     //Core
     public void Core_PreInput()
     {
@@ -85,7 +94,7 @@ public partial class Hero : MonoBehaviour
         if (HeroMoveState == MoveState.Locomotion)
         {
             _animator.SetInteger(GameManager.s_chargeenterindex,-1);
-            Effect_SuperArmor_Single(false);
+            Effect_SuperArmor(false);
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Normal);
             _animator.SetTrigger(GameManager.s_state_change);
         }
@@ -94,7 +103,7 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState is MoveState.Locomotion or MoveState.Roll && Get_Charged())
         {
-            Effect_SuperArmor_Single(true);
+            Effect_SuperArmor(true);
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
             _animator.SetTrigger(GameManager.s_state_change);
         }
@@ -122,11 +131,11 @@ public partial class Hero : MonoBehaviour
         Effect_Hit_Normal();
         return true;
     }
-    public bool Core_Hit_Strong(AttackMotionType attackMotionType, HitType hitType, Vector3 hitPoint)
+    public bool Core_Hit_Strong(TrailData_Monster trailData, Vector3 hitPoint)
     {
-        //저스트 회피
-        if (_superarmor && HeroMoveState == MoveState.Roll) return false;
-        //구르기, 슈퍼아머 필터링
+        //저스트 회피,중복히트 필터링
+        if (Time.time < _hitStrongTime + HitStrongDelay || _superarmor && HeroMoveState == MoveState.Roll) return false;
+        //구르기, 슈퍼아머 처리.
         if (_superarmor || HeroMoveState == MoveState.Roll)
         {
             
@@ -136,45 +145,51 @@ public partial class Hero : MonoBehaviour
             GameManager.Instance.Combo(GameManager.s_superarmor);
             return true;
         }
-        if (Time.time < _hitStrongTime + HitStrongDelay) return false;
+        //변수 초기화
         _fastRoll = 2;
         _animBase.cleanFinished = true;
         _animBase.isFinished = true;
         _hitStrongTime = Time.time;
         _hitStrongType = (_hitStrongType + 1) % 2;
         AttackIndex = -1;
-        _animator.SetBool(GameManager.s_leftstate,false);
-        if (_currentWeaponPack != null) Equipment_UpdateTrail(_currentWeaponPack,false,false,false);
+        //장비 초기화
         Equipment_Equip(null);
+        if (_currentWeaponPack != null) Equipment_UpdateTrail(_currentWeaponPack,false,false,false);
+        //Animator 초기화
+        _animator.SetBool(GameManager.s_leftstate,false);
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
-        //_animator.SetFloat(GameManager.s_hit_rot,1);
-        if (hitType == HitType.Normal)
+        //히트 처리
+        if (trailData.hitType == HitType.Normal)
         {
+            //상대적 벡터 계산
+            Vector3 targetHitVec = hitPoint-transform.position;
+            targetHitVec.y = 0;
+            Vector3 myLookVec = transform.forward;
+            float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
+            float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
+            float degDiff = targetHitDeg - myLookDeg + (int)trailData.attackMotionType;
+            while (degDiff < -180) degDiff += 360;
+            while (degDiff > 180) degDiff -= 360;
+            degDiff /= 180.0f;
+            _animator.SetFloat(GameManager.s_hit_rot,degDiff);
+            //각종 처리
             _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
             Tween_Punch_Down(1.4f);
             CamArm.instance.Tween_ShakeNormal_Hero();
         }
         else
         {
-            _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
+            //회전
+            Vector3 lookVec = hitPoint - transform.position;
+            lookVec.y = 0;
+            transform.rotation = Quaternion.LookRotation(lookVec);
+            //각종 처리
+            _animator.SetInteger(GameManager.s_hit_type,(int)trailData.hitType);
             Tween_Punch_Down(1.1f);
             CamArm.instance.Tween_ShakeStrong_Hero();
         }
-        //타겟 벡터
-        Vector3 targetHitVec = hitPoint-transform.position;
-        targetHitVec.y = 0;
-        Vector3 myLookVec = transform.forward;
-        float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
-        float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
-        float degDiff = targetHitDeg - myLookDeg + (int)attackMotionType;
-        while (degDiff < -180) degDiff += 360;
-        while (degDiff > 180) degDiff -= 360;
-        degDiff /= 180.0f;
-        _animator.SetFloat(GameManager.s_hit_rot,degDiff);
-        _animator.SetTrigger(GameManager.s_hit_additive);
-        
-        bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
+        bool isBloodBottom = trailData.hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);
         return true;
     }

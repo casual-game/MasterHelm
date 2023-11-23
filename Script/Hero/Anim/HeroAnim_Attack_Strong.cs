@@ -26,7 +26,6 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         animator.ResetTrigger(GameManager.s_turn);
         animator.SetBool(GameManager.s_charge_normal,false);
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
-        //_hero.Effect_Smoke(0.25f);
         _hero.Equipment_Equip(_weaponPack);
         
         _hero.Equipment_Collision_Reset(_weaponPack);

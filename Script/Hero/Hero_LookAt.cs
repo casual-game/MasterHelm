@@ -43,7 +43,7 @@ public partial class Hero : MonoBehaviour
         
         p_charge_begin.Play();
         _charged = false;
-        _chargeBeginTime = Time.time;
+        _chargeBeginTime = Time.unscaledTime;
         _lookDeg = null;
         E_BTN_Attack_RemoveListner();
         GameManager.Instance.E_LateUpdate.AddListener(E_BTN_Attack_PressedUpdate);
@@ -117,7 +117,7 @@ public partial class Hero : MonoBehaviour
         //크기 조정
         if (_lookScale < 1)
         {
-            _lookScale += 5 * Time.deltaTime;
+            _lookScale += 5 * Time.unscaledDeltaTime;
             _lookScale = Mathf.Clamp01(_lookScale);
             _lookIcon.localScale = GameManager.V3_One * _lookScale;
             if(canChargeMotion) _lookAtIK.solver.SetLookAtWeight(_lookScale);
@@ -125,7 +125,7 @@ public partial class Hero : MonoBehaviour
         }
         else if(!canChargeMotion) _lookAtIK.solver.SetLookAtWeight(0);
         //차지
-        if (!_charged && Time.time > _chargeBeginTime + heroData.chargeDuration && frameMain.MP_CanUse())
+        if (!_charged && Time.unscaledTime > _chargeBeginTime + heroData.chargeDuration && frameMain.MP_CanUse())
         {
             _charged = true;
             p_charge_fin.Play();
@@ -133,7 +133,7 @@ public partial class Hero : MonoBehaviour
             p_charge_Impact.Play();
             Tween_Punch_Down_Compact(1.2f);
             Tween_Blink_Evade(1.0f);
-            Effect_SuperArmor_Single(true);
+            Effect_SuperArmor(true);
         }
     }
     private void E_BTN_Attack_ReleasedUpdate()
@@ -147,7 +147,7 @@ public partial class Hero : MonoBehaviour
         //크기 조정
         if (_lookScale > 0)
         {
-            _lookScale -= 3 * Time.deltaTime;
+            _lookScale -= 3 * Time.unscaledDeltaTime;
             _lookScale = Mathf.Clamp01(_lookScale);
         }
         //종료

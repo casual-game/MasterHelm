@@ -63,20 +63,20 @@ public partial class GameManager : MonoBehaviour
             ComboText();
 
             s_combo = Sequence.Create()
-                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, -0.1f, 0.2f, useUnscaledTime: true))
-                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, -0.1f, 0.2f))
+                .Group(Tween.Custom(0,1,0.5f,onValueChange: newVal =>
                 {
                     Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
                 } ))
-                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
+                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f))
                 .ChainDelay(2.25f,true)
                 .ChainCallback(() =>
                 {
                     if (dmp_created_main != null) dmp_created_main.FadeOut();
                     if (dmp_created_sub != null) dmp_created_sub.FadeOut();
                 })
-                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f, useUnscaledTime: true));
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f));
         }
         else
         {
@@ -96,19 +96,19 @@ public partial class GameManager : MonoBehaviour
             ComboText();
             
             s_combo = Sequence.Create()
-                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+                .Group(Tween.Custom(0,1,0.5f,onValueChange: newVal =>
                 {
                     Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
                 } ))
-                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f, useUnscaledTime: true))
+                .Group(Tween.MaterialProperty(image_Combo.material, id_chromaaberramount, 0.05f, 0.25f))
                 .ChainDelay(2.25f,true)
                 .ChainCallback(() =>
                 {
                     if (dmp_created_main != null) dmp_created_main.FadeOut();
                     if (dmp_created_sub != null) dmp_created_sub.FadeOut();
                 })
-                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f, useUnscaledTime: true));
+                .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, 0.5f, 0.5f));
         }
     }
 }

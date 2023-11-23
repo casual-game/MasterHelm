@@ -139,17 +139,17 @@ public partial class Hero : MonoBehaviour
         bool collided = false;
         if (weaponL && data.weaponL != null)
         {
-            if (data.weaponL.Collision_Interact(_currentTrailData, t)) collided = true;
+            if (data.weaponL.Collision_Interact_Hero(_currentTrailData, t)) collided = true;
         }
 
         if (weaponR && data.weaponR != null)
         {
-            if (data.weaponR.Collision_Interact(_currentTrailData, t)) collided = true;
+            if (data.weaponR.Collision_Interact_Hero(_currentTrailData, t)) collided = true;
         }
 
         if (useShield && data.useShield)
         {
-            if(shield.Collision_Interact(_currentTrailData,t)) collided = true;
+            if(shield.Collision_Interact_Hero(_currentTrailData,t)) collided = true;
         }
         if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
     }
