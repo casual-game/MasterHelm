@@ -31,7 +31,7 @@ public partial class Monster : MonoBehaviour
     //Public,Static
     public enum MoveState
     {
-        Idle = 0,Pattern=1
+        Idle = 0,Pattern=1,Hit=2
     }
     public enum HitState {Ground=0,Air=1,Recovery=2}
     [HideInInspector] public float rotateCurrentVelocity;
@@ -57,6 +57,11 @@ public partial class Monster : MonoBehaviour
     public bool Get_CanSideRoll()
     {
         return _monsterMoveState == MoveState.Pattern && _currentTrailData != null;
+    }
+
+    public MoveState Get_MonsterMoveState()
+    {
+        return _monsterMoveState;
     }
     //Set
     public void Set_HitState(HitState hitState)

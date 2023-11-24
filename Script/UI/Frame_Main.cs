@@ -18,8 +18,8 @@ public class Frame_Main : MonoBehaviour
     [TitleGroup("HP 데이터")] public TMP_Text tmp_hp;
     [TitleGroup("HP 데이터")] public Color c_lerp_main, c_lerp_hit, c_tmp_main, c_tmp_hit;
     private int maxhp,currenthp;
-    private float i_hp_width = 413.01f,hp_CurrentRatio;
-    
+    private float i_hp_width = 413.01f,i_hplerp_width = 410.5499f,hp_CurrentRatio;
+    private float i_hp_height = 41.2131f, i_hplerp_height=39.186f;
     
     [TitleGroup("MP 데이터")] public Image[] i_mp_slots = new Image[3];
     [TitleGroup("MP 데이터")] public Sprite sprite_mp_charged, sprite_mp_charging;
@@ -44,9 +44,10 @@ public class Frame_Main : MonoBehaviour
             slot.rectTransform.sizeDelta = new Vector2(0, 20.3274f);
         }
         float ratio = (float)currenthp / (float)maxhp;
-        float width = i_hp_width * ratio;
-        i_hp_lerp.rectTransform.sizeDelta = new Vector2(width, 35.219f);
-        i_hp_main.rectTransform.sizeDelta = new Vector2(width, 37.9649f);
+        float width_main = i_hp_width * ratio;
+        float width_lerp = i_hplerp_width * ratio;
+        i_hp_lerp.rectTransform.sizeDelta = new Vector2(width_lerp, i_hplerp_height);
+        i_hp_main.rectTransform.sizeDelta = new Vector2(width_main, i_hp_height);
         tmp_hp.text = currenthp + "/" + maxhp + " (" + 100 + "%)";
         Charge_MP(100);
     }
@@ -56,15 +57,16 @@ public class Frame_Main : MonoBehaviour
         s_hp.Stop();
         currenthp = Mathf.Clamp(currenthp - damage, 0, maxhp);
         float ratio = (float)currenthp / (float)maxhp;
-        float width = i_hp_width * ratio;
+        float width_main = i_hp_width * ratio;
+        float width_lerp = i_hplerp_width * ratio;
         i_hp_lerp.color = c_lerp_hit;
         tmp_hp.color = c_tmp_hit;
         frame_main.anchoredPosition = frameAnchoredPos;
         
         
-        s_hp = Sequence.Create().Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width, 37.9649f),
+        s_hp = Sequence.Create().Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
                 0.6f, Ease.OutQuart, useUnscaledTime: true))
-            .Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width, 35.219f),
+            .Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
                 0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 1.5f))
             .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
             {

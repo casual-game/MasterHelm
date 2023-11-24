@@ -111,7 +111,11 @@ public partial class Hero : MonoBehaviour
     {
         return _speedRatio;
     }
-    
+
+    public MoveState Get_HeroMoveState()
+    {
+        return HeroMoveState;
+    }
     //Move
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {

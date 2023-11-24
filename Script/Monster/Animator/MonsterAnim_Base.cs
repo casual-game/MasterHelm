@@ -34,8 +34,8 @@ public class MonsterAnim_Base : StateMachineBehaviour
     }
     protected void Update_Trail(float normalizedTime,List<TrailData_Monster> trailDatas)
     {
+        if (_monster.Get_MonsterMoveState() != Monster.MoveState.Pattern) return;
         bool trailed = false, collided = false;
-
         for (int i = 0; i < trailDatas.Count; i++)
         {
             var trailData = trailDatas[i];

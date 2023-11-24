@@ -47,8 +47,9 @@ public class HeroAnim_Base : StateMachineBehaviour
     }
     protected void Update_Trail(float normalizedTime,Data_WeaponPack weaponPack)
     {
+        bool cando = _hero.Get_HeroMoveState() is Hero.MoveState.NormalAttack or Hero.MoveState.StrongAttack;
+        if (!cando) return;
         bool trailed = false, collided = false;
-        
         foreach (var trailData in _hero.CurrentAttackMotionData.TrailDatas)
         {
             bool canTrail = !trailed && trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;
@@ -108,6 +109,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     {
         _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
         _hero.Effect_SuperArmor(false);
+        _hero.Set_SpeedRatio(0);
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Locomotion);
         animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);

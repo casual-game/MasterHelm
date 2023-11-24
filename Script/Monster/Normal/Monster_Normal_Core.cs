@@ -18,13 +18,14 @@ public partial class Monster_Normal : Monster
     public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
+        _animBase.isFinished = true;
+        Set_MonsterMoveState(MoveState.Hit);
         Equipment_UpdateTrail(false,false,false);
-        
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
         bool isAirSmash = trailData.isAirSmash;
         string attackString;
-        int damage = Random.Range(trailData.damage.x, trailData.damage.y);
+        int damage = Random.Range(trailData.damage.x, trailData.damage.y+1);
         HitType hitType;
         if (_hitState == HitState.Ground)
         {
@@ -108,7 +109,6 @@ public partial class Monster_Normal : Monster
         transform.rotation = Quaternion.LookRotation(lookVec);
         
         //애니메이터 설정
-        _animBase.isFinished = true;
         _hitStrongTime = Time.time;
         _hitStrongType = (_hitStrongType + 1) % 2;
         _animator.SetBool(GameManager.s_hit,true);

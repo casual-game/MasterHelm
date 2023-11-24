@@ -33,19 +33,19 @@ public partial class Monster : MonoBehaviour
         if (_weaponL != null)
         {
             _weaponL.SetTrail(false);
-            _weaponL.Detach();
+            _weaponL.Detach(true);
         }
 
         if (_weaponR != null)
         {
             _weaponR.SetTrail(false);
-            _weaponR.Detach();
+            _weaponR.Detach(true);
         }
 
         if (_shield != null)
         {
             _shield.SetTrail(false);
-            _shield.Detach();
+            _shield.Detach(true);
         }
     }
     public void Equipment_UpdateTrail(bool weaponL,bool weaponR,bool shield)

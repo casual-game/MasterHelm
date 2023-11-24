@@ -15,6 +15,7 @@ public class MonsterAnim_Attack : MonsterAnim_Base
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);
+        
         if (IsNotAvailable(animator, stateInfo)) return;
         float normalizedTime = stateInfo.normalizedTime;
         Transform t = _monster.transform;

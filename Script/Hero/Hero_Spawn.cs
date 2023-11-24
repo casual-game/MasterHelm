@@ -33,13 +33,15 @@ public partial class Hero : MonoBehaviour
     private Vector3 _shadowScale;
     private Material _material;
     private OutlineTarget _outlineTarget;
-    
+    [Button]
     public void Test1()
     {
       Spawn(GameManager.V3_Zero,transform.rotation).Forget();   
     }
+    [Button]
     public void Test2()
     {
+        CamArm.instance.Tween_FadeOut();
         Despawn().Forget();   
     }
     
@@ -83,6 +85,7 @@ public partial class Hero : MonoBehaviour
         //Blood,Effect
         Tween_Punch_Down(0.75f);
         Tween_Blink_Hit(1.0f);
+        CamArm.instance.Tween_ShakeStrong_Hero();
         //기본 설정
         _animator.SetBool(GameManager.s_death,true);
         await UniTask.Delay(TimeSpan.FromSeconds(3.0f), DelayType.DeltaTime);
@@ -94,7 +97,6 @@ public partial class Hero : MonoBehaviour
         shield.Despawn();
         //파티클
         p_despawn.Play();
-        
         while (!_spawned && _dissolveRatio<1)
         {
             _dissolveRatio += Time.deltaTime*_dissolveSpeed_Despawn;

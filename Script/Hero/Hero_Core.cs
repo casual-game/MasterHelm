@@ -145,7 +145,9 @@ public partial class Hero : MonoBehaviour
             GameManager.Instance.Combo(GameManager.s_superarmor);
             return true;
         }
-        //변수 초기화
+        //각종 변수,데이터 설정
+        frameMain.HP_Damage(Random.Range(trailData.damage.x,trailData.damage.y+1));
+        Set_HeroMoveState(MoveState.Hit);
         _fastRoll = 2;
         _animBase.cleanFinished = true;
         _animBase.isFinished = true;
@@ -153,8 +155,10 @@ public partial class Hero : MonoBehaviour
         _hitStrongType = (_hitStrongType + 1) % 2;
         AttackIndex = -1;
         //장비 초기화
-        Equipment_Equip(null);
-        if (_currentWeaponPack != null) Equipment_UpdateTrail(_currentWeaponPack,false,false,false);
+        Equipment_Equip(null,false);
+        if (weaponPack_Normal != null) Equipment_UpdateTrail(weaponPack_Normal,false,false,false);
+        if (weaponPack_StrongL != null) Equipment_UpdateTrail(weaponPack_StrongL,false,false,false);
+        if (weaponPack_StrongR != null) Equipment_UpdateTrail(weaponPack_StrongR,false,false,false);
         //Animator 초기화
         _animator.SetBool(GameManager.s_leftstate,false);
         _animator.SetBool(GameManager.s_hit,true);

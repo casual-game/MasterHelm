@@ -23,7 +23,7 @@ public partial class Monster_Strong : Monster
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
         string attackString;
-        int damage = Random.Range(trailData.damage.x, trailData.damage.y);
+        int damage = Random.Range(trailData.damage.x, trailData.damage.y+1);
         switch (attackType)
         {
             case AttackType.Normal:

@@ -47,10 +47,10 @@ public class Prefab_Prop : MonoBehaviour
         if(!_canKeep) UT_ActivateProp_CantKeep().Forget();
         else UT_ActivateProp_CanKeep().Forget();
     }
-    public void Detach()
+    public void Detach(bool useDeactivateParticle)
     {
-        if(!_canKeep) UT_DeactivateProp_CantKeep().Forget();
-        else UT_DeactivateProp_CanKeep().Forget();
+        if(!_canKeep) UT_DeactivateProp_CantKeep(useDeactivateParticle).Forget();
+        else UT_DeactivateProp_CanKeep(useDeactivateParticle).Forget();
     }
     //CanKeep 일때만 사용..
     public void Spawn()
@@ -113,6 +113,11 @@ public class Prefab_Prop : MonoBehaviour
     public void Collision_Skip()
     {
         skipCurrentInteraction = true;
+    }
+    public void Set_UpdateSpeed(float activateSpeed = 2.0f, float deactivateSpeed = 1.25f)
+    {
+        _activateSpeed = activateSpeed;
+        _deactivateSpeed = deactivateSpeed;
     }
     //Setting
     public void Setting_Hero(Outlinable outlinable,bool canKeep,Transform attachT,Transform detachT,Transform nullFolder = null)
@@ -334,7 +339,7 @@ public class Prefab_Prop : MonoBehaviour
             _outlineTarget.CutoutThreshold = 0;
         }
     }
-
+    //즉시 실행
     private void CopyTransform(Transform targetT,Transform copyT)
     {
         Transform t = transform;

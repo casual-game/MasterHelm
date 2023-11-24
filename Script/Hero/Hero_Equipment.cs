@@ -85,7 +85,7 @@ public partial class Hero : MonoBehaviour
         _currentTrailData = traildata;
     }
     //Equipment
-    public void Equipment_Equip(Data_WeaponPack weaponPack)
+    public void Equipment_Equip(Data_WeaponPack weaponPack,bool useDeactivateParticle = true,float activateSpeed = 2.0f,float deactivateSpeed = 1.25f)
     {
         if (_currentWeaponPack == weaponPack) return;
         bool useShield = false;
@@ -95,33 +95,41 @@ public partial class Hero : MonoBehaviour
             var past = weapondata[_currentWeaponPack];
             if (past.weaponL != null)
             {
-                past.weaponL.Detach();
+                past.weaponL.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
+                past.weaponL.Detach(useDeactivateParticle);
                 //past.weaponL.Collision_Reset();
             }
 
             if (past.weaponR != null)
             {
-                past.weaponR.Detach();
+                past.weaponR.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
+                past.weaponR.Detach(useDeactivateParticle);
                 //past.weaponR.Collision_Reset();
             }
-            
-            //if(past.useShield) shield.Collision_Reset();
         }
-
         _lastWeaponPack = _currentWeaponPack;
         _currentWeaponPack = weaponPack;
         //현 무기 장착
         if (weaponPack != null)
         {
             var current = weapondata[_currentWeaponPack];
-            if(current.weaponL!=null) current.weaponL.Attach();
-            if(current.weaponR!=null) current.weaponR.Attach();
+            if (current.weaponL != null)
+            {
+                current.weaponL.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
+                current.weaponL.Attach();
+            }
+
+            if (current.weaponR != null)
+            {
+                current.weaponR.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
+                current.weaponR.Attach();
+            }
             useShield = current.useShield;
         }
-        if(useShield) shield.Attach();
-        else shield.Detach();
         
-    
+        shield.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
+        if(useShield) shield.Attach();
+        else shield.Detach(useDeactivateParticle);
     }
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
