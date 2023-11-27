@@ -134,7 +134,7 @@ public partial class Hero : MonoBehaviour
     public bool Core_Hit_Strong(TrailData_Monster trailData, Vector3 hitPoint)
     {
         //저스트 회피,중복히트 필터링
-        if (Time.time < _hitStrongTime + HitStrongDelay || _superarmor && HeroMoveState == MoveState.Roll) return false;
+        if (Time.time < _hitStrongTime + HitStrongDelay || _superarmor && HeroMoveState == MoveState.Roll || !_spawned) return false;
         //구르기, 슈퍼아머 처리.
         if (_superarmor || HeroMoveState == MoveState.Roll)
         {
@@ -146,7 +146,13 @@ public partial class Hero : MonoBehaviour
             return true;
         }
         //각종 변수,데이터 설정
-        frameMain.HP_Damage(Random.Range(trailData.damage.x,trailData.damage.y+1));
+        bool alive = frameMain.HP_Damage(Random.Range(trailData.damage.x,trailData.damage.y+1));
+        if (!alive)
+        {
+            Despawn().Forget();
+            _spawned = false;
+            return true;
+        }
         Set_HeroMoveState(MoveState.Hit);
         _fastRoll = 2;
         _animBase.cleanFinished = true;

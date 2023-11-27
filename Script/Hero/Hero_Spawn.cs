@@ -41,12 +41,17 @@ public partial class Hero : MonoBehaviour
     [Button]
     public void Test2()
     {
-        CamArm.instance.Tween_FadeOut();
         Despawn().Forget();   
     }
     
     async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot)
     {
+        AdvancedDissolveProperties.Cutout.Standard.
+            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _outlineTarget.CutoutThreshold = 1;
+        CamArm.instance.Tween_FadeIn();
+        gameObject.SetActive(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(1.0f), DelayType.DeltaTime);
         gameObject.SetActive(true);
         Move_Nav(relativePos,rot);
         _spawned = true;
@@ -60,7 +65,9 @@ public partial class Hero : MonoBehaviour
         //파티클
         p_spawn.Play();
         Tween_Punch_Up_Compact(1.0f);
-        
+        //await UniTask.Delay(TimeSpan.FromSeconds(0.2f), DelayType.DeltaTime);
+        CamArm.instance.Tween_Radial(0.5f,0.1f);
+        GameManager.Instance.Shockwave(transform.position + Vector3.up);
         while (_spawned && _dissolveRatio>0)
         {
             _dissolveRatio -= Time.deltaTime*_dissolveSpeed_Spawn;
@@ -82,14 +89,17 @@ public partial class Hero : MonoBehaviour
     }
     async UniTaskVoid Despawn()
     {
+        _animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+        CamArm.instance.Tween_FadeOut();
+        GameManager.Instance.Shockwave(transform.position + Vector3.up);
+        Equipment_Equip(null,false,2,2);
+        //기본 설정
+        _spawned = false;
+        _animator.SetBool(GameManager.s_death,true);
         //Blood,Effect
         Tween_Punch_Down(0.75f);
         Tween_Blink_Hit(1.0f);
-        CamArm.instance.Tween_ShakeStrong_Hero();
-        //기본 설정
-        _animator.SetBool(GameManager.s_death,true);
-        await UniTask.Delay(TimeSpan.FromSeconds(3.0f), DelayType.DeltaTime);
-        _spawned = false;
+        await UniTask.Delay(TimeSpan.FromSeconds(3.0f), DelayType.UnscaledDeltaTime);
         //무기 설정
         var weaponpack = weapondata[weaponPack_Normal];
         if(weaponpack.weaponL!=null) weaponpack.weaponL.Despawn();
@@ -99,7 +109,7 @@ public partial class Hero : MonoBehaviour
         p_despawn.Play();
         while (!_spawned && _dissolveRatio<1)
         {
-            _dissolveRatio += Time.deltaTime*_dissolveSpeed_Despawn;
+            _dissolveRatio += Time.unscaledDeltaTime*_dissolveSpeed_Despawn;
             float ratio = Mathf.Clamp01(_dissolveRatio);
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
@@ -107,15 +117,14 @@ public partial class Hero : MonoBehaviour
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
-
         if (!_spawned)
         {
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
             _outlineTarget.CutoutThreshold = 1;
             _shadow.localScale = GameManager.V3_Zero;
-            await UniTask.Delay(TimeSpan.FromSeconds(2.0f), DelayType.DeltaTime);
+            await UniTask.Delay(TimeSpan.FromSeconds(1.0f), DelayType.UnscaledDeltaTime);
         }
-        if (!_spawned)gameObject.SetActive(false);
+        if (!_spawned) gameObject.SetActive(false);
     }
 }

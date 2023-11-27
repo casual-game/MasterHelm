@@ -16,7 +16,7 @@ public class CamArm : MonoBehaviour
     //Public
     public static CamArm instance;
     public CloudShadowsProfile cloudShadows;
-    public TransitionAnimator transitionAnimator;
+    public TransitionProfile transition_main_fadein,transition_main_fadeout;
     [HideInInspector] public Camera mainCam;
     [TitleGroup("Movement")]
     [FoldoutGroup("Movement/data")] public Transform target;
@@ -32,6 +32,7 @@ public class CamArm : MonoBehaviour
     private Tween t_stop,t_shake,t_chromatic,t_radial;
     private Sequence s_zoom,s_impact,s_vignette,s_speedline,s_fade;
     private int id_radial,id_speedline;
+    private TransitionAnimator _transitionAnimator;
     private void Awake()
     {
         instance = this;
@@ -47,97 +48,123 @@ public class CamArm : MonoBehaviour
     {
         transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.unscaledDeltaTime);
     }
-    [Button]
     public void Tween_FadeIn()
     {
+        float delay = 0.5f;
         s_fade.Stop();
         cloudShadows.cloudsThickness = 10.0f;
         cloudShadows.cloudsOpacity = 1.0f;
         cloudShadows.coverage = 1.0f;
         _cams[0].orthographicSize = 5.5f;
         _cams[1].orthographicSize = 5.5f;
-        BeautifySettings.settings.purkinjeLuminanceThreshold.value = 1.0f;
+        BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
+        if(_transitionAnimator!=null) Destroy(_transitionAnimator.gameObject);
+        _transitionAnimator = TransitionAnimator.Start(transition_main_fadein,autoDestroy:false);
+        //Chromatic
+        t_chromatic.Stop();
+        t_chromatic = Tween.Custom(0.03f, 0.001f, 2.5f,startDelay:0.5f + delay, ease: Ease.OutCirc, useUnscaledTime: true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        //Shake Strong
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.25f, 0.375f, 45
+            , easeBetweenShakes: Ease.OutSine, useUnscaledTime: true,startDelay:0.5f + delay);
+        Tween.Delay(this, 0.5f + delay, (() => Tween_Radial(0.5f)), true);
+        //Stop
+        t_stop.Stop();
+        Time.timeScale = 1.0f;
         //
+        float duration = 1.0f;
         
-        //
-        float duration = 2.25f;
         Ease ease = Ease.InOutCubic;
         s_fade = Sequence.Create()
-            .Group(Tween.Custom(10.0f, 15.0f, duration, onValueChange: thickness =>
+            .ChainDelay(delay)
+            .Chain(Tween.Custom(10.0f, 15.0f, duration, onValueChange: thickness =>
             {
                 cloudShadows.cloudsThickness = thickness;
-            },ease))
+            }, ease))
             .Group(Tween.Custom(1.0f, 0.025f, duration, onValueChange: opacity =>
             {
                 cloudShadows.cloudsOpacity = opacity;
-            },ease))
+            }, ease))
             .Group(Tween.Custom(1.0f, 0.5f, duration, onValueChange: coverage =>
             {
                 cloudShadows.coverage = coverage;
-            },ease))
-            .Group(Tween.Custom(1.0f, 0.0f, 0.75f, onValueChange: threshold =>
-            {
-                BeautifySettings.settings.purkinjeLuminanceThreshold.value = threshold;
-            },ease,startDelay:1.25f))
-            .Group(Tween.CameraOrthographicSize(_cams[0],4,duration,ease))
-            .Group(Tween.CameraOrthographicSize(_cams[1],4,duration,ease))
-            .Group(Tween.Custom(1.0f, 0.0f, 1.5f, onValueChange: progress =>
-            {
-                transitionAnimator.SetProgress(progress);
-            },ease: Ease.InOutExpo,startDelay: 0.1f));
+            }, ease))
+            .Group(Tween.CameraOrthographicSize(_cams[0], 4, duration, ease))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 4, duration, ease));
     }
-    [Button]
     public void Tween_FadeOut()
     {
         s_fade.Stop();
+        t_shake.Complete();
+        t_stop.Complete();
+        t_chromatic.Stop();
+        s_zoom.Complete();
         cloudShadows.cloudsThickness = 15.0f;
         cloudShadows.cloudsOpacity = 0.025f;
         cloudShadows.coverage = 0.5f;
         _cams[0].orthographicSize = 4.0f;
         _cams[1].orthographicSize = 4.0f;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
-        transitionAnimator.SetProgress(0);
+        Tween_Radial(0.75f,0.2f);
         //Vignette
-        float vbegin = 0.15f, vdelay = 0.25f, vfin = 0.5f;
+        float vbegin = 0.15f, vdelay = 1.0f, vfin = 1.5f;
         s_vignette.Complete();
         s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, vbegin, ease: Ease.OutCirc, useUnscaledTime: true,
+            .Chain(Tween.Custom(0.75f, 1.0f, vbegin, ease: Ease.OutCirc,useUnscaledTime:true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, vbegin, useUnscaledTime: true,
+            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, vbegin,useUnscaledTime:true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
-            .ChainDelay(vdelay, true)
-            .Chain(Tween.Custom(1.0f, 0.75f, vfin, ease: Ease.OutCirc, useUnscaledTime: true,
+            .ChainDelay(vdelay,true)
+            .Chain(Tween.Custom(1.0f, 0.75f, vfin, ease: Ease.OutCirc,useUnscaledTime:true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, vfin, useUnscaledTime: true,
+            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, vfin,useUnscaledTime:true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
+        //Chromatic
+        BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
+        t_chromatic = Tween.Custom(0.04f, 0.001f, 3.5f, ease: Ease.OutCirc,useUnscaledTime:true,
+            onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        //Shake Strong
+        _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.25f, 0.375f, 45
+            , easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         //
-        float duration = 2.25f;
-        float delay = 2.0f;
+        float duration = 2.125f;
+        float delay = 2.5f;
         Ease ease = Ease.InOutCubic;
         s_fade = Sequence.Create()
             .Group(Tween.Custom(15.0f, 10.0f, duration, onValueChange: thickness =>
             {
                 cloudShadows.cloudsThickness = thickness;
-            },ease,startDelay:delay))
+            }, ease, startDelay: delay,useUnscaledTime:true))
             .Group(Tween.Custom(0.025f, 1.0f, duration, onValueChange: opacity =>
             {
                 cloudShadows.cloudsOpacity = opacity;
-            },ease,startDelay:delay))
+            }, ease, startDelay: delay,useUnscaledTime:true))
             .Group(Tween.Custom(0.5f, 1.0f, duration, onValueChange: coverage =>
             {
                 cloudShadows.coverage = coverage;
-            },ease,startDelay:delay))
+            }, ease, startDelay: delay,useUnscaledTime:true))
             .Group(Tween.Custom(0.0f, 1.0f, 1.5f, onValueChange: threshold =>
             {
                 BeautifySettings.settings.purkinjeLuminanceThreshold.value = threshold;
-            },ease,startDelay:1.5f))
-            .Group(Tween.CameraOrthographicSize(_cams[0],5.5f,duration,ease,startDelay:delay))
-            .Group(Tween.CameraOrthographicSize(_cams[1],5.5f,duration,ease,startDelay:delay))
-            .Group(Tween.Custom(0.0f, 1.0f, 2.5f, onValueChange: progress =>
+            }, ease, startDelay: delay-1,useUnscaledTime:true))
+            .Group(Tween.Custom(1.0f, 0.0f, 1.5f, onValueChange: progress =>
             {
-                transitionAnimator.SetProgress(progress);
-            },ease: Ease.InOutExpo,startDelay: 2.0f));
-        
+                _transitionAnimator.SetProgress(progress);
+            }, ease: Ease.InOutQuad, startDelay: delay+0.5f,useUnscaledTime:true));
+        //Zoom
+        s_zoom = Sequence.Create()
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.1f,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 3.25f, 0.1f,useUnscaledTime:true))
+            .ChainDelay(.25f,true)
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[0], 5.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 5.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true));
+        //Stop
+        t_stop = Tween.GlobalTimeScale(0.25f, 0.0f, 2.5f, ease: Ease.InExpo);
+
     }
     public void Tween_ShakeStrong()
     {

@@ -51,8 +51,7 @@ public class Frame_Main : MonoBehaviour
         tmp_hp.text = currenthp + "/" + maxhp + " (" + 100 + "%)";
         Charge_MP(100);
     }
-    [Button]
-    public void HP_Damage(int damage=10)
+    public bool HP_Damage(int damage=10)
     {
         s_hp.Stop();
         currenthp = Mathf.Clamp(currenthp - damage, 0, maxhp);
@@ -80,7 +79,7 @@ public class Frame_Main : MonoBehaviour
                 Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 3;
                 frame_main.anchoredPosition = frameAnchoredPos + RandomVec;
             } ));
-
+        return currenthp > 0;
     }
 
     [Button]
