@@ -6,7 +6,7 @@ using UnityEngine;
 public class Data_MonsterInfo : ScriptableObject
 {
     public int hp = 1000;
-    public List<MonsterPattern> patterns;
+    [ListDrawerSettings(AddCopiesLastElement = true)] public List<MonsterPattern> patterns;
     [ColorUsage(true,true)] public Color c_hit_begin, c_hit_fin;
     
 }
@@ -19,6 +19,6 @@ public class MonsterPattern
     public float endRatio = 0.75f;
     public float rotateDuration = 1.0f;
     [MinMaxSlider(0,1,true)] public Vector2 rotateRange = new Vector2(0, 1);
-    public List<TrailData_Monster> trailDatas = new List<TrailData_Monster>();
+    [ListDrawerSettings(AddCopiesLastElement = true)] public List<TrailData_Monster> trailDatas = new List<TrailData_Monster>();
 }
 

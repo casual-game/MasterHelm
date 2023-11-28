@@ -10,7 +10,7 @@ public class MonsterAnim_Base : StateMachineBehaviour
     protected Monster _monster;
     private bool script_entered = false;
     private bool _collisionChecked;
-    private static TrailData _staticTrailData = null;
+    protected static TrailData_Monster _staticTrailData = null;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -32,11 +32,11 @@ public class MonsterAnim_Base : StateMachineBehaviour
                                  animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
         return isNotCurrentState || isFinished;
     }
-    protected void Update_Trail(float normalizedTime,List<TrailData_Monster> trailDatas)
+    protected void Update_Trail(float normalizedTime,int beginIndex,int finIndex,List<TrailData_Monster> trailDatas)
     {
         if (_monster.Get_MonsterMoveState() != Monster.MoveState.Pattern) return;
         bool trailed = false, collided = false;
-        for (int i = 0; i < trailDatas.Count; i++)
+        for (int i = beginIndex; i <= finIndex; i++)
         {
             var trailData = trailDatas[i];
             bool canTrail = !trailed && trailData.trailRange.x <= normalizedTime && normalizedTime < trailData.trailRange.y;

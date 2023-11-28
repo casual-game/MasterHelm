@@ -145,21 +145,32 @@ public partial class Hero : MonoBehaviour
         var data = weapondata[weaponPack];
         Transform t = transform;
         bool collided = false;
+        int count = 0;
         if (weaponL && data.weaponL != null)
         {
-            if (data.weaponL.Collision_Interact_Hero(_currentTrailData, t)) collided = true;
+            var hitData = data.weaponL.Collision_Interact_Hero(_currentTrailData, t);
+            if (hitData.collided) collided = true;
+            count += hitData.count;
         }
 
         if (weaponR && data.weaponR != null)
         {
-            if (data.weaponR.Collision_Interact_Hero(_currentTrailData, t)) collided = true;
+            var hitData = data.weaponR.Collision_Interact_Hero(_currentTrailData, t);
+            if (hitData.collided) collided = true;
+            count += hitData.count;
         }
 
         if (useShield && data.useShield)
         {
-            if(shield.Collision_Interact_Hero(_currentTrailData,t)) collided = true;
+            var hitData = shield.Collision_Interact_Hero(_currentTrailData, t);
+            if(hitData.collided) collided = true;
+            count += hitData.count;
         }
         if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
+        for (int i = 0; i < count; i++)
+        {
+            frameMain.HP_Regain(_currentTrailData.regain);
+        }
     }
     public void Equipment_Collision_Reset(Data_WeaponPack weaponPack)
     {
@@ -182,7 +193,12 @@ public partial class Hero : MonoBehaviour
             signal.Object.TryGetComponent<Monster>(out var monster);
             if(monster.AI_Hit(t,t,_currentTrailData)) collided = true;
         }
-        if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
+
+        if (collided)
+        {
+            frameMain.HP_Regain(_currentTrailData.regain);
+            frameMain.Charge_MP(_currentTrailData.charge_mp);
+        }
     }
 
     public void Equipment_CancelEffect()

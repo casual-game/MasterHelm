@@ -18,7 +18,7 @@ public partial class Monster_Normal : Monster
     public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
-        _animBase.isFinished = true;
+        
         Set_MonsterMoveState(MoveState.Hit);
         Equipment_UpdateTrail(false,false,false);
         //현 상태에 따른 히트 타입 설정
@@ -29,6 +29,7 @@ public partial class Monster_Normal : Monster
         HitType hitType;
         if (_hitState == HitState.Ground)
         {
+            _animBase.isFinished = true;
             _animator.SetBool(GameManager.s_isair,false);
             
             switch (attackType)
@@ -73,6 +74,7 @@ public partial class Monster_Normal : Monster
         }
         else if (_hitState == HitState.Air)
         {
+            _animBase.isFinished = true;
             _animator.SetBool(GameManager.s_isair,true);
             if (isAirSmash)
             {

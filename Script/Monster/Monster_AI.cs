@@ -81,9 +81,11 @@ public partial class Monster : MonoBehaviour
     public void AI_Pattern()
     {
         if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_death)) return;
-        var p = _patterns["DoubleSwing"];
+        string patternName = "TripleSwing";
+        var p = _patterns[patternName];
         _animator.SetTrigger(GameManager.s_state_change);
         _animator.SetInteger(GameManager.s_state_type,1);
+        _animator.SetInteger(GameManager.s_125ms,p.pattern.trailDatas[0].transition125ms);
         _animator.SetInteger(GameManager.s_pattern,p.index);
         _animator.SetFloat(GameManager.s_speed,p.pattern.playSpeed);
         _currentPattern = p.pattern;

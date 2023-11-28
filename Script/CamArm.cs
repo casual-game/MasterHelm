@@ -15,7 +15,6 @@ public class CamArm : MonoBehaviour
     
     //Public
     public static CamArm instance;
-    public CloudShadowsProfile cloudShadows;
     public TransitionProfile transition_main_fadein,transition_main_fadeout;
     [HideInInspector] public Camera mainCam;
     [TitleGroup("Movement")]
@@ -26,6 +25,8 @@ public class CamArm : MonoBehaviour
     [FoldoutGroup("Effect/data")] public Material m_radialblur,m_speedline;
     [FoldoutGroup("Effect/data")] public CustomPostProcessingInstance cp_invert, cp_radial;
     [FoldoutGroup("Effect/data")] public Color vignette_NormalColor, vignette_HitColor;
+    [FoldoutGroup("Effect/data")] public CloudShadowsProfile cloudShadows;
+    [FoldoutGroup("Effect/data")] public Color cloud_FadeColor, cloud_IngameColor;
     //Private
     private Transform _camT;
     private Camera[] _cams;
@@ -55,6 +56,7 @@ public class CamArm : MonoBehaviour
         cloudShadows.cloudsThickness = 10.0f;
         cloudShadows.cloudsOpacity = 1.0f;
         cloudShadows.coverage = 1.0f;
+        cloudShadows.sunColor = cloud_FadeColor;
         _cams[0].orthographicSize = 5.5f;
         _cams[1].orthographicSize = 5.5f;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
@@ -90,6 +92,10 @@ public class CamArm : MonoBehaviour
             {
                 cloudShadows.coverage = coverage;
             }, ease))
+            .Group(Tween.Custom(cloud_FadeColor,cloud_IngameColor,duration,onValueChange: sunColor =>
+            {
+                cloudShadows.sunColor = sunColor;
+            }, ease))
             .Group(Tween.CameraOrthographicSize(_cams[0], 4, duration, ease))
             .Group(Tween.CameraOrthographicSize(_cams[1], 4, duration, ease));
     }
@@ -103,6 +109,7 @@ public class CamArm : MonoBehaviour
         cloudShadows.cloudsThickness = 15.0f;
         cloudShadows.cloudsOpacity = 0.025f;
         cloudShadows.coverage = 0.5f;
+        cloudShadows.sunColor = cloud_IngameColor;
         _cams[0].orthographicSize = 4.0f;
         _cams[1].orthographicSize = 4.0f;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
@@ -144,6 +151,10 @@ public class CamArm : MonoBehaviour
             .Group(Tween.Custom(0.5f, 1.0f, duration, onValueChange: coverage =>
             {
                 cloudShadows.coverage = coverage;
+            }, ease, startDelay: delay,useUnscaledTime:true))
+            .Group(Tween.Custom(cloud_IngameColor,cloud_FadeColor,duration,onValueChange: sunColor =>
+            {
+                cloudShadows.sunColor = sunColor;
             }, ease, startDelay: delay,useUnscaledTime:true))
             .Group(Tween.Custom(0.0f, 1.0f, 1.5f, onValueChange: threshold =>
             {

@@ -101,7 +101,7 @@ public partial class Hero : MonoBehaviour
     }
     public void Core_StrongAttack()
     {
-        if (HeroMoveState is MoveState.Locomotion or MoveState.Roll && Get_Charged())
+        if (HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust && Get_Charged())
         {
             Effect_SuperArmor(true);
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
@@ -134,11 +134,12 @@ public partial class Hero : MonoBehaviour
     public bool Core_Hit_Strong(TrailData_Monster trailData, Vector3 hitPoint)
     {
         //저스트 회피,중복히트 필터링
-        if (Time.time < _hitStrongTime + HitStrongDelay || _superarmor && HeroMoveState == MoveState.Roll || !_spawned) return false;
+        if (Time.time < _hitStrongTime + HitStrongDelay || HeroMoveState == MoveState.RollJust || !_spawned) return false;
         //구르기, 슈퍼아머 처리.
         if (_superarmor || HeroMoveState == MoveState.Roll)
         {
-            
+            float dmg = Random.Range(trailData.damage.x, trailData.damage.y + 1);
+            frameMain.HP_Damage(Mathf.RoundToInt(dmg*heroData.RollDamageRatio));
             Tween_Punch_Down(1.5f);
             Effect_Hit_SuperArmor();
             CamArm.instance.Tween_ShakeSuperArmor();
@@ -239,6 +240,7 @@ public partial class Hero : MonoBehaviour
 
         //구르기
         bool canRoll = HeroMoveState != MoveState.Hit && HeroMoveState != MoveState.Roll
+                                                      && HeroMoveState != MoveState.RollJust
                                                       && !_animator.GetBool(GameManager.s_hit)
                                                       && !_animator.GetBool(GameManager.s_death);
         /*

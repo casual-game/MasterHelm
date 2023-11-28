@@ -38,7 +38,7 @@ public partial class Hero : MonoBehaviour
     }
     
     //Public
-    public enum MoveState { Locomotion = 0,Roll = 1,Interact = 2,Hit=3,NormalAttack=4,StrongAttack=5}
+    public enum MoveState { Locomotion = 0,Roll = 1,Interact = 2,Hit=3,NormalAttack=4,StrongAttack=5,RollJust=6}
     public MoveState HeroMoveState
     {
         get;

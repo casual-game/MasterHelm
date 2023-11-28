@@ -38,7 +38,7 @@ public partial class Hero : MonoBehaviour
     //Event
     private void E_BTN_Attack_Pressed()
     {
-        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         if(canChargeMotion) _animator.SetBool(GameManager.s_charge_normal,true);
         
         p_charge_begin.Play();
@@ -68,7 +68,7 @@ public partial class Hero : MonoBehaviour
     }
     private void E_BTN_Attack_PressedUpdate()
     {
-        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         Quaternion myRot = transform.rotation;
         //공격 조이스틱 각도 계산,Display 회전
         float jsDeg;
@@ -138,7 +138,7 @@ public partial class Hero : MonoBehaviour
     }
     private void E_BTN_Attack_ReleasedUpdate()
     {
-        bool canChargeMotion = HeroMoveState == MoveState.Locomotion || HeroMoveState == MoveState.Roll;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         float eulery = transform.rotation.eulerAngles.y;
         float targetDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
             eulery, ref _lookDisplayRefDeg, heroData.lookDisplayDuration);

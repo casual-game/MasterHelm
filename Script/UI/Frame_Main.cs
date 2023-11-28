@@ -66,7 +66,7 @@ public class Frame_Main : MonoBehaviour
         s_hp = Sequence.Create().Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
                 0.6f, Ease.OutQuart, useUnscaledTime: true))
             .Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
-                0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 1.5f))
+                0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 5.0f))
             .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
             {
                 hp_CurrentRatio = f;
@@ -82,7 +82,47 @@ public class Frame_Main : MonoBehaviour
         return currenthp > 0;
     }
 
-    [Button]
+    public void HP_Regain(int regain)
+    {
+        s_hp.Stop();
+        int _maxhp = Mathf.Clamp(Mathf.RoundToInt(maxhp * (float)i_hp_lerp.rectTransform.sizeDelta.x 
+                                                  / (float)i_hplerp_width),currenthp, maxhp);
+        //int에 맞게 uillerp 업데이트
+        i_hp_lerp.rectTransform.sizeDelta = new Vector2(i_hplerp_width *((float)_maxhp / (float)maxhp), i_hplerp_height);
+        //각종 데이터 계산
+        bool canGain = _maxhp > currenthp;
+        currenthp = Mathf.Clamp(currenthp + regain, 0, _maxhp);
+        float ratio = (float)currenthp / (float)maxhp;
+        float width_main = i_hp_width * ratio;
+        float width_lerp = i_hplerp_width * ratio;
+        frame_main.anchoredPosition = frameAnchoredPos;
+        
+        
+        s_hp = Sequence.Create();
+        //회복 불가능하면 시간만 갱신
+        s_hp.Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
+            0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 3.0f));
+        //회복 가능하면 회복, 불가능하면 넘김
+        if (canGain)
+        {
+            i_hp_lerp.color = c_lerp_hit;
+            tmp_hp.color = c_tmp_hit;
+            s_hp.Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
+                    0.6f, Ease.OutQuart, useUnscaledTime: true))
+                .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
+                {
+                    hp_CurrentRatio = f;
+                    tmp_hp.text = currenthp + "/" + maxhp + " (" + Mathf.RoundToInt(f * 100) + "%)";
+                }, ease: Ease.OutQuart, useUnscaledTime: true))
+                .Group(Tween.Color(i_hp_lerp, c_lerp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
+                .Group(Tween.Color(tmp_hp, c_tmp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
+                .Group(Tween.Custom(0, 1, 0.5f, useUnscaledTime: true, onValueChange: newVal =>
+                {
+                    Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2 - 2 * newVal) * 3;
+                    frame_main.anchoredPosition = frameAnchoredPos + RandomVec;
+                }));
+        }
+    }
     public void Charge_MP(int charge =1)
     {
         s_mp.Stop();

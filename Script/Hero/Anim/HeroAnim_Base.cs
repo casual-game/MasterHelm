@@ -207,7 +207,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     {
         
         //기본
-        if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
+        if (_hero.HeroMoveState == Hero.MoveState.Roll || _hero.HeroMoveState == Hero.MoveState.RollJust) return;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
         _hero.Effect_SuperArmor(false);
         CamArm.instance.Tween_ResetTimescale();

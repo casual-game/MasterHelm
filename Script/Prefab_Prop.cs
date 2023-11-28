@@ -64,10 +64,11 @@ public class Prefab_Prop : MonoBehaviour
     }
     //Collision
     
-    public bool Collision_Interact_Hero(TrailData trailData,Transform attacker)//공격 판정 계산할때 호출한다.
+    public (bool collided,int count) Collision_Interact_Hero(TrailData trailData,Transform attacker)//공격 판정 계산할때 호출한다.
     {
-        if (skipCurrentInteraction) return false;
+        if (skipCurrentInteraction) return (false,0);
         bool collided = false;
+        int count = 0;
         foreach (var coll in _interact_savedTargets) Interact(coll);
         foreach (var coll in _interact_currentTargets) Interact(coll);
         void Interact(Collider coll)
@@ -75,12 +76,16 @@ public class Prefab_Prop : MonoBehaviour
             if (!_interact_interactedTargets.Contains(coll))
             {
                 coll.TryGetComponent<Monster>(out var monster);
-                if (monster.AI_Hit(attacker, transform, trailData)) collided = true;
+                if (monster.AI_Hit(attacker, transform, trailData))
+                {
+                    collided = true;
+                    count++;
+                }
                 _interact_interactedTargets.Add(coll);
             }
         }
         _interact_savedTargets.Clear();
-        return collided;
+        return (collided,count);
     }
     public bool Collision_Interact_Monster(TrailData_Monster trailData,Transform attacker)//공격 판정 계산할때 호출한다.
     {

@@ -50,6 +50,7 @@ public class TrailData
     [TitleGroup("AttackData")] public AttackType attackType_ground;
     [TitleGroup("AttackData")] public bool isAirSmash;
     [TitleGroup("AttackData")] public Vector2Int damage = new Vector2Int(10,15);
+    [TitleGroup("AttackData")] public int regain = 2;
     [FormerlySerializedAs("mp_charge")] [FormerlySerializedAs("manaCharge")] [TitleGroup("AttackData")] public int charge_mp = 1;
     [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
     [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
@@ -67,6 +68,8 @@ public class TrailData
 public class TrailData_Monster : TrailData
 {
     [LabelText("종료 상태")] public PlayerAttackType swingFinState;
+    public int transition125ms = 1;
+    public bool isTransition = false;
     public AttackMotionType attackMotionType = AttackMotionType.Center;
     public HitType hitType = HitType.Normal;
 }
