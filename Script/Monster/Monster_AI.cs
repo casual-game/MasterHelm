@@ -8,14 +8,26 @@ public partial class Monster : MonoBehaviour
     private void Setting_AI()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _patterns = new Dictionary<string, (int index,MonsterPattern pattern)>(monsterInfo.patterns.Count);
+        _patterns = new Dictionary<string, (int index,MonsterPattern pattern)>(8);
         //패턴 설정
-        for (int i = 0; i < monsterInfo.patterns.Count; i++)
-        {
-            MonsterPattern pattern = monsterInfo.patterns[i];
-            _patterns.Add(pattern.patternName,(i,pattern));
-        }
+        AddPattern(monsterInfo.Pattern_0,0);
+        AddPattern(monsterInfo.Pattern_1,1);
+        AddPattern(monsterInfo.Pattern_2,2);
+        AddPattern(monsterInfo.Pattern_3,3);
+        AddPattern(monsterInfo.Pattern_4,4);
+        AddPattern(monsterInfo.Pattern_5,5);
+        AddPattern(monsterInfo.Pattern_6,6);
+        AddPattern(monsterInfo.Pattern_7,7);
         GameManager.Instance.E_Debug1_Begin.AddListener(AI_Pattern);
+        void AddPattern(MonsterPattern pattern,int index)
+        {
+            if (pattern.usePattern)
+            {
+                pattern.Setting();
+                _patterns.Add(pattern.patternName,(index,pattern));
+            }
+            
+        }
     }
     //Private,Protected
     private Dictionary<string, (int index,MonsterPattern pattern)> _patterns;
@@ -85,9 +97,8 @@ public partial class Monster : MonoBehaviour
         var p = _patterns[patternName];
         _animator.SetTrigger(GameManager.s_state_change);
         _animator.SetInteger(GameManager.s_state_type,1);
-        _animator.SetInteger(GameManager.s_125ms,p.pattern.trailDatas[0].transition125ms);
         _animator.SetInteger(GameManager.s_pattern,p.index);
-        _animator.SetFloat(GameManager.s_speed,p.pattern.playSpeed);
+        _animator.SetInteger(GameManager.s_125ms,p.pattern.Pointer_GetData_TransitionDuration());
         _currentPattern = p.pattern;
     }
     public virtual bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)

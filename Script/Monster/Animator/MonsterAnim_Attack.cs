@@ -15,27 +15,6 @@ public class MonsterAnim_Attack : MonsterAnim_Base
         base.OnStateEnter(animator, stateInfo, layerIndex);
         _monster.Set_HitState(Monster.HitState.Ground);
         _pattern = _monster.Get_CurrentPattern();
-        int count=0;
-        bool min = false, max = false;
-        for (int i = 0; i < _pattern.trailDatas.Count; i++)
-        {
-            var td = _pattern.trailDatas[i];
-            if (td.isTransition) count++;
-            if (!min && count == index)
-            {
-                min = true;
-                minIndex = count;
-            }
-
-            if (!max && (i == _pattern.trailDatas.Count - 1 || _pattern.trailDatas[i + 1].isTransition))
-            {
-                max = true;
-                maxIndex = i;
-                if (i < _pattern.trailDatas.Count - 1 && _pattern.trailDatas[i + 1].isTransition) toIdle = false;
-            }
-            
-        }
-        Debug.Log("Min: "+minIndex+", Max: "+maxIndex + ", ToIdle: "+toIdle + " Index: "+moveState);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -47,7 +26,7 @@ public class MonsterAnim_Attack : MonsterAnim_Base
         Transform t = _monster.transform;
         //이동,회전
         Quaternion targetRot;
-        if (_pattern.rotateRange.x <= normalizedTime && normalizedTime < _pattern.rotateRange.y)
+        if (_staticTrailData.rotateToHero)
         {
             float targetDeg;
 
@@ -58,15 +37,16 @@ public class MonsterAnim_Attack : MonsterAnim_Base
             while (degDiff > 180) degDiff -= 360;
             degDiff = Mathf.Clamp(degDiff, -60, 60) / 60.0f;
             targetDeg = Mathf.SmoothDampAngle(t.eulerAngles.y, playerDeg,
-                ref _monster.rotateCurrentVelocity, _pattern.rotateDuration * Mathf.Abs(degDiff));
+                ref _monster.rotateCurrentVelocity, _staticTrailData.rotateDuration * Mathf.Abs(degDiff));
             targetRot = Quaternion.Euler(0, targetDeg, 0);
         }
         else targetRot = animator.rootRotation;
-        _monster.Move_Nav(animator.deltaPosition*_pattern.motionSpeed,targetRot);
+        //_monster.Move_Nav(animator.deltaPosition*_pattern.motionSpeed,targetRot);
         //트레일
-        Update_Trail(normalizedTime,minIndex,maxIndex, _pattern.trailDatas);
+        //Update_Trail(normalizedTime,minIndex,maxIndex, _pattern.trailDatas);
         //Idle로 이동 혹은 다음 콤보로 transition.
-        if (normalizedTime > _pattern.endRatio)
+        /*
+        if (normalizedTime > _staticTrailData.endRatio)
         {
             if (toIdle)
             {
@@ -85,6 +65,7 @@ public class MonsterAnim_Attack : MonsterAnim_Base
                 Debug.Log("Combo");
             }
         }
+        */
     }
     
 }

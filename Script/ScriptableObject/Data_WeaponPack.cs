@@ -47,31 +47,47 @@ public class PlayerAttackMotionData
 [System.Serializable]
 public class TrailData
 {
-    [TitleGroup("AttackData")] public AttackType attackType_ground;
-    [TitleGroup("AttackData")] public bool isAirSmash;
-    [TitleGroup("AttackData")] public Vector2Int damage = new Vector2Int(10,15);
-    [TitleGroup("AttackData")] public int regain = 2;
-    [FormerlySerializedAs("mp_charge")] [FormerlySerializedAs("manaCharge")] [TitleGroup("AttackData")] public int charge_mp = 1;
-    [TitleGroup("TrailData")] public bool weaponL, weaponR, shield;
-    [MinMaxSlider(0,1,true)][TitleGroup("TrailData")] 
+    [FoldoutGroup("TrailData")]
+    [TitleGroup("TrailData/공격 정보 설정")] public AttackType attackType_ground;
+    [TitleGroup("TrailData/공격 정보 설정")] public bool isAirSmash;
+    [TitleGroup("TrailData/공격 정보 설정")] public Vector2Int damage = new Vector2Int(10,15);
+    [TitleGroup("TrailData/공격 정보 설정")] public int regain = 2;
+    [TitleGroup("TrailData/공격 정보 설정")] public int charge_mp = 1;
+    
+    
+    
+    
+    [TitleGroup("TrailData/타이밍 설정")] public bool weaponL, weaponR, shield;
+    [TitleGroup("TrailData/타이밍 설정")] [MinMaxSlider(0,1,true)]
     public Vector2 trailRange = new Vector2(0,1);
-    
-    
-    
-    [TitleGroup("InteractType")]public bool isHitScan = false;
-    [HideIf("$isHitScan")][TitleGroup("InteractType")][MinMaxSlider(0,1,true)] 
-    public Vector2 collisionRange = new Vector2(0,1);
-    [ShowIf("$isHitScan")] [TitleGroup("InteractType")]
+
+    [TitleGroup("TrailData/타이밍 설정")]
+    [Button("$GetHitscanButtonName")]
+    public void ChangeHitScan()
+    {
+        isHitScan = !isHitScan;
+    }
+    private string GetHitscanButtonName()
+    {
+        if (isHitScan) return "HitScan 사용중";
+        else return "실시간 동적 충돌계산 사용중";
+    }
+    [HideInInspector] public bool isHitScan = false;
+    [TitleGroup("TrailData/타이밍 설정")][ShowIf("$isHitScan")]
     public Vector3 hitscan_pos, hitscan_rot, hitscan_scale;
+    [TitleGroup("TrailData/타이밍 설정")][HideIf("$isHitScan")]
+    [MinMaxSlider(0,1,true)]
+    public Vector2 collisionRange = new Vector2(0,1);
 }
 [System.Serializable]
 public class TrailData_Monster : TrailData
 {
-    [LabelText("종료 상태")] public PlayerAttackType swingFinState;
-    public int transition125ms = 1;
-    public bool isTransition = false;
-    public AttackMotionType attackMotionType = AttackMotionType.Center;
-    public HitType hitType = HitType.Normal;
+    [FoldoutGroup("TrailData")]
+    [TitleGroup("TrailData/공격 정보 설정")][LabelText("종료 상태")][EnumToggleButtons] public PlayerAttackType swingFinState;
+    [TitleGroup("TrailData/공격 정보 설정")][LabelText("공격 판정")][EnumToggleButtons]  public AttackMotionType attackMotionType = AttackMotionType.Center;
+    [TitleGroup("TrailData/공격 정보 설정")][EnumToggleButtons,HideLabel] public HitType hitType = HitType.Normal;
+    [TitleGroup("TrailData/공격 정보 설정")] public bool rotateToHero = true;
+    [TitleGroup("TrailData/공격 정보 설정")] [ShowIf("rotateToHero")] public float rotateDuration = 1.0f;
 }
 public enum PlayerAttackType
 {
