@@ -212,6 +212,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         _hero.Effect_SuperArmor(false);
         CamArm.instance.Tween_ResetTimescale();
         animator.SetBool(GameManager.s_roll,true);
+        animator.SetTrigger(GameManager.s_rolltransition);
         //저스트 구르기인지 확인, 저스트 관련 데이터 저장
         bool isJustRoll = false;
         float minDist = _hero.heroData.justEvadeDistance * _hero.heroData.justEvadeDistance;
@@ -248,10 +249,11 @@ public class HeroAnim_Base : StateMachineBehaviour
             _hero.Set_AnimatorUnscaledTime(true);
             CamArm.instance.Tween_JustEvade();
             
-            var state = mtarget.Get_CurrentTrail().swingFinState;
+            var state = mtarget.Get_CurrentTrail().evadeType;
             int rollState;
-            if (state == PlayerAttackType.LeftState) rollState = 1;
-            else rollState = 2;
+            if (state == EvadeType.LeftSide) rollState = 1;
+            else if (state == EvadeType.RightSide) rollState = 2;
+            else rollState = 3;
             animator.SetInteger(GameManager.s_state_type,rollState);
         }
         animator.SetBool(GameManager.s_leftstate,false);

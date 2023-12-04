@@ -82,14 +82,18 @@ public class TrailData
 [System.Serializable]
 public class TrailData_Monster : TrailData
 {
-    [FoldoutGroup("TrailData")]
-    [TitleGroup("TrailData/공격 정보 설정")][LabelText("종료 상태")][EnumToggleButtons] public PlayerAttackType swingFinState;
+    [TitleGroup("TrailData/공격 정보 설정")][LabelText("회피 방식")][EnumToggleButtons] public EvadeType evadeType;
     [TitleGroup("TrailData/공격 정보 설정")][LabelText("공격 판정")][EnumToggleButtons]  public AttackMotionType attackMotionType = AttackMotionType.Center;
     [TitleGroup("TrailData/공격 정보 설정")][EnumToggleButtons,HideLabel] public HitType hitType = HitType.Normal;
+    [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public float playSpeed = 1.0f, moveSpeed = 1.0f;
     [TitleGroup("TrailData/공격 정보 설정")] public bool rotateToHero = true;
     [TitleGroup("TrailData/공격 정보 설정")] [ShowIf("rotateToHero")] public float rotateDuration = 1.0f;
 }
 public enum PlayerAttackType
 {
     LeftState =0, RightState =1
+}
+public enum EvadeType
+{
+    Backward =0, LeftSide =1 ,RightSide = 2
 }

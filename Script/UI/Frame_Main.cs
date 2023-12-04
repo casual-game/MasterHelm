@@ -58,6 +58,7 @@ public class Frame_Main : MonoBehaviour
         float ratio = (float)currenthp / (float)maxhp;
         float width_main = i_hp_width * ratio;
         float width_lerp = i_hplerp_width * ratio;
+        float lerpDelay = currenthp == 0 ? 0 : 5.0f;
         i_hp_lerp.color = c_lerp_hit;
         tmp_hp.color = c_tmp_hit;
         frame_main.anchoredPosition = frameAnchoredPos;
@@ -66,7 +67,7 @@ public class Frame_Main : MonoBehaviour
         s_hp = Sequence.Create().Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
                 0.6f, Ease.OutQuart, useUnscaledTime: true))
             .Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
-                0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 5.0f))
+                0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: lerpDelay))
             .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
             {
                 hp_CurrentRatio = f;

@@ -28,32 +28,45 @@ public class MonsterPattern
     [HideLabel] public string patternName = "PatternName";
 
     [Title("세부 단계","각각의 세부 단계는 Animator에서의 State를 나타냅니다.")] 
-    [LabelText(" N0 종료시점",SdfIconType.CircleFill)]public float pattern_n_0_endratio = 0.75f;
-    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,5)] public int pattern_n_0_transitionduration = 1;
+    [LabelText(" N0 종료시점",SdfIconType.CircleFill)][OnValueChanged("Setting")]
+    public float pattern_n_0_endratio = 0.75f;
+    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)][OnValueChanged("Setting")]
+    public int pattern_n_0_transitionduration = 1;
     [ListDrawerSettings(AddCopiesLastElement = true)]
     public List<TrailData_Monster> pattern_n_0 = new List<TrailData_Monster>();
-    [LabelText(" N1 종료시점",SdfIconType.CircleFill),PropertySpace(8)] public float pattern_n_1_endratio = 0.75f;
-    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,5)] public int pattern_n_1_transitionduration = 1;
-    [ListDrawerSettings(AddCopiesLastElement = true)]
+    [LabelText(" N1 종료시점",SdfIconType.CircleFill),PropertySpace(8)]
+    public float pattern_n_1_endratio = 0.75f;
+    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
+    public int pattern_n_1_transitionduration = 1;
+    [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_1 = new List<TrailData_Monster>();
-    [LabelText(" N2 종료시점",SdfIconType.CircleFill),PropertySpace(8)] public float pattern_n_2_endratio = 0.75f;
-    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,5)] public int pattern_n_2_transitionduration = 1;
-    [ListDrawerSettings(AddCopiesLastElement = true)]
+    [LabelText(" N2 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
+    public float pattern_n_2_endratio = 0.75f;
+    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
+    public int pattern_n_2_transitionduration = 1;
+    [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_2 = new List<TrailData_Monster>();
-    [LabelText(" N3 종료시점",SdfIconType.CircleFill),PropertySpace(8)] public float pattern_n_3_endratio = 0.75f;
-    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,5)] public int pattern_n_3_transitionduration = 1;
-    [ListDrawerSettings(AddCopiesLastElement = true)]
+    [LabelText(" N3 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
+    public float pattern_n_3_endratio = 0.75f;
+    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
+    public int pattern_n_3_transitionduration = 1;
+    [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_3 = new List<TrailData_Monster>();
-    [LabelText(" N4 종료시점",SdfIconType.CircleFill),PropertySpace(8)] public float pattern_n_4_endratio = 0.75f;
-    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,5)] public int pattern_n_4_transitionduration = 1;
-    [ListDrawerSettings(AddCopiesLastElement = true)]
+    [LabelText(" N4 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
+    public float pattern_n_4_endratio = 0.75f;
+    [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)][OnValueChanged("Setting")]
+    public int pattern_n_4_transitionduration = 1;
+    [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_4 = new List<TrailData_Monster>();
+    
+    
+    
     //실시간
-    private List<(float endRatio, int transitionDuration, List<TrailData_Monster> dataMonster)> stateData =
-        new List<(float endRatio, int transitionDuration, List<TrailData_Monster> dataMonster)>(5);
+    private List<(float endRatio, int transitionDuration, List<TrailData_Monster> dataMonster)> stateData;
     private (int stateIndex, int trailIndex) statePointer = (0, 0);
     public void Setting()
     {
+        stateData = new List<(float endRatio, int transitionDuration, List<TrailData_Monster> dataMonster)>(5);
         if(pattern_n_0.Count>0) stateData.Add((pattern_n_0_endratio, 
             pattern_n_0_transitionduration, pattern_n_0));
         if(pattern_n_1.Count>0) stateData.Add((pattern_n_1_endratio,
@@ -72,17 +85,22 @@ public class MonsterPattern
     /// <returns></returns>
     public bool Pointer_Update()
     {
-        if (stateData[statePointer.stateIndex].dataMonster.Count <= statePointer.trailIndex)
+        if (stateData[statePointer.stateIndex].dataMonster.Count-1 <= statePointer.trailIndex)
         {
-            if (stateData.Count <= statePointer.stateIndex + 1) return false;
+            if (stateData.Count <= statePointer.stateIndex + 1)
+            {
+                return false;
+            }
             else
             {
                 statePointer.stateIndex++;
                 statePointer.trailIndex = 0;
             }
         }
-        else statePointer.trailIndex++;
-
+        else
+        {
+            statePointer.trailIndex++;
+        }
         return true;
     }
     public void Pointer_Reset()
@@ -100,6 +118,10 @@ public class MonsterPattern
     public TrailData_Monster Pointer_GetData_TrailDataMonster()
     {
         return stateData[statePointer.stateIndex].dataMonster[statePointer.trailIndex];
+    }
+    public bool Pointer_CompareState(int index)
+    {
+        return index == statePointer.stateIndex;
     }
 }
 

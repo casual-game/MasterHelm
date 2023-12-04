@@ -12,14 +12,13 @@ public partial class Monster : MonoBehaviour
     protected Prefab_Prop _weaponL, _weaponR, _shield;
     private TrailData_Monster _currentTrailData;
     //Get,Set
-    public void Set_CurrentTrail(TrailData_Monster traildata)
-    {
-        _currentTrailData = traildata;
-    }
-
     public TrailData_Monster Get_CurrentTrail()
     {
         return _currentTrailData;
+    }
+    public void Set_CurrentTrail(TrailData_Monster data)
+    {
+        _currentTrailData = data;
     }
     //Equipment
     public void Equipment_Equip()

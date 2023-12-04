@@ -32,7 +32,6 @@ public partial class Monster : MonoBehaviour
     //Private,Protected
     private Dictionary<string, (int index,MonsterPattern pattern)> _patterns;
     private MoveState _monsterMoveState = MoveState.Idle;
-    private MonsterPattern _currentPattern;
     private NavMeshAgent _agent;
     private float _clipLength;
     protected HitState _hitState
@@ -40,6 +39,8 @@ public partial class Monster : MonoBehaviour
         get;
         private set;
     }
+
+    private MonsterPattern _currentMonsterPattern;
     //Public,Static
     public enum MoveState
     {
@@ -49,10 +50,6 @@ public partial class Monster : MonoBehaviour
     [HideInInspector] public float rotateCurrentVelocity;
     
     //Get
-    public MonsterPattern Get_CurrentPattern()
-    {
-        return _currentPattern;
-    }
     public bool Get_CanJustRoll(float free_time)
     {
         if (_monsterMoveState != MoveState.Pattern || _currentTrailData == null) return false;
@@ -70,10 +67,13 @@ public partial class Monster : MonoBehaviour
     {
         return _monsterMoveState == MoveState.Pattern && _currentTrailData != null;
     }
-
     public MoveState Get_MonsterMoveState()
     {
         return _monsterMoveState;
+    }
+    public MonsterPattern Get_CurrentMonsterPattern()
+    {
+        return _currentMonsterPattern;
     }
     //Set
     public void Set_HitState(HitState hitState)
@@ -84,7 +84,6 @@ public partial class Monster : MonoBehaviour
     {
         _monsterMoveState = moveState;
     }
-
     public void Set_ClipLength(float length)
     {
         _clipLength = length;
@@ -95,11 +94,12 @@ public partial class Monster : MonoBehaviour
         if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_death)) return;
         string patternName = "TripleSwing";
         var p = _patterns[patternName];
+        p.pattern.Pointer_Reset();
         _animator.SetTrigger(GameManager.s_state_change);
         _animator.SetInteger(GameManager.s_state_type,1);
         _animator.SetInteger(GameManager.s_pattern,p.index);
         _animator.SetInteger(GameManager.s_125ms,p.pattern.Pointer_GetData_TransitionDuration());
-        _currentPattern = p.pattern;
+        _currentMonsterPattern = p.pattern;
     }
     public virtual bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {

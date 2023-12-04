@@ -400,7 +400,7 @@ public class CamArm : MonoBehaviour
         Tween_Radial(0.75f,0.15f);
         //Stop
         t_stop.Stop();
-        t_stop = Tween.GlobalTimeScale(0.25f, 1.0f, 2.0f, ease: Ease.InExpo);
+        t_stop = Tween.GlobalTimeScale(0.375f, 1.0f, 1.2f, ease: Ease.InOutCirc);
         //Shake Normal
         float shakeDuration = 0.5f;
         t_shake.Stop();
