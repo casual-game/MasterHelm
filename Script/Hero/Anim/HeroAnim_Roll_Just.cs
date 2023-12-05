@@ -21,8 +21,10 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
         else endDeg = startDeg;
         pattern = 0;
         animator.SetBool(GameManager.s_leftstate,false);
-        _hero.Effect_Roll();
+        _hero.Effect_Smoke();
+        _hero.Tween_Blink_Evade(1.5f);
         _hero.Tween_Punch_Up_Compact(0.4f);
+        _hero.frameMain.Charge_MP(_heroData.MP_Recovery_JustRoll);
         Quaternion targetRot = Quaternion.Euler(0,endDeg,0);
         _hero.Move_Nav(Vector3.zero, targetRot);
         pattern = 1;

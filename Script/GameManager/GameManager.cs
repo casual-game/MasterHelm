@@ -27,7 +27,8 @@ public partial class GameManager : MonoBehaviour
         ,s_advanceddissolvecutoutstandardmap1 = "_AdvancedDissolveCutoutStandardMap1",s_basemap = "_BaseMap",s_maincolor = "_MainColor"
         ,s_bluramount = "_BlurAmount",s_colour = "_Colour",s_roll = "Roll",s_unscaledtime = "_UnscaledTime",s_pattern = "Pattern"
         ,s_rolltransition = "RollTransition";
-    
+
+    public static string s_burn = "Burn";
     //Public
     public AnimationCurve curve_inout,curve_in,curve_out;
     public DamageNumber dmp_normal, dmp_strong, dmp_weak;

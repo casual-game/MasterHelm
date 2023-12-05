@@ -11,6 +11,7 @@ public partial class Hero : MonoBehaviour
     private void Setting_Effect()
     {
         _meshRoot = transform.GetChild(0);
+        var smr = GetComponentInChildren<SkinnedMeshRenderer>();
         trailEffect = GetComponentInChildren<SkinnedMeshRenderer>().GetComponent<TrailEffect>();
         trailEffect.active = false;
         var trailModuleM = p_charge_main.trails;
@@ -23,38 +24,32 @@ public partial class Hero : MonoBehaviour
         trailModuleR.colorOverTrail = weaponPack_StrongR.colorOverTrail;
         trailModuleR.colorOverLifetime = weaponPack_StrongR.colorOverLifetime;
 
-        mat_superarmor = new Material(mat_superarmor);
-        var smr = GetComponentInChildren<SkinnedMeshRenderer>();
-        Material[] newmats = new Material[2];
-        newmats[0] = smr.material;
-        newmats[1] = mat_superarmor;
-        smr.materials = newmats;
-        UpdateWeaponMat(weaponPack_Normal,mat_superarmor);
-        UpdateWeaponMat(weaponPack_StrongL,mat_superarmor);
-        UpdateWeaponMat(weaponPack_StrongR,mat_superarmor);
-        if(shield!=null) UpdatePropMat(shield,mat_superarmor);
-        id_superarmor = Shader.PropertyToID(GameManager.s_maincolor);
-        void UpdateWeaponMat(Data_WeaponPack weaponPack,Material mat)
+        customMaterialController = GetComponent<CustomMaterialController>();
+        List<Renderer> renderers = new List<Renderer>();
+        renderers.Add(smr);
+        AddWeaponPackRenderer(weaponPack_Normal);
+        AddWeaponPackRenderer(weaponPack_StrongL);
+        AddWeaponPackRenderer(weaponPack_StrongR);
+        AddPropRenderer(shield);
+        customMaterialController.Setting(renderers);
+        
+        void AddWeaponPackRenderer(Data_WeaponPack weaponPack)
         {
-            var wp = weapondata[weaponPack];
-            if (wp.weaponL != null) UpdatePropMat(wp.weaponL,mat);
-            if (wp.weaponR != null) UpdatePropMat(wp.weaponR,mat);
+            if (weapondata[weaponPack].weaponL != null) AddPropRenderer(weapondata[weaponPack].weaponL);
+            if (weapondata[weaponPack].weaponR != null) AddPropRenderer(weapondata[weaponPack].weaponR);
         }
-        void UpdatePropMat(Prefab_Prop prop, Material mat)
+        void AddPropRenderer(Prefab_Prop prop)
         {
-            var mr = prop.GetComponent<MeshRenderer>();
-            Material[] propmats = new Material[2];
-            propmats[0] = mr.material;
-            propmats[1] = mat;
-            mr.materials = propmats;
+            MeshRenderer renderer = prop.GetComponent<MeshRenderer>();
+            renderers.Add(renderer);
         }
     }
     
     //Public
     private TrailEffect trailEffect;
-    [FoldoutGroup("Particle")] public Material mat_superarmor;
+    //[FoldoutGroup("Particle")] public Material mat_superarmor;
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_superarmor;
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
 
     [FoldoutGroup("Particle")][SerializeField]
     private ParticleSystem p_charge_main,p_charge_strongL,p_charge_strongR;
@@ -64,15 +59,14 @@ public partial class Hero : MonoBehaviour
         ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
 
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
-    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin,c_superarmor_deactivated,c_superarmor_activated;
+    public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
 
     //Private
     private Tween t_blink,t_punch;
     private Sequence s_trail,s_superarmor;
     private Transform _meshRoot;
+    private CustomMaterialController customMaterialController;
     private bool _superarmor = false;
-
-    private int id_superarmor;
     //Tween
     public void Tween_Blink_Hit(float timeScale)
     {
@@ -172,15 +166,11 @@ public partial class Hero : MonoBehaviour
             Transform t = transform;
             p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
             p_change.Play();
-            p_superarmor.Play();
-            s_superarmor = Sequence.Create()
-                .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_activated, 0.25f));
+            customMaterialController.Activate(GameManager.s_burn);
         }
         else
         {
-            p_superarmor.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            s_superarmor = Sequence.Create()
-                .Chain(Tween.MaterialColor(mat_superarmor, id_superarmor, c_superarmor_deactivated, 0.25f));
+            customMaterialController.Deactivate();
         }
     }
     public void Effect_Smoke(float fwd = 0)

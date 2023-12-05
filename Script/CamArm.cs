@@ -31,7 +31,8 @@ public class CamArm : MonoBehaviour
     private Transform _camT;
     private Camera[] _cams;
     private Tween t_stop,t_shake,t_chromatic,t_radial;
-    private Sequence s_zoom,s_impact,s_vignette,s_speedline,s_fade;
+    private Sequence s_impact,s_speedline,s_fade;
+    private Sequence s_frame,s_vignette,s_zoom;
     private int id_radial,id_speedline;
     private TransitionAnimator _transitionAnimator;
     private void Awake()
@@ -49,6 +50,7 @@ public class CamArm : MonoBehaviour
     {
         transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.unscaledDeltaTime);
     }
+    //복합 이펙트. 중복 불가
     public void Tween_FadeIn()
     {
         float delay = 0.5f;
@@ -114,19 +116,7 @@ public class CamArm : MonoBehaviour
         _cams[1].orthographicSize = 4.0f;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
         Tween_Radial(0.75f,0.2f);
-        //Vignette
-        float vbegin = 0.15f, vdelay = 1.0f, vfin = 1.5f;
-        s_vignette.Complete();
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, vbegin, ease: Ease.OutCirc,useUnscaledTime:true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, vbegin,useUnscaledTime:true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
-            .ChainDelay(vdelay,true)
-            .Chain(Tween.Custom(1.0f, 0.75f, vfin, ease: Ease.OutCirc,useUnscaledTime:true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, vfin,useUnscaledTime:true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
+        Tween_Vignette(0.15f,1.0f,1.5f,vignette_HitColor,vignette_NormalColor);
         //Chromatic
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
         t_chromatic = Tween.Custom(0.04f, 0.001f, 3.5f, ease: Ease.OutCirc,useUnscaledTime:true,
@@ -216,10 +206,10 @@ public class CamArm : MonoBehaviour
     public void Tween_ShakeSuperArmor()
     {
         Tween_Radial(0.15f);
+        Tween_Vignette(0.074f,0.125f,0.5f,vignette_HitColor,vignette_NormalColor);
         t_shake.Complete();
         t_stop.Complete();
         t_chromatic.Complete();
-        s_vignette.Complete();
         //Shake Normal
         _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
         t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, 0.3f, 25,
@@ -230,28 +220,16 @@ public class CamArm : MonoBehaviour
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
         t_chromatic = Tween.Custom(0.015f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
-        //Vignette
-        float begin = 0.075f, delay = 0.125f, fin = 0.5f;
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, begin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
-            .ChainDelay(delay, true)
-            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, fin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
     }
 
     public void Tween_ShakeStrong_Hero()
     {
         Tween_Radial(0.5f);
+        Tween_Vignette(0.15f,0.25f,0.5f,vignette_HitColor,vignette_NormalColor);
         t_shake.Complete();
         t_stop.Complete();
         t_chromatic.Stop();
         s_zoom.Complete();
-        s_vignette.Complete();
         //Zoom
         s_zoom = Sequence.Create()
             .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.15f, useUnscaledTime: true))
@@ -268,28 +246,15 @@ public class CamArm : MonoBehaviour
             , easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         //Stop
         t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.3f, ease: Ease.InSine);
-        //Vignette
-        float begin = 0.15f, delay = 0.25f, fin = 0.5f;
-        
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, begin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
-            .ChainDelay(delay, true)
-            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, fin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
 
     }
     public void Tween_ShakeNormal_Hero()
     {
         Tween_Radial(0.25f);
+        Tween_Vignette(0.075f,0.125f,0.5f,vignette_HitColor,vignette_NormalColor);
         t_shake.Complete();
         t_stop.Complete();
         t_chromatic.Stop();
-        s_vignette.Complete();
         //Shake Normal
         _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
         t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, 0.3f, 25,
@@ -301,18 +266,6 @@ public class CamArm : MonoBehaviour
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.025f;
         t_chromatic = Tween.Custom(0.02f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
-        //Vignette
-        float begin = 0.075f, delay = 0.125f, fin = 0.5f;
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_NormalColor, vignette_HitColor, begin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
-            .ChainDelay(delay, true)
-            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .Group(Tween.Custom(vignette_HitColor, vignette_NormalColor, fin, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
 
     }
     
@@ -327,14 +280,6 @@ public class CamArm : MonoBehaviour
     {
         t_stop.Complete();
         t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.2f, ease: Ease.OutQuad);
-    }
-    public void Tween_Radial(float duration,float bluramount =0.1f)
-    {
-        t_radial.Stop();
-        cp_radial.Activate();
-        m_radialblur.SetFloat(GameManager.s_bluramount,bluramount);
-        t_radial = Tween.MaterialProperty(m_radialblur, id_radial, 0.0f, duration,useUnscaledTime: true)
-            .OnComplete(target:this, target=> target.cp_radial.Deactivate());
     }
     public void Tween_Impact(ParticleSystem particle,int damage)
     {
@@ -396,8 +341,9 @@ public class CamArm : MonoBehaviour
     }
     public void Tween_JustEvade()
     {
-        
-        Tween_Radial(0.75f,0.15f);
+        Tween_Vignette(0.75f,0.75f,0.75f);
+        Tween_Frame(0.75f,0.75f,0.75f);
+        Tween_Radial(1.05f,0.15f);
         //Stop
         t_stop.Stop();
         t_stop = Tween.GlobalTimeScale(0.375f, 1.0f, 1.2f, ease: Ease.InOutCirc);
@@ -409,23 +355,16 @@ public class CamArm : MonoBehaviour
             easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         //Chromatic
         t_chromatic.Stop();
-        t_chromatic = Tween.Custom(0.03f, 0.001f, 2.5f, ease: Ease.OutCirc, useUnscaledTime: true,
+        t_chromatic = Tween.Custom(0.035f, 0.001f, 2.5f, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
-        //Vignette
-        s_vignette.Complete();
-        float begin = 0.15f, delay = 1.5f, fin = 0.4f;
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .ChainDelay(delay, true)
-            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal));
         
     }
     public void Tween_Skill()
     {
         float duration = 0.5f;
         Tween_Radial(duration,0.075f);
+        Tween_Vignette(0.25f,0.4f,0.5f);
+        Tween_Zoom(0.25f,0.4f,0.5f,0,3.5f);
         //Stop
         t_stop.Complete();
         t_stop = Tween.GlobalTimeScale(0.2f, 1.0f, duration, ease: Ease.InExpo);
@@ -439,27 +378,68 @@ public class CamArm : MonoBehaviour
         t_chromatic.Complete();
         t_chromatic = Tween.Custom(0.035f, 0.001f, duration, ease: Ease.OutCirc, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
-
-        float begin = 0.25f, delay = 0.4f, fin = 0.5f;
-        //Vignette
-        s_vignette.Complete();
-        s_vignette = Sequence.Create()
-            .Chain(Tween.Custom(0.75f,1.0f,begin,ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange:newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
-            .ChainDelay(delay,true)
-            .Chain(Tween.Custom(1.0f,0.75f,fin,ease: Ease.OutCirc, useUnscaledTime: true,
-                onValueChange:newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal));
-        //Zoom
-        s_zoom.Complete();
-        s_zoom = Sequence.Create()
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.5f, begin, useUnscaledTime: true,ease: Ease.OutCirc))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 3.5f, begin, useUnscaledTime: true,ease: Ease.OutCirc))
-            .ChainDelay(delay,true)
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true));
     }
     public void Tween_ResetTimescale()
     {
         t_stop.Complete();
     }
+    //싱글 이펙트. 복합에서 호출한다.
+    public void Tween_Radial(float duration,float bluramount =0.1f)
+    {
+        t_radial.Stop();
+        cp_radial.Activate();
+        m_radialblur.SetFloat(GameManager.s_bluramount,bluramount);
+        t_radial = Tween.MaterialProperty(m_radialblur, id_radial, 0.0f, duration,useUnscaledTime: true)
+            .OnComplete(target:this, target=> target.cp_radial.Deactivate());
+    }
+    public void Tween_Frame(float begin,float delay,float fin)
+    {
+        s_frame.Stop();
+        float startVal = BeautifySettings.settings.frameBandVerticalSize.value;
+        s_frame = Sequence.Create()
+            .Chain(Tween.Custom(startVal, 0.5f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.frameBandVerticalSize.value = newVal))
+            .ChainDelay(delay, true)
+            .Chain(Tween.Custom(0.5f, 0.0f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.frameBandVerticalSize.value = newVal));
+    }
+    public void Tween_Vignette(float begin,float delay,float fin)
+    {
+        s_vignette.Complete();
+        s_vignette = Sequence.Create()
+            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .ChainDelay(delay, true)
+            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal));
+    }
+    public void Tween_Vignette(float begin,float delay,float fin,Color hitColor,Color normalColor)
+    {
+        s_vignette = Sequence.Create()
+            .Chain(Tween.Custom(0.75f, 1.0f, begin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .Group(Tween.Custom(normalColor, hitColor, begin, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal))
+            .ChainDelay(delay, true)
+            .Chain(Tween.Custom(1.0f, 0.75f, fin, ease: Ease.OutCirc, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingInnerRing.value = newVal))
+            .Group(Tween.Custom(hitColor, normalColor, fin, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
+    }
+    public void Tween_Zoom(float begin, float delay, float fin, float startDelay,float orthographicSize)
+    {
+        //Zoom
+        s_zoom.Complete();
+        s_zoom = Sequence.Create();
+        if (startDelay > 0.01f) s_zoom.ChainDelay(startDelay, true);
+        s_zoom
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, begin, useUnscaledTime: true,
+                ease: Ease.OutCirc))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, begin, useUnscaledTime: true,
+                ease: Ease.OutCirc))
+            .ChainDelay(delay, true)
+            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true));
+    }
+    
 }

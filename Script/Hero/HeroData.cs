@@ -9,8 +9,9 @@ public class HeroData : ScriptableObject
 {
     //---------------------------------------------------------------------------------------------------------------
     [TitleGroup("메인")] public int HP = 100;
-    [TitleGroup("메인")] public int MP_Slot_Capacity=7;
-    [TitleGroup("메인")] public float RollDamageRatio = 0.3f;
+    [TitleGroup("메인"),LabelText("MP 1칸 용량")] public int MP_Slot_Capacity=7;
+    [TitleGroup("메인"),LabelText("완벽회피 MP 회복")] public int MP_Recovery_JustRoll = 2;
+    [TitleGroup("메인"),LabelText("구르기시 받는 데미지 비율")] public float RollDamageRatio = 0.3f;
     //---------------------------------------------------------------------------------------------------------------
     [TitleGroup("움직임")][FoldoutGroup("움직임/기타")] public float ladderClimbMotionSpeed = 2.0f;
     [TitleGroup("움직임")][FoldoutGroup("움직임/일반")] public AnimationCurve moveCurve;
