@@ -63,7 +63,7 @@ public partial class Hero : MonoBehaviour
 
     //Private
     private Tween t_blink,t_punch;
-    private Sequence s_trail,s_superarmor;
+    private Sequence s_trail;
     private Transform _meshRoot;
     private CustomMaterialController customMaterialController;
     private bool _superarmor = false;
@@ -155,24 +155,6 @@ public partial class Hero : MonoBehaviour
         p_roll.transform.SetPositionAndRotation(t.position + t.forward * 0.5f,t.rotation);
         p_roll.Play();
     }
-    public void Effect_SuperArmor(bool activate)
-    {
-        if (!activate && !_superarmor) return;
-        _superarmor = activate;
-        
-        if(activate)
-        {
-            s_superarmor.Stop();
-            Transform t = transform;
-            p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
-            p_change.Play();
-            customMaterialController.Activate(GameManager.s_burn);
-        }
-        else
-        {
-            customMaterialController.Deactivate();
-        }
-    }
     public void Effect_Smoke(float fwd = 0)
     {
         Transform t = transform;
@@ -205,21 +187,59 @@ public partial class Hero : MonoBehaviour
     {
         if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        foreach (var value in weapondata.Values)
+        {
+            foreach (var particle in value.attackParticles)
+            {
+                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
         p_charge_main.Play();
     }
     public void Particle_Charge_L()
     {
         if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        foreach (var value in weapondata.Values)
+        {
+            foreach (var particle in value.attackParticles)
+            {
+                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
         p_charge_strongL.Play();
     }
     public void Particle_Charge_R()
     {
         if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        foreach (var value in weapondata.Values)
+        {
+            foreach (var particle in value.attackParticles)
+            {
+                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
         p_charge_strongR.Play();
     }
-
+    //CustomEffect
+    public void Activate_SuperArmor()
+    {
+        _superarmor = true;
+        Transform t = transform;
+        p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
+        p_change.Play();
+        customMaterialController.Activate(GameManager.s_burn);
+    }
+    public void Activate_Feather()
+    {
+        customMaterialController.Activate(GameManager.s_feather);
+    }
+    public void Deactivate_CustomMaterial()
+    {
+        _superarmor = false;
+        customMaterialController.Deactivate();
+    }
 
     
 }

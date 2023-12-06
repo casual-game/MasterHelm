@@ -8,17 +8,19 @@ using PrimeTween;
 public partial class GameManager : MonoBehaviour
 {
     public static float recoveryDamage = 0.33f;
-    
-    [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
+    [TitleGroup("콤보 시스템 인스펙터")]
+    [TabGroup("콤보 시스템 인스펙터/ComboUI","인게임",SdfIconType.Controller)]
+    public DamageNumber dmp_normal, dmp_strong, dmp_weak;
+    [TabGroup("콤보 시스템 인스펙터/ComboUI","캔버스",SdfIconType.CardImage)]
     public Image image_Combo;
-
-    [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
+    [TabGroup("콤보 시스템 인스펙터/ComboUI","캔버스",SdfIconType.CardImage)]
     public RectTransform rectT_Combo_Main, rectT_Combo_Sub;
-
-    [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
+    [TabGroup("콤보 시스템 인스펙터/ComboUI","캔버스",SdfIconType.CardImage)]
     public DamageNumber dmp_Main, dmp_Sub;
-    [FoldoutGroup("UI")] [TitleGroup("UI/Combo")]
-    public float comboDelay = 2.5f;
+    
+    
+    private float comboDelay = 2.5f;//-> 콤보 텍스트 초기화되는 딜레이 시간
+    
     private Sequence s_combo;
     private DamageNumber dmp_created_main, dmp_created_sub;
     private float comboBeginTime = -100;

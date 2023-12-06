@@ -133,7 +133,7 @@ public partial class Hero : MonoBehaviour
             p_charge_Impact.Play();
             Tween_Punch_Down_Compact(1.2f);
             Tween_Blink_Evade(1.0f);
-            Effect_SuperArmor(true);
+            Activate_SuperArmor();
         }
     }
     private void E_BTN_Attack_ReleasedUpdate()

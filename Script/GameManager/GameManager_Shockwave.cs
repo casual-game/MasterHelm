@@ -6,7 +6,7 @@ using UnityEngine;
 
 public partial class GameManager : MonoBehaviour
 {
-    [FoldoutGroup("Shockwave")]
+    [TitleGroup("기타 데이터들")][BoxGroup("기타 데이터들/data",false)]
     public Material mat_shockwave;
     private Tween t_shockwave;
     private int properyID;

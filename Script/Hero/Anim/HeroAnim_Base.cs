@@ -108,7 +108,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Locomotion(Animator animator)
     {
         _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
-        _hero.Effect_SuperArmor(false);
+        _hero.Deactivate_CustomMaterial();
         _hero.Set_SpeedRatio(0);
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Locomotion);
         animator.SetTrigger(GameManager.s_state_change);
@@ -120,14 +120,14 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Attack_Normal(Animator animator)
     {
         if(animator.GetInteger(GameManager.s_state_type) == (int)Hero.AnimationState.Attack_Strong) 
-            _hero.Effect_SuperArmor(false);
+            _hero.Deactivate_CustomMaterial();
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Normal);
         animator.SetTrigger(GameManager.s_state_change);
     }
 
     protected void Set_Attack_Strong(Animator animator)
     {
-        _hero.Effect_SuperArmor(true);
+        _hero.Activate_SuperArmor();
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Strong);
         animator.SetTrigger(GameManager.s_state_change);
     }
@@ -209,7 +209,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         //기본
         if (_hero.HeroMoveState == Hero.MoveState.Roll || _hero.HeroMoveState == Hero.MoveState.RollJust) return;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
-        _hero.Effect_SuperArmor(false);
+        _hero.Deactivate_CustomMaterial();
         CamArm.instance.Tween_ResetTimescale();
         animator.SetBool(GameManager.s_roll,true);
         animator.SetTrigger(GameManager.s_rolltransition);

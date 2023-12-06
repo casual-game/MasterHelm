@@ -12,6 +12,7 @@ using UnityEngine;
 
 public class Prefab_Prop : MonoBehaviour
 {
+    private AnimationCurve _curve = AnimationCurve.EaseInOut(0,0,1,1);
     private float _currentActivateRatio, _targetActivateRatio;
     private bool _targetActivation;
     private Material _material;
@@ -229,7 +230,7 @@ public class Prefab_Prop : MonoBehaviour
         while (_activateRatio<1 && _targetActivation)
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
-            float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
+            float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
@@ -252,7 +253,7 @@ public class Prefab_Prop : MonoBehaviour
         while (_activateRatio>0 &&!_targetActivation)
         {
             _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
-            float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
+            float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
@@ -288,7 +289,7 @@ public class Prefab_Prop : MonoBehaviour
         while (_activateRatio<1 && _targetActivation)
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
-            float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
+            float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
@@ -311,7 +312,7 @@ public class Prefab_Prop : MonoBehaviour
         while (_activateRatio>0 &&!_targetActivation)
         {
             _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
-            float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
+            float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
@@ -330,7 +331,7 @@ public class Prefab_Prop : MonoBehaviour
         while (_activateRatio<1 && !_targetActivation)
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
-            float ratio = 1-GameManager.Instance.curve_inout.Evaluate(Mathf.Clamp01(_activateRatio));
+            float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
             AdvancedDissolveProperties.Cutout.Standard.
                 UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;

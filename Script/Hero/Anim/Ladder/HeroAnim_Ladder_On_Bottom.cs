@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class HeroAnim_Ladder_On_Bottom : HeroAnim_Base
 {
+    public AnimationCurve ladderCurve;
     private Vector3 _startPos, _endPos;
     private Quaternion _startRot, _endRot;
     private float _startRatio;
@@ -29,7 +30,7 @@ public class HeroAnim_Ladder_On_Bottom : HeroAnim_Base
         if (IsNotAvailable(animator,stateInfo)) return;
         if (stateInfo.normalizedTime< 0.5f)
         {
-            float ratio = GameManager.Instance.curve_inout.Evaluate((stateInfo.normalizedTime-_startRatio)/(0.5f-_startRatio));
+            float ratio = ladderCurve.Evaluate((stateInfo.normalizedTime-_startRatio)/(0.5f-_startRatio));
             Vector3 nextPos = Vector3.Lerp(_startPos, _endPos, ratio);
             Quaternion nextRot = Quaternion.Lerp(_startRot, _endRot, ratio);
             _hero.Move_Normal(nextPos, nextRot);

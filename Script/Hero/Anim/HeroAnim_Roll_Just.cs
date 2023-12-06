@@ -22,8 +22,9 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
         pattern = 0;
         animator.SetBool(GameManager.s_leftstate,false);
         _hero.Effect_Smoke();
-        _hero.Tween_Blink_Evade(1.5f);
+        _hero.Tween_Blink_Evade(1.75f);
         _hero.Tween_Punch_Up_Compact(0.4f);
+        _hero.Activate_Feather();
         _hero.frameMain.Charge_MP(_heroData.MP_Recovery_JustRoll);
         Quaternion targetRot = Quaternion.Euler(0,endDeg,0);
         _hero.Move_Nav(Vector3.zero, targetRot);
@@ -56,6 +57,7 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
         {
             isFinished = true;
             _hero.Set_RolledTime();
+            _hero.Deactivate_CustomMaterial();
             animator.SetBool(GameManager.s_roll,false);
         }
     }
