@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 public partial class Monster : MonoBehaviour
 {
-    public virtual void Setting_Monster(Prefab_Prop _weaponl,Prefab_Prop _weaponr,Prefab_Prop _shield)
+    public virtual void Setting_Monster(AnimatorOverrideController animatorOverrideController)
     {
         _shadow = transform.Find(GameManager.s_shadow);
         _shadowScale = _shadow.localScale;
@@ -21,6 +21,7 @@ public partial class Monster : MonoBehaviour
         _meshRoot = smr.rootBone;
         _outlinable = GetComponent<Outlinable>();
         _animator = GetComponent<Animator>();
+        _animator.runtimeAnimatorController = animatorOverrideController;
         _outlineTarget = _outlinable.OutlineTargets[0];
         _dissolveRatio = 1.0f;
         
@@ -29,8 +30,8 @@ public partial class Monster : MonoBehaviour
         _outlineTarget.CutoutThreshold = 1;
         
         //장비 설정
-        Prefab_Prop l = _weaponl==null?null:Instantiate(_weaponl), 
-            r = _weaponr==null?null:Instantiate(_weaponr), 
+        Prefab_Prop l = _weaponL==null?null:Instantiate(_weaponL), 
+            r = _weaponR==null?null:Instantiate(_weaponR), 
             s = _shield==null?null:Instantiate(_shield);
         if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,this,GameManager.Folder_MonsterProp);
         if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,this,GameManager.Folder_MonsterProp);
@@ -41,13 +42,17 @@ public partial class Monster : MonoBehaviour
         Setting_AI();
         //생성
         Transform t = transform;
-        Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
+        _weaponL = l;
+        _weaponR = r;
+        _shield = s;
+        //Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
         Monsters.Add(this);
+        DespawnEmmediately();
     }
     //Static,Public
     public static List<Monster> Monsters = new List<Monster>();
     [FoldoutGroup("MainData")] public Data_MonsterInfo monsterInfo;
-    
+    [FoldoutGroup("MainData")] public Prefab_Prop _weaponL, _weaponR, _shield;
     //Private,Protected
     private float _dissolveRatio = 1.0f;
     private Material _material;
@@ -65,29 +70,8 @@ public partial class Monster : MonoBehaviour
     protected float dissolveSpeed = 1.3f;
     protected SkinnedMeshRenderer smr;
     
-    //Editor
-    #if UNITY_EDITOR
-    [FoldoutGroup("Debug")] public Prefab_Prop debugWepaonL, debugWaeponR, debugShield;
-    public void Start()
-    {
-        Setting_Monster(debugWepaonL,debugWaeponR,debugShield);
-    }
-
-    [Button]
-    public void DebugSpawn()
-    {
-        Spawn(GameManager.V3_Zero,transform.rotation,_weaponL,_weaponR,_shield).Forget();
-    }
-
-    [Button]
-    public void DebugDespawn()
-    {
-        Despawn().Forget();
-    }
-    #endif
-    
     //Unitask
-    protected async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot,Prefab_Prop weaponL,Prefab_Prop weaponR,Prefab_Prop shield)
+    public async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot)
     {
         _agent.enabled = true;
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
@@ -99,9 +83,7 @@ public partial class Monster : MonoBehaviour
         p_spawn.Play();
         Move_Nav(relativePos,rot);
         ActivateUI();
-        _weaponL = weaponL;
-        _weaponR = weaponR;
-        _shield = shield;
+        
         Equipment_Equip();
         while (_isAlive && _dissolveRatio>0)
         {
@@ -119,7 +101,7 @@ public partial class Monster : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
         _shadow.localScale = _shadowScale;
     }
-    protected async UniTaskVoid Despawn()
+    public async UniTaskVoid Despawn()
     {
         _agent.enabled = false;
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
@@ -152,8 +134,29 @@ public partial class Monster : MonoBehaviour
         t_blink.Complete();
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
         gameObject.SetActive(false);
+        GameManager.Instance.AI_Enqueue(this);
     }
-    
+
+    public void DespawnEmmediately()
+    {
+        _agent.enabled = false;
+        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
+        _outlineTarget.CutoutThreshold = 0.0f;
+        _isReady = false;
+        _isAlive = false;
+        _animator.SetBool(GameManager.s_death,true);
+        DeactivateUI();
+        Equipment_Unequip();
+        p_spawn.Play();
+        AdvancedDissolveProperties.Cutout.Standard.
+            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _outlineTarget.CutoutThreshold = 1;
+        _shadow.localScale = GameManager.V3_Zero;
+        seq_ui.Complete();
+        t_punch.Complete();
+        t_blink.Complete();
+        gameObject.SetActive(false);
+    }
     //Setter
     public void Set_AnimBase(MonsterAnim_Base animBase)
     {

@@ -187,9 +187,11 @@ public partial class Hero : MonoBehaviour
     {
         if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var value in weapondata.Values)
+        foreach (var key in weapondata.Keys)
         {
-            foreach (var particle in value.attackParticles)
+            if(!key.cancelableEffect) continue;
+            var particles = weapondata[key].attackParticles;
+            foreach (var particle in particles)
             {
                 if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             }
@@ -200,9 +202,11 @@ public partial class Hero : MonoBehaviour
     {
         if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var value in weapondata.Values)
+        foreach (var key in weapondata.Keys)
         {
-            foreach (var particle in value.attackParticles)
+            if(!key.cancelableEffect) continue;
+            var particles = weapondata[key].attackParticles;
+            foreach (var particle in particles)
             {
                 if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             }
@@ -213,9 +217,11 @@ public partial class Hero : MonoBehaviour
     {
         if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var value in weapondata.Values)
+        foreach (var key in weapondata.Keys)
         {
-            foreach (var particle in value.attackParticles)
+            if(!key.cancelableEffect) continue;
+            var particles = weapondata[key].attackParticles;
+            foreach (var particle in particles)
             {
                 if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             }

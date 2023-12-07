@@ -11,11 +11,12 @@ public class Data_WeaponPack : ScriptableObject
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public Prefab_Prop wepaon_L, weapon_R;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public bool useShield = false;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public Gradient colorOverTrail,colorOverLifetime;
-
-    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")]
-    public List<ParticleSystem> attackEffects = new List<ParticleSystem>();
+    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public bool cancelableEffect = true;
+    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public List<ParticleSystem> attackEffects = new List<ParticleSystem>();
+    
     //메인 무기
-    [FormerlySerializedAs("PlayerAttackMotionDatas_Main")] [TitleGroup("일반 공격으로 사용")] [FoldoutGroup("일반 공격으로 사용/Data")][LabelText("일반 공격 정보")]
+    [FormerlySerializedAs("PlayerAttackMotionDatas_Main")] [TitleGroup("일반 공격으로 사용")] 
+    [FoldoutGroup("일반 공격으로 사용/Data")][LabelText("일반 공격 정보")]
     public List<PlayerAttackMotionData> PlayerAttackMotionDatas_Normal = new List<PlayerAttackMotionData>();
     //스킬
     [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")]

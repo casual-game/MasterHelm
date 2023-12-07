@@ -32,30 +32,40 @@ public class MonsterPattern
     public float pattern_n_0_endratio = 0.75f;
     [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)][OnValueChanged("Setting")]
     public int pattern_n_0_transitionduration = 1;
+    [LabelText("애니메이션 클립", SdfIconType.CircleFill)] [OnValueChanged("Setting")]
+    public AnimationClip pattern_n_0_clip;
     [ListDrawerSettings(AddCopiesLastElement = true)]
     public List<TrailData_Monster> pattern_n_0 = new List<TrailData_Monster>();
     [LabelText(" N1 종료시점",SdfIconType.CircleFill),PropertySpace(8)]
     public float pattern_n_1_endratio = 0.75f;
     [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
     public int pattern_n_1_transitionduration = 1;
+    [LabelText("애니메이션 클립", SdfIconType.CircleFill)] [OnValueChanged("Setting")]
+    public AnimationClip pattern_n_1_clip;
     [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_1 = new List<TrailData_Monster>();
     [LabelText(" N2 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
     public float pattern_n_2_endratio = 0.75f;
     [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
     public int pattern_n_2_transitionduration = 1;
+    [LabelText("애니메이션 클립", SdfIconType.CircleFill)] [OnValueChanged("Setting")]
+    public AnimationClip pattern_n_2_clip;
     [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_2 = new List<TrailData_Monster>();
     [LabelText(" N3 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
     public float pattern_n_3_endratio = 0.75f;
     [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)] [OnValueChanged("Setting")]
     public int pattern_n_3_transitionduration = 1;
+    [LabelText("애니메이션 클립", SdfIconType.CircleFill)] [OnValueChanged("Setting")]
+    public AnimationClip pattern_n_3_clip;
     [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_3 = new List<TrailData_Monster>();
     [LabelText(" N4 종료시점",SdfIconType.CircleFill),PropertySpace(8)] 
     public float pattern_n_4_endratio = 0.75f;
     [LabelText(" State진입 전환시간",SdfIconType.CircleFill),Range(0,4)][OnValueChanged("Setting")]
     public int pattern_n_4_transitionduration = 1;
+    [LabelText("애니메이션 클립", SdfIconType.CircleFill)] [OnValueChanged("Setting")]
+    public AnimationClip pattern_n_4_clip;
     [ListDrawerSettings(AddCopiesLastElement = true)][OnValueChanged("Setting")]
     public List<TrailData_Monster> pattern_n_4 = new List<TrailData_Monster>();
     

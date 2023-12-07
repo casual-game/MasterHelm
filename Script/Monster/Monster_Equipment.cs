@@ -9,7 +9,6 @@ public partial class Monster : MonoBehaviour
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield;
     
     //Private
-    protected Prefab_Prop _weaponL, _weaponR, _shield;
     private TrailData_Monster _currentTrailData;
     //Get,Set
     public TrailData_Monster Get_CurrentTrail()
