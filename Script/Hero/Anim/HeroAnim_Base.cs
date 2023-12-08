@@ -123,24 +123,32 @@ public class HeroAnim_Base : StateMachineBehaviour
             _hero.Deactivate_CustomMaterial();
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Normal);
         animator.SetTrigger(GameManager.s_state_change);
+        TrySet_ManualTargeting();
+        
     }
-
     protected void Set_Attack_Strong(Animator animator)
     {
         _hero.Activate_SuperArmor();
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Strong);
         animator.SetTrigger(GameManager.s_state_change);
+        if(_hero.Get_LookDeg().HasValue) _hero.Set_UseManualTargeting(_hero.Get_LookDeg().Value);
+        TrySet_ManualTargeting();
+    }
+
+    protected void TrySet_ManualTargeting()
+    {
+        if (_hero.Get_LookDeg().HasValue) _hero.Set_UseManualTargeting(_hero.Get_LookDeg().Value);
     }
     protected void Set_LookAt(ref Transform lookT, ref float lookF, bool isFirst)
     {
-        float? lookDeg = _hero.Get_LookDeg();
         Transform myT = _hero.transform;
         Vector3 myPos = myT.position;
         //드래그
-        if (lookDeg.HasValue)
+        if (!_hero.Get_UseAutoTargeting())
         {
             //활성화된 적 중 각도가 가장 근접한 적
-            Vector3 dragVec = Quaternion.Euler(0,lookDeg.Value,0)*Vector3.forward;
+            float lookDeg = _hero.Get_ManualTargetingDeg();
+            Vector3 dragVec = Quaternion.Euler(0,lookDeg,0)*Vector3.forward;
             int? index = null;
             float dist = Mathf.Infinity;
             for (int i = 0; i < Monster.Monsters.Count; i++)
@@ -167,7 +175,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             else
             {
                 lookT = null;
-                lookF = lookDeg.Value;
+                lookF = lookDeg;
             }
         }
         //탭

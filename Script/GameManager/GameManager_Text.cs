@@ -55,5 +55,7 @@ public partial class GameManager: MonoBehaviour
         s_pattern = "Pattern",
         s_rolltransition = "RollTransition",
         s_burn = "Burn",
-        s_feather = "Feather";
+        s_feather = "Feather",
+        s_attackready = "AttackReady",
+        s_cancounter = "CanCounter";
 }

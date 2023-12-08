@@ -52,7 +52,11 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         if (GameManager.DelayCheck_Attack() < _heroData.preinput_attack)
         {
             //기본 공격
-            if(!_hero.Get_Charged()) animator.SetTrigger(GameManager.s_transition);
+            if (!_hero.Get_Charged())
+            {
+                animator.SetTrigger(GameManager.s_transition);
+                TrySet_ManualTargeting();
+            }
             //강 공격
             else Set_Attack_Strong(animator);
             isFinished = true;

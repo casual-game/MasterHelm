@@ -31,8 +31,13 @@ public class Data_WeaponPack : ScriptableObject
 [System.Serializable]
 public class PlayerAttackMotionData
 {
-    [FormerlySerializedAs("playerAttackEndType")]
-    [PropertySpace(16)]
+    [PropertySpace(16)][DetailedInfoBox("클립 설정에 대하여...",
+        "클립 설정에 대하여...\n \n" +
+        "1. 공격 클립은 필수입니다.\n" +
+        "2. 마지막 공격은 차지 클립이 필요 없습니다.\n" +
+        "3. 스킬 공격도 차지 클립이 필요 없습니다.")]
+    [LabelText("공격 클립")] public AnimationClip clip_attack;
+    [LabelText("차지 클립")] public AnimationClip clip_charge;
     [LabelText("종료 상태")] public PlayerAttackType playerAttackType_End;
     [PropertySpace(8)]
     public float playSpeed = 1.0f;

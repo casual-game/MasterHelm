@@ -47,6 +47,19 @@ public partial class Hero : MonoBehaviour
                 rightEnterIndex = i;
             }
         }
+        //플레이어 AnimatorOverrideController 설정
+        var overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
+        for (int i = 0; i < weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count; i++)
+        {
+            var motionData = weaponPack_Normal.PlayerAttackMotionDatas_Normal[i];
+            var attackClipName = "Combo_" + i;
+            var chargeClipName = attackClipName + "_Charge";
+            overrideController[attackClipName] = motionData.clip_attack;
+            overrideController[chargeClipName] = motionData.clip_charge;
+        }
+        overrideController["StrongAttack_L"] = weaponPack_StrongL.playerAttackMotionData_Strong.clip_attack;
+        overrideController["StrongAttack_R"] = weaponPack_StrongR.playerAttackMotionData_Strong.clip_attack;
+        _animator.runtimeAnimatorController = overrideController;
     }
     
     //Public

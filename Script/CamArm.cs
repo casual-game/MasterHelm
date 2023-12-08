@@ -186,10 +186,10 @@ public class CamArm : MonoBehaviour
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
         //Shake Strong
         _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
-        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.25f, 0.375f, 45
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.375f, 0.375f, 45
             , easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         //Stop
-        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.3f, ease: Ease.InSine);
+        t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.4f, ease: Ease.InSine);
     }
     public void Tween_ShakeNormal()
     {
@@ -197,7 +197,7 @@ public class CamArm : MonoBehaviour
         t_stop.Complete();
         //Shake Normal
         _camT.transform.SetLocalPositionAndRotation(GameManager.V3_Zero,GameManager.Q_Identity);
-        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.2f, 0.3f, 25,
+        t_shake = Tween.ShakeLocalPosition(_camT, GameManager.V3_One * 0.275f, 0.3f, 25,
             easeBetweenShakes: Ease.OutSine, useUnscaledTime: true);
         
         //Stop Normal

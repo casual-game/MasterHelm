@@ -97,6 +97,8 @@ public partial class Hero : MonoBehaviour
             Deactivate_CustomMaterial();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Normal);
             _animator.SetTrigger(GameManager.s_state_change);
+            if(Get_LookDeg().HasValue) Set_UseManualTargeting(Get_LookDeg().Value);
+            else Set_UseAutoTargeting();
         }
     }
     public void Core_StrongAttack()
@@ -106,6 +108,8 @@ public partial class Hero : MonoBehaviour
             Activate_SuperArmor();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
             _animator.SetTrigger(GameManager.s_state_change);
+            if(Get_LookDeg().HasValue) Set_UseManualTargeting(Get_LookDeg().Value);
+            else Set_UseAutoTargeting();
         }
         else Core_NormalAttack();
     }

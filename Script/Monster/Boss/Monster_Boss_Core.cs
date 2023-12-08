@@ -18,7 +18,7 @@ public partial class Monster_Boss : Monster
         Normal = 0, AttackReady = 1, CanCounter = 2,Groggy = 3
     }
     [ReadOnly] public BossInteractionState interactionState;
-    [FoldoutGroup("Effect")] public ParticleSystem p_groundimpact,p_countable;
+    [FoldoutGroup("Effect")] public ParticleSystem p_groundimpact;
     //Private
     private int _hitStrongType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
@@ -87,14 +87,12 @@ public partial class Monster_Boss : Monster
                 break;
         }
         
-        
-        
-
         if (!Get_IsAlive()) attackString = GameManager.s_kill;
         if(attackString != String.Empty) GameManager.Instance.Combo(attackString);
         return true;
         void Effect_Normal()
         {
+            if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
             if (!Get_IsAlive())
             {
@@ -107,6 +105,7 @@ public partial class Monster_Boss : Monster
         }
         void Effect_Strong_Groggy()
         {
+            if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
             
             Vector3 pos = transform.position;
@@ -160,6 +159,7 @@ public partial class Monster_Boss : Monster
         }
         void Effect_Weak()
         {
+            if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
             if (!Get_IsAlive())
             {
@@ -180,22 +180,30 @@ public partial class Monster_Boss : Monster
             case BossInteractionState.Groggy:
             case BossInteractionState.Normal:
             default:
-                Effect_Submat(false);
-                if(p_countable.isPlaying) p_countable.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                Deactivate_CustomMaterial();
                 break;
             case BossInteractionState.CanCounter:
                 t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.75f,
                     onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
                     ,ease: Ease.InQuad);
-                Effect_Submat(true);
-                p_countable.Play();
+                Activate_CanCounter();
                 break;
             case BossInteractionState.AttackReady:
-                Effect_Submat(true);
-                if(p_countable.isPlaying) p_countable.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                Activate_AttackReady();
                 break;
         }
         interactionState = state;
+    }
+    //CustomMaterialController
+    public void Activate_AttackReady()
+    {
+        if (_customMaterialController == null) return;
+        _customMaterialController.Activate(GameManager.s_attackready);
+    }
+    public void Activate_CanCounter()
+    {
+        if (_customMaterialController == null) return;
+        _customMaterialController.Activate(GameManager.s_cancounter);
     }
     //AnimationEvent
     public void GroggyDown()

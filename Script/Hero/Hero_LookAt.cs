@@ -35,6 +35,9 @@ public partial class Hero : MonoBehaviour
     private Transform _lookT;
     private Quaternion _lookRot;
     
+    private bool _useAutoTargeting = false;
+    private float _manualTargetingDeg = 0;
+    
     //Event
     private void E_BTN_Attack_Pressed()
     {
@@ -196,5 +199,23 @@ public partial class Hero : MonoBehaviour
     public ref Quaternion Get_LookRot()
     {
         return ref _lookRot;
+    }
+    public bool Get_UseAutoTargeting()
+    {
+        return _useAutoTargeting;
+    }
+    public float Get_ManualTargetingDeg()
+    {
+        return _manualTargetingDeg;
+    }
+    //Setter
+    public void Set_UseAutoTargeting()
+    {
+        _useAutoTargeting = true;
+    }
+    public void Set_UseManualTargeting(float deg)
+    {
+        _useAutoTargeting = false;
+        _manualTargetingDeg = deg;
     }
 }

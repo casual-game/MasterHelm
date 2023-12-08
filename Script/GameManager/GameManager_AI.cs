@@ -6,7 +6,7 @@ using UnityEngine;
 
 public partial class GameManager : MonoBehaviour
 {
-    public AnimatorOverrideController baseOverride_Monster;
+    public AnimatorOverrideController baseOverride_Monster,baseOverride_Boss;
     
     private Dictionary<Data_MonsterInfo, AnimatorOverrideController> _aiAnimators = new Dictionary<Data_MonsterInfo, AnimatorOverrideController>();
     private Dictionary<Data_MonsterInfo, Transform> folders = new Dictionary<Data_MonsterInfo, Transform>();
@@ -24,7 +24,9 @@ public partial class GameManager : MonoBehaviour
             var monster = dummy.monster;
             if (!_aiAnimators.ContainsKey(monster.monsterInfo))
             {
-                var overrideController = new AnimatorOverrideController(baseOverride_Monster);
+                AnimatorOverrideController overrideController;
+                if (monster is Monster_Boss) overrideController = new AnimatorOverrideController(baseOverride_Boss);
+                else overrideController = new AnimatorOverrideController(baseOverride_Monster);
                 ApplyPatternAnim(monster.monsterInfo.Pattern_0,0);
                 ApplyPatternAnim(monster.monsterInfo.Pattern_1,1);
                 ApplyPatternAnim(monster.monsterInfo.Pattern_2,2);
@@ -68,6 +70,11 @@ public partial class GameManager : MonoBehaviour
             pools[monster.monsterInfo].Enqueue(m);
             if (!createPools[monster.monsterInfo].Contains(monster)) createPools[monster.monsterInfo].Add(monster);
         }
+        
+        //디버그용 적 바로 생성하는 코드
+        #if UNITY_EDITOR
+        foreach (var dummy in FindObjectsOfType<Dummy>()) dummy.Spawn();
+        #endif
     }
 
     public Monster AI_Dequeue(Data_MonsterInfo monsterInfo)

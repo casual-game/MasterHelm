@@ -36,16 +36,15 @@ public partial class Monster : MonoBehaviour
         if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,this,GameManager.Folder_MonsterProp);
         if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,this,GameManager.Folder_MonsterProp);
         if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,this,GameManager.Folder_MonsterProp);
-        //세팅
-        Setting_UI();
-        Setting_Effect();
-        Setting_AI();
         //생성
         Transform t = transform;
         _weaponL = l;
         _weaponR = r;
         _shield = s;
-        //Spawn(GameManager.V3_Zero, t.rotation,l,r,s).Forget();
+        //세팅
+        Setting_UI();
+        Setting_Effect();
+        Setting_AI();
         Monsters.Add(this);
         DespawnEmmediately();
     }
@@ -103,7 +102,6 @@ public partial class Monster : MonoBehaviour
     }
     public async UniTaskVoid Despawn()
     {
-        _agent.enabled = false;
         _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
@@ -133,6 +131,7 @@ public partial class Monster : MonoBehaviour
         t_punch.Complete();
         t_blink.Complete();
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f), DelayType.DeltaTime);
+        _agent.enabled = false;
         gameObject.SetActive(false);
         GameManager.Instance.AI_Enqueue(this);
     }

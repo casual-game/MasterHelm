@@ -29,6 +29,7 @@ public partial class Monster_Boss : Monster
     protected override void ActivateUI()
     {
         base.ActivateUI();
+        Core_InteractionState(BossInteractionState.Normal);
         seq_ui.Complete();
         img_health_root.rectTransform.localScale = GameManager.V3_Zero;
         img_nameplate.rectTransform.localScale = GameManager.V3_Zero;
@@ -96,6 +97,7 @@ public partial class Monster_Boss : Monster
         }
         else if(_isAlive)
         {
+            Core_InteractionState(BossInteractionState.Normal);
             _isAlive = false;
             Vector2 targetVec = new Vector2(0, 58);
             t_dmg_main.Stop();
