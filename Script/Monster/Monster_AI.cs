@@ -89,10 +89,11 @@ public partial class Monster : MonoBehaviour
         _clipLength = length;
     }
     //AI
+    public string patternName = "TripleSwing";
     public void AI_Pattern()
     {
         if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_death)) return;
-        string patternName = "TripleSwing";
+        
         var p = _patterns[patternName];
         p.pattern.Pointer_Reset();
         _animator.SetTrigger(GameManager.s_state_change);

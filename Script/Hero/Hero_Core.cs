@@ -93,6 +93,7 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState == MoveState.Locomotion)
         {
+            GameManager.Reset_AttackRealeasedTime();
             _animator.SetInteger(GameManager.s_chargeenterindex,-1);
             Deactivate_CustomMaterial();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Normal);
@@ -105,6 +106,7 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust && Get_Charged())
         {
+            GameManager.Reset_AttackRealeasedTime();
             Activate_SuperArmor();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
             _animator.SetTrigger(GameManager.s_state_change);

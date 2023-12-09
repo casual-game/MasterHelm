@@ -175,7 +175,6 @@ public class Frame_Main : MonoBehaviour
     }
     public void MP_Use()
     {
-        return;
         if (mp_Slot_CurrentCapacity < mp_Slot_Capacity)
         {
             #if UNITY_EDITOR

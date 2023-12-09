@@ -51,6 +51,10 @@ public partial class GameManager : MonoBehaviour
     {
         return Time.time - AttackReleasedTime;
     }
+    public static void Reset_AttackRealeasedTime()
+    {
+        AttackReleasedTime = -100;
+    }
     public void Input_JS_Action(InputAction.CallbackContext inputValue)
     {
         if (inputValue.performed && BTN_Action) JS_Action = inputValue.ReadValue<Vector2>();

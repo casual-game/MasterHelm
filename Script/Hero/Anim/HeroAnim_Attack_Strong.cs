@@ -48,7 +48,8 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             return;
         }
         //강공격으로 캔슬할 경우 처리
-        if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < _heroData.preinput_attack && _hero.Get_Charged())
+        if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < _heroData.preinput_attack 
+                                                && _hero.Get_Charged() && !GameManager.BTN_Attack)
         {
             _hero.Equipment_UpdateTrail(_weaponPack,false,false,false);
             Set_Attack_Strong(animator);

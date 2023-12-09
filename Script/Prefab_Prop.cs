@@ -110,11 +110,8 @@ public class Prefab_Prop : MonoBehaviour
     {
         skipCurrentInteraction = false;
         _interact_interactedTargets.Clear();
-        for(int i = _interact_savedTargets.Count-1; i>=0; i--)
-        {
-            bool canRemove = !_interact_currentTargets.Contains(_interact_savedTargets[i]);
-            if(canRemove)_interact_savedTargets.RemoveAt(i);
-        }
+        _interact_savedTargets.Clear();
+        _interact_currentTargets.Clear();
     }
     public void Collision_Skip()
     {

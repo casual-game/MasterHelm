@@ -209,6 +209,11 @@ public partial class Hero : MonoBehaviour
         return _manualTargetingDeg;
     }
     //Setter
+    public void Set_ResetCharge()
+    {
+        _chargeBeginTime = 9999;
+        _charged = false;
+    }
     public void Set_UseAutoTargeting()
     {
         _useAutoTargeting = true;

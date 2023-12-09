@@ -29,6 +29,7 @@ public partial class Monster_Boss : Monster
     protected override void ActivateUI()
     {
         base.ActivateUI();
+        CamArm.instance.Tween_CamBossVec(true);
         Core_InteractionState(BossInteractionState.Normal);
         seq_ui.Complete();
         img_health_root.rectTransform.localScale = GameManager.V3_Zero;
@@ -48,7 +49,7 @@ public partial class Monster_Boss : Monster
         img_health_lerp.rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
         seq_ui = Sequence.Create()
-            .Chain(Tween.Scale(img_health_root.transform, 0.75f, _uiDuration, Ease.OutBack))
+            .Chain(Tween.Scale(img_health_root.transform, 0.73f, _uiDuration, Ease.OutBack))
             .Chain(Tween.UISizeDelta(img_health_root.rectTransform, new Vector2(730.3395f, 106.3343f), _uiDuration,
                 Ease.InOutBack))
             .Group(Tween.Scale(img_nameplate.transform, 1.0f, _uiDuration * 0.8f, Ease.OutBack, startDelay: 0.25f))
@@ -70,8 +71,9 @@ public partial class Monster_Boss : Monster
     protected override void DeactivateUI()
     {
         base.DeactivateUI();
+        CamArm.instance.Tween_CamBossVec(false);
         seq_ui.Complete();
-        img_health_root.rectTransform.localScale = GameManager.V3_One*0.75f;
+        img_health_root.rectTransform.localScale = GameManager.V3_One*0.73f;
         img_nameplate.rectTransform.localScale = GameManager.V3_One;
         img_health_root.rectTransform.sizeDelta = new Vector2(730.3395f, 106.3343f);
 

@@ -15,7 +15,7 @@ public class CamArm : MonoBehaviour
     
     //Public
     public static CamArm instance;
-    public TransitionProfile transition_main_fadein,transition_main_fadeout;
+    public TransitionProfile transition_main_fadein;
     [HideInInspector] public Camera mainCam;
     [TitleGroup("Movement")]
     [FoldoutGroup("Movement/data")] public Transform target;
@@ -28,9 +28,10 @@ public class CamArm : MonoBehaviour
     [FoldoutGroup("Effect/data")] public CloudShadowsProfile cloudShadows;
     [FoldoutGroup("Effect/data")] public Color cloud_FadeColor, cloud_IngameColor;
     //Private
+    private Vector3 _camBossVec;
     private Transform _camT;
     private Camera[] _cams;
-    private Tween t_stop,t_shake,t_chromatic,t_radial;
+    private Tween t_stop,t_shake,t_chromatic,t_radial,t_cambossvec;
     private Sequence s_impact,s_speedline,s_fade;
     private Sequence s_frame,s_vignette,s_zoom;
     private int id_radial,id_speedline;
@@ -48,7 +49,21 @@ public class CamArm : MonoBehaviour
     
     void Update()
     {
-        transform.position = Vector3.Lerp(transform.position,target.position + addVec,moveSpeed*Time.unscaledDeltaTime);
+        transform.position = Vector3.Lerp(transform.position,target.position + addVec + _camBossVec,moveSpeed*Time.unscaledDeltaTime);
+    }
+    public void Tween_CamBossVec(bool activateBossVec)
+    {
+        float height = 1.25f;
+        if (activateBossVec)
+        {
+            t_cambossvec = Tween.Custom(0, height,0.75f, onValueChange: value =>
+                { _camBossVec = new Vector3(0, value, 0); } ,ease: Ease.InOutCirc,startDelay:0.5f);
+        }
+        else
+        {
+            t_cambossvec = Tween.Custom(height, 0,0.75f, onValueChange: value =>
+                { _camBossVec = new Vector3(0, value, 0); } ,ease: Ease.InOutCirc,startDelay:0.5f);
+        }
     }
     //복합 이펙트. 중복 불가
     public void Tween_FadeIn()

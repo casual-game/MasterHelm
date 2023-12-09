@@ -124,15 +124,17 @@ public class HeroAnim_Base : StateMachineBehaviour
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Normal);
         animator.SetTrigger(GameManager.s_state_change);
         TrySet_ManualTargeting();
-        
+        GameManager.Reset_AttackRealeasedTime();
     }
     protected void Set_Attack_Strong(Animator animator)
     {
         _hero.Activate_SuperArmor();
+        _hero.Set_ResetCharge();
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Strong);
         animator.SetTrigger(GameManager.s_state_change);
         if(_hero.Get_LookDeg().HasValue) _hero.Set_UseManualTargeting(_hero.Get_LookDeg().Value);
         TrySet_ManualTargeting();
+        GameManager.Reset_AttackRealeasedTime();
     }
 
     protected void TrySet_ManualTargeting()
