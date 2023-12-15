@@ -34,6 +34,8 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         else _hero.Particle_Charge_R();
         CamArm.instance.Tween_Skill();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
+        SoundManager.Play(_hero.sound_combat_skill);
+        SoundManager.Stop(_hero.sound_combat_superarmor);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

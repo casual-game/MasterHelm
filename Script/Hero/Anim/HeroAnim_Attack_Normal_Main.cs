@@ -23,12 +23,18 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         _hero.Equipment_Equip(_hero.weaponPack_Normal);
         _hero.Equipment_Collision_Reset(_hero.weaponPack_Normal);
-        
-        if (_hero.AttackIndex == 0) _hero.Effect_Smoke(0.25f);
+
+        if (_hero.AttackIndex == 0)
+        {
+            SoundManager.Play(_hero.sound_chain);
+            _hero.Effect_Smoke(0.25f);
+        }
         if (_isLastAttack)
         {
             _hero.Effect_Smoke();
             _hero.Particle_Charge_Main();
+            _hero.Activate_SuperArmor();
+            CamArm.instance.Tween_Skill();
         }
         
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);

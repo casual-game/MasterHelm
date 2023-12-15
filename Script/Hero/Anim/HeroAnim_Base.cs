@@ -152,7 +152,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             float lookDeg = _hero.Get_ManualTargetingDeg();
             Vector3 dragVec = Quaternion.Euler(0,lookDeg,0)*Vector3.forward;
             int? index = null;
-            float dist = Mathf.Infinity;
+            float dist = 5f;
             for (int i = 0; i < Monster.Monsters.Count; i++)
             {
                 if(!Monster.Monsters[i].Get_IsAlive()) continue;
@@ -185,13 +185,13 @@ public class HeroAnim_Base : StateMachineBehaviour
         {
             //활성화된 적 중 가장 가까운 적
             int? index = null;
-            float dist = Mathf.Infinity;
+            float dist = 6.5f;
             
             for (int i = 0; i < Monster.Monsters.Count; i++)
             {
                 if(!Monster.Monsters[i].Get_IsAlive()) continue;
                 float monsterDist = (myPos - Monster.Monsters[i].transform.position).sqrMagnitude;
-                if (monsterDist < dist)
+                if (monsterDist < dist*dist)
                 {
                     dist = monsterDist;
                     index = i;

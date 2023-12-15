@@ -42,8 +42,12 @@ public partial class Hero : MonoBehaviour
     private void E_BTN_Attack_Pressed()
     {
         bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
-        if(canChargeMotion) _animator.SetBool(GameManager.s_charge_normal,true);
-        
+        if (canChargeMotion)
+        {
+            SoundManager.Play(sound_friction_cloth);
+            _animator.SetBool(GameManager.s_charge_normal,true);
+        }
+        SoundManager.Play(sound_combat_chargebegin);
         p_charge_begin.Play();
         _charged = false;
         _chargeBeginTime = Time.unscaledTime;
@@ -57,6 +61,7 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_charge_normal,false);
         p_charge_begin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         p_charge_fin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        SoundManager.Stop(sound_combat_chargebegin);
         //공격 설정. 상황 판단은 해당 함수 내부에서 체크한다.
         if (!_charged)
         {
@@ -137,6 +142,7 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down_Compact(1.2f);
             Tween_Blink_Evade(1.0f);
             Activate_SuperArmor();
+            SoundManager.Play(sound_combat_chargefin);
         }
     }
     private void E_BTN_Attack_ReleasedUpdate()

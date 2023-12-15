@@ -20,6 +20,7 @@ public partial class GameManager : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         Instance = this;
+        FindObjectOfType<SoundManager>().Setting();
         Setting_Resource();
         Setting_UI();
         Setting_Shockwave();

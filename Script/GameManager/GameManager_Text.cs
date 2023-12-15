@@ -57,5 +57,7 @@ public partial class GameManager: MonoBehaviour
         s_burn = "Burn",
         s_feather = "Feather",
         s_attackready = "AttackReady",
-        s_cancounter = "CanCounter";
+        s_cancounter = "CanCounter",
+        s_concrete = "Concrete",
+        s_stone = "Stone";
 }

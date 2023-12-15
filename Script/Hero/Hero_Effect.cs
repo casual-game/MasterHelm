@@ -140,14 +140,19 @@ public partial class Hero : MonoBehaviour
         Transform t = transform;
         mainParticle.transform.SetPositionAndRotation(t.position, t.rotation);
         mainParticle.Play();
+
+        if (mainParticle.TryGetComponent(out ShakeTrigger shakeTrigger)) shakeTrigger.Shake();
+
     }
     public void Effect_Footstep_L()
     {
         p_footstep_l.Play();
+        Sound_Footstep(p_footstep_l.transform.position);
     }
     public void Effect_Footstep_R()
     {
         p_footstep_r.Play();
+        Sound_Footstep(p_footstep_r.transform.position);
     }
     public void Effect_Roll()
     {
@@ -236,6 +241,7 @@ public partial class Hero : MonoBehaviour
         p_change.transform.SetPositionAndRotation(t.position + Vector3.up,t.rotation);
         p_change.Play();
         customMaterialController.Activate(GameManager.s_burn);
+        SoundManager.Play(sound_combat_superarmor);
     }
     public void Activate_Feather()
     {
@@ -245,6 +251,8 @@ public partial class Hero : MonoBehaviour
     {
         _superarmor = false;
         customMaterialController.Deactivate();
+        SoundManager.Stop(sound_combat_superarmor);
+        print("?");
     }
 
     

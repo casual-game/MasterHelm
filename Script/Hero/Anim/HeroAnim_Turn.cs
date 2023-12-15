@@ -10,6 +10,7 @@ public class HeroAnim_Turn : HeroAnim_Base
         _hero.Set_SpeedRatio(0.35f);
         animator.SetFloat(GameManager.s_speed,_hero.Get_SpeedRatio());
         animator.SetBool(GameManager.s_leftstate,false);
+        _hero.Sound_Footstep_Turn();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
