@@ -39,8 +39,8 @@ public partial class Monster_Normal : Monster
                     hitType = HitType.Normal;
                     Core_Damage_Normal(damage);
                     Effect(false);
-                    
                     attackString =GameManager.s_normalattack;
+                    SoundManager.Play_Hit_Normal();
                     break;
                 case AttackType.Stun:
                     Set_HitState(HitState.Ground);
@@ -48,6 +48,7 @@ public partial class Monster_Normal : Monster
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_combobegin;
+                    SoundManager.Play_Hit_Smash();
                     break;
                 case AttackType.Smash:
                     Set_HitState(HitState.Ground);
@@ -55,6 +56,7 @@ public partial class Monster_Normal : Monster
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_smash;
+                    SoundManager.Play_Hit_Smash();
                     break;
                 case AttackType.Combo:
                     Set_HitState(HitState.Air);
@@ -62,6 +64,7 @@ public partial class Monster_Normal : Monster
                     Core_Damage_Strong(damage);
                     Effect(true);
                     attackString = GameManager.s_combobegin;
+                    SoundManager.Play_Hit_Smash();
                     break;
                 default:
                     Set_HitState(HitState.Ground);
@@ -69,6 +72,7 @@ public partial class Monster_Normal : Monster
                     Core_Damage_Normal(damage);
                     Effect(false);
                     attackString = GameManager.s_normalattack;
+                    SoundManager.Play_Hit_Normal();
                     break;
             }
         }
@@ -83,6 +87,7 @@ public partial class Monster_Normal : Monster
                 Core_Damage_Strong(damage);
                 Effect(true);
                 attackString = GameManager.s_combofinish;
+                SoundManager.Play_Hit_Smash();
             }
             else
             {
@@ -91,6 +96,7 @@ public partial class Monster_Normal : Monster
                 Core_Damage_Normal(damage);
                 Effect(false);
                 attackString = GameManager.s_truecombo;
+                SoundManager.Play_Hit_Normal();
             }
         }
         else

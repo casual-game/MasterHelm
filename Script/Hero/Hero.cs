@@ -31,6 +31,7 @@ public partial class Hero : MonoBehaviour
         Setting_Equipment();
         Setting_Effect();
         Setting_Spawn();
+        Setting_Sound();
         frameMain = FindObjectOfType<Frame_Main>();
         frameMain.Setting(heroData.HP,heroData.MP_Slot_Capacity);
 

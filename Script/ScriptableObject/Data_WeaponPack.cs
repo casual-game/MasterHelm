@@ -13,6 +13,7 @@ public class Data_WeaponPack : ScriptableObject
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public Gradient colorOverTrail,colorOverLifetime;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public bool cancelableEffect = true;
     [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public List<ParticleSystem> attackEffects = new List<ParticleSystem>();
+    [TitleGroup("기본 설정")] [FoldoutGroup("기본 설정/Data")] public List<SoundData>  effectSounds = null;
     
     //메인 무기
     [FormerlySerializedAs("PlayerAttackMotionDatas_Main")] [TitleGroup("일반 공격으로 사용")] 
@@ -53,7 +54,7 @@ public class PlayerAttackMotionData
 [System.Serializable]
 public class TrailData
 {
-    [FoldoutGroup("TrailData")]
+    [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public SoundData soundData;
     [TitleGroup("TrailData/공격 정보 설정")] public AttackType attackType_ground;
     [TitleGroup("TrailData/공격 정보 설정")] public bool isAirSmash;
     [TitleGroup("TrailData/공격 정보 설정")] public Vector2Int damage = new Vector2Int(10,15);

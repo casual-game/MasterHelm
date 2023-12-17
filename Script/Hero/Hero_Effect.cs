@@ -136,7 +136,10 @@ public partial class Hero : MonoBehaviour
         if (_animator.IsInTransition(0) || !(HeroMoveState is MoveState.NormalAttack or MoveState.StrongAttack)) return;
         var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
         if (mainParticle == null) return;
-
+        if (_currentWeaponPack != null)
+        {
+            foreach (var sd in _currentWeaponPack.effectSounds) SoundManager.Play(sd);
+        }
         Transform t = transform;
         mainParticle.transform.SetPositionAndRotation(t.position, t.rotation);
         mainParticle.Play();
@@ -252,7 +255,6 @@ public partial class Hero : MonoBehaviour
         _superarmor = false;
         customMaterialController.Deactivate();
         SoundManager.Stop(sound_combat_superarmor);
-        print("?");
     }
 
     

@@ -18,7 +18,7 @@ public class SingleSound
 	[TitleGroup("$TitleName")]public bool isLoop;
 	[TitleGroup("$TitleName")][LabelText("시작시간 설정")][MinMaxSlider(0.0f,1.0f,true)]  
 	public Vector2 clipRange = new Vector2(0,1);
-	[TitleGroup("$TitleName")][LabelText("렌덤 pitch")][MinMaxSlider(-0.15f,0.15f,true)] 
+	[TitleGroup("$TitleName")][LabelText("렌덤 pitch")][MinMaxSlider(-0.075f,0.075f,true)] 
 	public Vector2 pitch = new Vector2(-0.025f, 0.025f);
 	[TitleGroup("$TitleName")] [LabelText("볼륨")][Range(0,1)]
 	public float volume = 0.8f;

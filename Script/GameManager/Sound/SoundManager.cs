@@ -9,14 +9,19 @@ using Random = UnityEngine.Random;
 public class SoundManager : MonoBehaviour
 {
     private static SoundManager instance;
-    [TableList(AlwaysExpanded = true,ShowIndexLabels = true)]
+    [TableList(AlwaysExpanded = true,ShowIndexLabels = true)][TitleGroup("수동 추가 사운드")]
     public List<SoundGroup> soundGroups = new List<SoundGroup>();
+
+    [TitleGroup("필수 사운드")] public SoundData sound_hit_normal,sound_hit_smash;
 
     private Dictionary<SoundData, SoundGroup> ingameData = new Dictionary<SoundData, SoundGroup>();
     public void Setting()
     {
         foreach (var group in soundGroups) ingameData.Add(group.soundData, group);
         instance = this;
+        
+        Add(sound_hit_normal,2);
+        Add(sound_hit_smash,2);
     }
     public static void Play(SoundData soundData)
     {
@@ -27,7 +32,6 @@ public class SoundManager : MonoBehaviour
         }
         instance.ingameData[soundData].Play();
     }
-
     public static void Stop(SoundData soundData)
     {
         if (!instance.ingameData.ContainsKey(soundData))
@@ -36,6 +40,66 @@ public class SoundManager : MonoBehaviour
             return;
         }
         instance.ingameData[soundData].Stop();
+    }
+    public static void Add(SoundData soundData,int count = 1)
+    {
+        if (soundData == null) return;
+        if (instance.ingameData.ContainsKey(soundData))
+        {
+            SoundGroup soundGroup = instance.ingameData[soundData];
+            Transform parent = soundGroup.audioSources[0].transform.parent;
+
+            for (int i = 0; i < count; i++)
+            {
+                var singleSound = soundData.sounds[i% soundData.sounds.Count];
+                GameObject g_singleSound = new GameObject((i+1)+"_"+soundData.name);
+                g_singleSound.transform.parent = parent;
+                var source = g_singleSound.AddComponent<AudioSource>();
+
+                source.playOnAwake = false;
+                source.clip = singleSound.clip;
+                source.volume = singleSound.volume;
+                source.loop = singleSound.isLoop;
+                soundGroup.audioSources.Add(source);
+            }
+        }
+        else
+        {
+            GameObject g_soundGroup = new GameObject(soundData.name);
+            g_soundGroup.transform.parent = instance.transform;
+            int length = Mathf.Max(count, soundData.sounds.Count);
+            SoundGroup soundGroup = new SoundGroup();
+            soundGroup.soundData = soundData;
+            soundGroup.audioIndex = 0;
+            soundGroup.audioSources = new List<AudioSource>();
+            soundGroup.poolLength = count;
+        
+            for (int i = 0; i < length; i++)
+            {
+                var singleSound = soundData.sounds[i% soundData.sounds.Count];
+                GameObject g_singleSound = new GameObject((i+1)+"_"+soundData.name);
+                g_singleSound.transform.parent = g_soundGroup.transform;
+                var source = g_singleSound.AddComponent<AudioSource>();
+
+                source.playOnAwake = false;
+                source.clip = singleSound.clip;
+                source.volume = singleSound.volume;
+                source.loop = singleSound.isLoop;
+                soundGroup.audioSources.Add(source);
+            }
+
+            instance.soundGroups.Add(soundGroup);
+            instance.ingameData.Add(soundData, soundGroup);
+        }
+    }
+    //필수 사운드
+    public static void Play_Hit_Normal()
+    {
+        Play(instance.sound_hit_normal);
+    }
+    public static void Play_Hit_Smash()
+    {
+        Play(instance.sound_hit_smash);
     }
     //DEBUG
     public void DebugPlay(SingleSound clip)
@@ -99,11 +163,12 @@ public class SoundGroup
 
     [HideInInspector] public List<AudioSource> audioSources = new List<AudioSource>();
     [HideInInspector] public int audioIndex = 0;
-
+    [Button]
     public void Play()
     {
         audioIndex = (audioIndex + 1) % audioSources.Count;
         AudioSource source = audioSources[audioIndex];
+        if (source.isPlaying) source.Stop();
         var singleSound = soundData.sounds[audioIndex % soundData.sounds.Count];
         //시작 시간
         source.time = singleSound.clipRange.x * singleSound.clip.length;

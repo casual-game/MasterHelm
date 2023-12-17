@@ -45,7 +45,7 @@ public class HeroAnim_Base : StateMachineBehaviour
                               animator.GetNextAnimatorStateInfo(0).shortNameHash != stateInfo.shortNameHash;
         return isNotCurrentState || isFinished;
     }
-    protected void Update_Trail(float normalizedTime,Data_WeaponPack weaponPack)
+    protected void Update_Trail(Animator animator,AnimatorStateInfo stateInfo,float normalizedTime,Data_WeaponPack weaponPack)
     {
         bool cando = _hero.Get_HeroMoveState() is Hero.MoveState.NormalAttack or Hero.MoveState.StrongAttack;
         if (!cando) return;
@@ -60,7 +60,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             {
                 trailed = true;
                 _hero.Equipment_UpdateTrail(weaponPack,trailData.weaponL,trailData.weaponR,trailData.shield);
-                if (_staticTrailData != trailData)
+                if (_staticTrailData != trailData && !IsNotAvailable(animator,stateInfo))
                 {
                     //trail 정보가 바뀌는 순간에 만약 이전 trail에서 한번도 충돌계산이 없었다면, 1회 진행.
                     if (_hero.CurrentAttackMotionData.TrailDatas.IndexOf(trailData) != 0 && !_collisionChecked)
@@ -72,8 +72,6 @@ public class HeroAnim_Base : StateMachineBehaviour
                     _hero.Equipment_Collision_Reset(weaponPack);
                     _staticTrailData = trailData;
                     _hero.Set_CurrentTrail(trailData);
-                    
-                    
                 }
             }
             //충돌했으면 충돌계산

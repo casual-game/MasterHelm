@@ -12,9 +12,32 @@ public partial class Hero : MonoBehaviour
     {
         _sensor = GetComponentInChildren<RangeSensor>();
         weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
+        //무기 추가
         AddWeaponPack(weaponPack_Normal,t_back,true);
         AddWeaponPack(weaponPack_StrongL,GameManager.Folder_Hero,false);
         AddWeaponPack(weaponPack_StrongR,GameManager.Folder_Hero,false);
+        //사운드 추가
+        if(weaponPack_Normal.effectSounds.Count>0) 
+            foreach (var sd in weaponPack_Normal.effectSounds) SoundManager.Add(sd);
+        if(weaponPack_StrongL.effectSounds.Count>0) 
+            foreach (var sd in weaponPack_StrongL.effectSounds) SoundManager.Add(sd);
+        if(weaponPack_StrongR.effectSounds.Count>0) 
+            foreach (var sd in weaponPack_StrongR.effectSounds) SoundManager.Add(sd);
+        foreach (var motionData in weaponPack_Normal.PlayerAttackMotionDatas_Normal)
+        {
+            foreach (var td in motionData.TrailDatas)
+            {
+                SoundManager.Add(td.soundData);
+            }
+        }
+        foreach (var td in weaponPack_StrongL.playerAttackMotionData_Strong.TrailDatas)
+        {
+            SoundManager.Add(td.soundData);
+        }
+        foreach (var td in weaponPack_StrongR.playerAttackMotionData_Strong.TrailDatas)
+        {
+            SoundManager.Add(td.soundData);
+        }
         shield = Instantiate(shield);
         shield.Setting_Hero(_outlinable,true,t_shield,t_back);
         void AddWeaponPack(Data_WeaponPack weaponPack,Transform detachT,bool canKeep)
@@ -31,6 +54,7 @@ public partial class Hero : MonoBehaviour
             if(r!=null) r.Setting_Hero(_outlinable,canKeep,t_hand_r,detachT);
             weapondata.Add(weaponPack,(l,r,weaponPack.useShield,attackParticles));
         }
+        
         //Animator의 ChargeEnterIndex용 변수 설정
         bool foundLeft = false, foundRight = false;
         for (int i = 0; i < weaponPack_Normal.PlayerAttackMotionDatas_Normal.Count; i++)
@@ -95,6 +119,18 @@ public partial class Hero : MonoBehaviour
     //Setter
     public void Set_CurrentTrail(TrailData traildata)
     {
+        if (traildata != null && traildata != _currentTrailData)
+        {
+            SoundManager.Play(traildata.soundData);
+            if (traildata.attackType_ground == AttackType.Normal)
+            {
+                SoundManager.Play(sound_voice_attack_normal);
+            }
+            else
+            {
+                SoundManager.Play(sound_voice_attack_strong);
+            }
+        }
         _currentTrailData = traildata;
     }
     //Equipment
@@ -105,6 +141,7 @@ public partial class Hero : MonoBehaviour
         //이전 무기 해제
         if (_currentWeaponPack != null)
         {
+            Sound_Weapon_Despawn();
             var past = weapondata[_currentWeaponPack];
             if (past.weaponL != null)
             {
@@ -125,6 +162,7 @@ public partial class Hero : MonoBehaviour
         //현 무기 장착
         if (weaponPack != null)
         {
+            Sound_Weapon_Spawn();
             var current = weapondata[_currentWeaponPack];
             if (current.weaponL != null)
             {
@@ -179,7 +217,11 @@ public partial class Hero : MonoBehaviour
             if(hitData.collided) collided = true;
             count += hitData.count;
         }
-        if(collided) frameMain.Charge_MP(_currentTrailData.charge_mp);
+
+        if (collided)
+        {
+            frameMain.Charge_MP(_currentTrailData.charge_mp);
+        }
         for (int i = 0; i < count; i++)
         {
             frameMain.HP_Regain(_currentTrailData.regain);
@@ -213,7 +255,6 @@ public partial class Hero : MonoBehaviour
             frameMain.Charge_MP(_currentTrailData.charge_mp);
         }
     }
-
     public void Equipment_CancelEffect()
     {
         foreach (var p in weapondata[weaponPack_Normal].attackParticles)

@@ -35,7 +35,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         CamArm.instance.Tween_Skill();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
         SoundManager.Play(_hero.sound_combat_skill);
-        SoundManager.Stop(_hero.sound_combat_superarmor);
+        SoundManager.Play(_hero.sound_friction_cloth);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -69,7 +69,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             _hero.Equipment_Equip(_hero.weaponPack_Normal);
         }
         //핵심
-        Update_Trail(normalizedTime,_weaponPack);
+        Update_Trail(animator,stateInfo,normalizedTime,_weaponPack);
         if (_weaponOff || isCurrentWeapon)
         {
             Update_LookDeg(ref _hero.Get_LookT(), ref _hero.Get_LookF(),ref _hero.Get_LookRot());

@@ -23,7 +23,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         _hero.Equipment_Equip(_hero.weaponPack_Normal);
         _hero.Equipment_Collision_Reset(_hero.weaponPack_Normal);
-
+        SoundManager.Play(_hero.sound_friction_cloth);
         if (_hero.AttackIndex == 0)
         {
             SoundManager.Play(_hero.sound_chain);
@@ -35,8 +35,9 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
             _hero.Particle_Charge_Main();
             _hero.Activate_SuperArmor();
             CamArm.instance.Tween_Skill();
+            SoundManager.Play(_hero.sound_combat_skill);
         }
-        
+        else _hero.Deactivate_CustomMaterial();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
         
     }
@@ -58,7 +59,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         if (_isLastAttack && IsNotAvailable(animator, stateInfo)) return;
         //isFinished 가 False여도 동작한다.
         float normalizedTime = stateInfo.normalizedTime;
-        Update_Trail(normalizedTime,_hero.weaponPack_Normal);
+        Update_Trail(animator,stateInfo,normalizedTime,_hero.weaponPack_Normal);
         Update_LookDeg(ref _hero.Get_LookT(), ref _hero.Get_LookF(),ref _hero.Get_LookRot());
         _hero.Move_Nav(animator.deltaPosition*_hero.CurrentAttackMotionData.moveSpeed,_hero.Get_LookRot());
         

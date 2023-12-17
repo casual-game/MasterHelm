@@ -45,9 +45,10 @@ public partial class Hero : MonoBehaviour
         if (canChargeMotion)
         {
             SoundManager.Play(sound_friction_cloth);
+            SoundManager.Play(sound_combat_chargebegin);
             _animator.SetBool(GameManager.s_charge_normal,true);
         }
-        SoundManager.Play(sound_combat_chargebegin);
+        
         p_charge_begin.Play();
         _charged = false;
         _chargeBeginTime = Time.unscaledTime;
