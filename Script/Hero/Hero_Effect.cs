@@ -189,6 +189,9 @@ public partial class Hero : MonoBehaviour
     {
         Tween_Punch_Up(1.25f);
         Effect_Smoke();
+        Sound_Footstep_Turn();
+        SoundManager.Play(sound_weapon_spawn);
+        SoundManager.Play(sound_friction_cloth);
     }
     //Particle
     public void Particle_Charge_Main()
@@ -205,6 +208,7 @@ public partial class Hero : MonoBehaviour
             }
         }
         p_charge_main.Play();
+        Sound_Voice_Short();
     }
     public void Particle_Charge_L()
     {
@@ -220,6 +224,7 @@ public partial class Hero : MonoBehaviour
             }
         }
         p_charge_strongL.Play();
+        Sound_Voice_Short();
     }
     public void Particle_Charge_R()
     {
@@ -235,6 +240,7 @@ public partial class Hero : MonoBehaviour
             }
         }
         p_charge_strongR.Play();
+        Sound_Voice_Short();
     }
     //CustomEffect
     public void Activate_SuperArmor()

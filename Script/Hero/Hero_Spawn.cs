@@ -57,6 +57,8 @@ public partial class Hero : MonoBehaviour
         _spawned = true;
         _animator.Rebind();
         Tween_Blink_Evade(1.0f);
+        SoundManager.Play(sound_combat_chargefin);
+        Sound_Voice_Short();
         //무기 설정
         var weaponpack = weapondata[weaponPack_Normal];
         if(weaponpack.weaponL!=null) weaponpack.weaponL.Spawn();

@@ -28,6 +28,7 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
         _hero.frameMain.Charge_MP(_heroData.MP_Recovery_JustRoll);
         Quaternion targetRot = Quaternion.Euler(0,endDeg,0);
         _hero.Move_Nav(Vector3.zero, targetRot);
+        CamArm.instance.Tween_CamAttackVec(false);
         pattern = 1;
     }
 

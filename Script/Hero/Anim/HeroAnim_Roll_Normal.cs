@@ -28,7 +28,9 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
         _hero.Effect_Roll();
         _hero.Tween_Punch_Up_Compact(0.4f);
         _hero.Sound_Footstep();
+        _hero.Sound_Voice_Short();
         SoundManager.Play(_hero.sound_footstep_roll_begin);
+        CamArm.instance.Tween_CamAttackVec(false);
         //사이드 구르기 확인, 세팅
         float minDist = _hero.heroData.justEvadeDistance * _hero.heroData.justEvadeDistance;
         mtarget = null;

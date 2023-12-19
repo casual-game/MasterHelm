@@ -119,16 +119,16 @@ public partial class Hero : MonoBehaviour
     //Setter
     public void Set_CurrentTrail(TrailData traildata)
     {
-        if (traildata != null && traildata != _currentTrailData)
+        if (traildata != null)
         {
             SoundManager.Play(traildata.soundData);
             if (traildata.attackType_ground == AttackType.Normal)
             {
-                SoundManager.Play(sound_voice_attack_normal);
+                Sound_Voice_Attack_Normal();
             }
             else
             {
-                SoundManager.Play(sound_voice_attack_strong);
+                Sound_Voice_Attack_Strong();
             }
         }
         _currentTrailData = traildata;

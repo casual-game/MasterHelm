@@ -35,8 +35,10 @@ public class HeroAnim_Base : StateMachineBehaviour
         _hero.Set_HeroMoveState(moveState);
         _hero.Get_NavMeshAgent().updatePosition = useNavPosition;
         _hero.Set_AnimatorUnscaledTime(useUnscaledTime);
+        
         if(useTrail) _hero.Tween_Trail(trailDuration);
         animator.speed = 1.0f;
+        _staticTrailData = null;
     }
 
     protected bool IsNotAvailable(Animator animator,AnimatorStateInfo stateInfo)
@@ -112,6 +114,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);
         _hero.Set_AttackIndex(-1);
+        CamArm.instance.Tween_CamAttackVec(false);
         isFinished = true;
     }
 

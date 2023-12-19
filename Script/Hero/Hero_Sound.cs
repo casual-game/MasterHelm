@@ -25,14 +25,16 @@ public partial class Hero : MonoBehaviour
         sound_weapon_spawn,
         sound_weapon_despawn,
         sound_voice_attack_normal,
-        sound_voice_attack_strong;
+        sound_voice_attack_strong,
+        sound_voice_short;
 
-    private float _time_footstep,_time_weapon_spawn,_time_weapon_despawn;
+    private float _time_footstep,_time_weapon_spawn,_time_weapon_despawn,_time_voice;
 
     private void Setting_Sound()
     {
         SoundManager.Add(sound_voice_attack_normal);
         SoundManager.Add(sound_voice_attack_strong);
+        SoundManager.Add(sound_voice_short);
     }
     private void Sound_Weapon_Spawn()
     {
@@ -79,6 +81,24 @@ public partial class Hero : MonoBehaviour
             if(hit.collider.CompareTag(GameManager.s_stone)) SoundManager.Play(sound_footstep_stone_turn);
             else if(hit.collider.CompareTag(GameManager.s_concrete)) SoundManager.Play(sound_footstep_concrete_turn);
         }
+    }
+
+    public void Sound_Voice_Attack_Normal()
+    {
+        if (Time.unscaledTime - _time_voice < 0.75f) return;
+        _time_voice = Time.unscaledTime;
+        SoundManager.Play(sound_voice_attack_normal);
+    }
+    public void Sound_Voice_Attack_Strong()
+    {
+        _time_voice = Time.unscaledTime;
+        SoundManager.Play(sound_voice_attack_strong);
+    }
+    public void Sound_Voice_Short()
+    {
+        if (Time.unscaledTime - _time_voice < 0.5f) return;
+        _time_voice = Time.unscaledTime;
+        SoundManager.Play(sound_voice_short);
     }
     //AnimationEvent
     public void Sound_Footstep_Roll_Fin()

@@ -93,6 +93,7 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState == MoveState.Locomotion)
         {
+            CamArm.instance.Tween_CamAttackVec(true);
             GameManager.Reset_AttackRealeasedTime();
             _animator.SetInteger(GameManager.s_chargeenterindex,-1);
             Deactivate_CustomMaterial();
@@ -106,6 +107,7 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust && Get_Charged())
         {
+            CamArm.instance.Tween_CamAttackVec(true);
             GameManager.Reset_AttackRealeasedTime();
             Activate_SuperArmor();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
@@ -117,6 +119,7 @@ public partial class Hero : MonoBehaviour
     }
     public bool Core_Hit_Normal()
     {
+        CamArm.instance.Tween_CamAttackVec(false);
         //감속시킨다.
         _speedRatio *=0.35f;
         //타겟 벡터
@@ -160,6 +163,7 @@ public partial class Hero : MonoBehaviour
             _spawned = false;
             return true;
         }
+        CamArm.instance.Tween_CamAttackVec(false);
         Set_HeroMoveState(MoveState.Hit);
         _fastRoll = 2;
         _animBase.cleanFinished = true;

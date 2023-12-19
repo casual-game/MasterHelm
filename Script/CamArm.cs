@@ -16,6 +16,7 @@ public class CamArm : MonoBehaviour
     //Public
     public static CamArm instance;
     public TransitionProfile transition_main_fadein;
+    public float orthographicSize = 4;
     [HideInInspector] public Camera mainCam;
     [TitleGroup("Movement")]
     [FoldoutGroup("Movement/data")] public Transform target;
@@ -28,14 +29,17 @@ public class CamArm : MonoBehaviour
     [FoldoutGroup("Effect/data")] public CloudShadowsProfile cloudShadows;
     [FoldoutGroup("Effect/data")] public Color cloud_FadeColor, cloud_IngameColor;
     //Private
-    private Vector3 _camBossVec;
+    private Vector3 _camBossVec,_camAttackVec;
+    private float _camAttackVecDist;
     private Transform _camT;
     private Camera[] _cams;
-    private Tween t_stop,t_shake,t_chromatic,t_radial,t_cambossvec;
+    private Tween t_stop,t_shake,t_chromatic,t_radial,t_cambossvec,t_camattackvec;
     private Sequence s_impact,s_speedline,s_fade;
     private Sequence s_frame,s_vignette,s_zoom;
     private int id_radial,id_speedline;
     private TransitionAnimator _transitionAnimator;
+    private Hero _hero;
+    private bool attackVecActivating = false;
     private void Awake()
     {
         instance = this;
@@ -45,11 +49,15 @@ public class CamArm : MonoBehaviour
         transform.position = target.position + addVec;
         id_radial = Shader.PropertyToID(GameManager.s_bluramount);
         id_speedline = Shader.PropertyToID(GameManager.s_colour);
+        _hero = target.GetComponentInParent<Hero>();
     }
-    
+
     void Update()
     {
-        transform.position = Vector3.Lerp(transform.position,target.position + addVec + _camBossVec,moveSpeed*Time.unscaledDeltaTime);
+        _camAttackVec = Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward;
+        
+        transform.position = Vector3.Lerp(transform.position,
+            target.position + addVec + _camBossVec + (_camAttackVec*_camAttackVecDist),moveSpeed*Time.unscaledDeltaTime);
     }
     public void Tween_CamBossVec(bool activateBossVec)
     {
@@ -65,6 +73,23 @@ public class CamArm : MonoBehaviour
                 { _camBossVec = new Vector3(0, value, 0); } ,ease: Ease.InOutCirc,startDelay:0.5f);
         }
     }
+    public void Tween_CamAttackVec(bool activateAttackVec)
+    {
+        if (activateAttackVec == attackVecActivating) return;
+        float distance = 1.25f;
+        if (activateAttackVec)
+        {
+            attackVecActivating = true;
+            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.0f, onValueChange: value =>
+            { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
+        }
+        else
+        {
+            attackVecActivating = false;
+            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f, onValueChange: value =>
+                { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
+        }
+    }
     //복합 이펙트. 중복 불가
     public void Tween_FadeIn()
     {
@@ -74,8 +99,8 @@ public class CamArm : MonoBehaviour
         cloudShadows.cloudsOpacity = 1.0f;
         cloudShadows.coverage = 1.0f;
         cloudShadows.sunColor = cloud_FadeColor;
-        _cams[0].orthographicSize = 5.5f;
-        _cams[1].orthographicSize = 5.5f;
+        _cams[0].orthographicSize = orthographicSize + 1.5f;
+        _cams[1].orthographicSize = orthographicSize + 1.5f;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
         if(_transitionAnimator!=null) Destroy(_transitionAnimator.gameObject);
         _transitionAnimator = TransitionAnimator.Start(transition_main_fadein,autoDestroy:false);
@@ -101,7 +126,7 @@ public class CamArm : MonoBehaviour
             {
                 cloudShadows.cloudsThickness = thickness;
             }, ease))
-            .Group(Tween.Custom(1.0f, 0.025f, duration, onValueChange: opacity =>
+            .Group(Tween.Custom(1.0f, 0.035f, duration, onValueChange: opacity =>
             {
                 cloudShadows.cloudsOpacity = opacity;
             }, ease))
@@ -113,8 +138,8 @@ public class CamArm : MonoBehaviour
             {
                 cloudShadows.sunColor = sunColor;
             }, ease))
-            .Group(Tween.CameraOrthographicSize(_cams[0], 4, duration, ease))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4, duration, ease));
+            .Group(Tween.CameraOrthographicSize(_cams[0], orthographicSize, duration, ease))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, duration, ease));
     }
     public void Tween_FadeOut()
     {
@@ -127,8 +152,8 @@ public class CamArm : MonoBehaviour
         cloudShadows.cloudsOpacity = 0.025f;
         cloudShadows.coverage = 0.5f;
         cloudShadows.sunColor = cloud_IngameColor;
-        _cams[0].orthographicSize = 4.0f;
-        _cams[1].orthographicSize = 4.0f;
+        _cams[0].orthographicSize = orthographicSize;
+        _cams[1].orthographicSize = orthographicSize;
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
         Tween_Radial(0.75f,0.2f);
         Tween_Vignette(0.15f,1.0f,1.5f,vignette_HitColor,vignette_NormalColor);
@@ -149,7 +174,7 @@ public class CamArm : MonoBehaviour
             {
                 cloudShadows.cloudsThickness = thickness;
             }, ease, startDelay: delay,useUnscaledTime:true))
-            .Group(Tween.Custom(0.025f, 1.0f, duration, onValueChange: opacity =>
+            .Group(Tween.Custom(0.035f, 1.0f, duration, onValueChange: opacity =>
             {
                 cloudShadows.cloudsOpacity = opacity;
             }, ease, startDelay: delay,useUnscaledTime:true))
@@ -171,13 +196,13 @@ public class CamArm : MonoBehaviour
             }, ease: Ease.InOutQuad, startDelay: delay+0.5f,useUnscaledTime:true));
         //Zoom
         s_zoom = Sequence.Create()
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.1f,useUnscaledTime:true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 3.25f, 0.1f,useUnscaledTime:true))
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize-0.75f, 0.1f,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize-0.75f, 0.1f,useUnscaledTime:true))
             .ChainDelay(.25f,true)
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc,useUnscaledTime:true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc,useUnscaledTime:true))
-            .Group(Tween.CameraOrthographicSize(_cams[0], 5.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 5.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, 1.0f, Ease.OutCirc,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, 1.0f, Ease.OutCirc,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[0], orthographicSize+1.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize+1.5f, duration, ease, startDelay: delay-.5f,useUnscaledTime:true));
         //Stop
         t_stop = Tween.GlobalTimeScale(0.25f, 0.0f, 2.5f, ease: Ease.InExpo);
 
@@ -191,10 +216,10 @@ public class CamArm : MonoBehaviour
         s_zoom.Complete();
         //Zoom
         s_zoom = Sequence.Create()
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.15f, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 3.25f, 0.15f, useUnscaledTime: true))
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize-0.75f, 0.15f, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize-0.75f, 0.15f, useUnscaledTime: true))
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true));
         //Chromatic
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
         t_chromatic = Tween.Custom(0.02f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
@@ -247,10 +272,10 @@ public class CamArm : MonoBehaviour
         s_zoom.Complete();
         //Zoom
         s_zoom = Sequence.Create()
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.25f, 0.15f, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 3.25f, 0.15f, useUnscaledTime: true))
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize-0.75f, 0.15f, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize-0.75f, 0.15f, useUnscaledTime: true))
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true));
         //Chromatic
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.02f;
         t_chromatic = Tween.Custom(0.02f, 0.001f, 1.5f, ease: Ease.OutCirc, useUnscaledTime: true,
@@ -346,11 +371,11 @@ public class CamArm : MonoBehaviour
         t_stop = Tween.GlobalTimeScale(0.05f, 1.0f, 0.5f, ease: Ease.InSine);
         //Zoom
         s_zoom = Sequence.Create()
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 3.5f, 0.15f, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 3.5f, 0.15f, useUnscaledTime: true))
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize-0.5f, 0.15f, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize-0.5f, 0.15f, useUnscaledTime: true))
             .ChainDelay(0.35f,useUnscaledTime:true)
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, 1.0f, Ease.OutCirc, useUnscaledTime: true));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, 1.0f, Ease.OutCirc, useUnscaledTime: true));
         
         
     }
@@ -443,20 +468,20 @@ public class CamArm : MonoBehaviour
             .Group(Tween.Custom(hitColor, normalColor, fin, useUnscaledTime: true,
                 onValueChange: newVal => BeautifySettings.settings.vignettingColor.value = newVal));
     }
-    public void Tween_Zoom(float begin, float delay, float fin, float startDelay,float orthographicSize)
+    public void Tween_Zoom(float begin, float delay, float fin, float startDelay,float zoom)
     {
         //Zoom
         s_zoom.Complete();
         s_zoom = Sequence.Create();
         if (startDelay > 0.01f) s_zoom.ChainDelay(startDelay, true);
         s_zoom
-            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, begin, useUnscaledTime: true,
+            .Chain(Tween.CameraOrthographicSize(_cams[0], zoom, begin, useUnscaledTime: true,
                 ease: Ease.OutCirc))
-            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, begin, useUnscaledTime: true,
+            .Group(Tween.CameraOrthographicSize(_cams[1], zoom, begin, useUnscaledTime: true,
                 ease: Ease.OutCirc))
             .ChainDelay(delay, true)
-            .Chain(Tween.CameraOrthographicSize(_cams[0], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true))
-            .Group(Tween.CameraOrthographicSize(_cams[1], 4.0f, fin, Ease.OutCirc, useUnscaledTime: true));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, fin, Ease.OutCirc, useUnscaledTime: true))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, fin, Ease.OutCirc, useUnscaledTime: true));
     }
     
 }

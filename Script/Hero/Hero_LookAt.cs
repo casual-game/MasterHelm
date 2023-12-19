@@ -46,6 +46,7 @@ public partial class Hero : MonoBehaviour
         {
             SoundManager.Play(sound_friction_cloth);
             SoundManager.Play(sound_combat_chargebegin);
+            Sound_Voice_Short();
             _animator.SetBool(GameManager.s_charge_normal,true);
         }
         
@@ -116,7 +117,6 @@ public partial class Hero : MonoBehaviour
             }
             
             degDiff = Mathf.Clamp(degDiff,heroData.lookRange.x, heroData.lookRange.y);
-            
         }
         float currentDiff = Mathf.DeltaAngle(myRot.eulerAngles.y, _lookTargetT.eulerAngles.y);
         float targetTargetDeg = Mathf.SmoothDamp(myRot.eulerAngles.y + currentDiff, 
