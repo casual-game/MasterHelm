@@ -187,8 +187,25 @@ public class Prefab_Prop : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
+        //Prop 상호작용
+        Vector3 thisPos = transform.position;
+        if (other.CompareTag(GameManager.s_prop) && GetTrail())
+        {
+            other.GetComponent<Prop>().Interact(other.transform.position-transform.position);
+            var position = other.ClosestPoint(thisPos);
+            ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+        }
+        
         if (_isHero)
         {
+            //Sparkle 상호작용
+            if (other.CompareTag(GameManager.s_sparkable) && GetTrail())
+            {
+                
+                var position = other.ClosestPoint(thisPos);
+                ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+            }
+            //몬스터 상호작용
             if (!other.CompareTag(GameManager.s_monster)) return;
             if(!_interact_savedTargets.Contains(other))_interact_savedTargets.Add(other);
             if(!_interact_currentTargets.Contains(other))_interact_currentTargets.Add(other);
@@ -202,6 +219,7 @@ public class Prefab_Prop : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
+        
         if (_isHero)
         {
             if (!other.CompareTag(GameManager.s_monster)) return;
@@ -213,6 +231,8 @@ public class Prefab_Prop : MonoBehaviour
             if(_interact_currentTargets.Contains(other))_interact_currentTargets.Remove(other);
         }
     }
+
+
     //UniTask - Keep불가능
     private async UniTaskVoid UT_ActivateProp_CantKeep()
     {
@@ -350,5 +370,4 @@ public class Prefab_Prop : MonoBehaviour
         t.SetLocalPositionAndRotation(copyT.localPosition,copyT.localRotation);
         t.localScale = copyT.localScale; 
     }
-    
 }

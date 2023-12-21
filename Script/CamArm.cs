@@ -77,16 +77,17 @@ public class CamArm : MonoBehaviour
     {
         if (activateAttackVec == attackVecActivating) return;
         float distance = 1.25f;
+        float distanceRatio = Vector3.Distance(_camAttackVec, transform.position - target.position) / distance;
         if (activateAttackVec)
         {
             attackVecActivating = true;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.0f, onValueChange: value =>
+            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.5f*distanceRatio, onValueChange: value =>
             { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
         }
         else
         {
             attackVecActivating = false;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f, onValueChange: value =>
+            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f*distanceRatio, onValueChange: value =>
                 { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
         }
     }

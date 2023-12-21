@@ -44,12 +44,11 @@ public partial class Hero : MonoBehaviour
             renderers.Add(renderer);
         }
     }
-    
     //Public
     private TrailEffect trailEffect;
     //[FoldoutGroup("Particle")] public Material mat_superarmor;
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_dust;
 
     [FoldoutGroup("Particle")][SerializeField]
     private ParticleSystem p_charge_main,p_charge_strongL,p_charge_strongR;

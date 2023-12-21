@@ -53,6 +53,8 @@ public partial class Hero : MonoBehaviour
         gameObject.SetActive(false);
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f), DelayType.DeltaTime);
         gameObject.SetActive(true);
+        p_dust.Simulate(1.5f);
+        p_dust.Play();
         Move_Nav(relativePos,rot);
         _spawned = true;
         _animator.Rebind();
