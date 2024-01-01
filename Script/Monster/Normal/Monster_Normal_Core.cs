@@ -18,7 +18,6 @@ public partial class Monster_Normal : Monster
     public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
-        
         Set_MonsterMoveState(MoveState.Hit);
         Equipment_UpdateTrail(false,false,false);
         //현 상태에 따른 히트 타입 설정
@@ -41,6 +40,7 @@ public partial class Monster_Normal : Monster
                     Effect(false);
                     attackString =GameManager.s_normalattack;
                     SoundManager.Play_Hit_Normal();
+                    Voice_Hit();
                     break;
                 case AttackType.Stun:
                     Set_HitState(HitState.Ground);
@@ -49,6 +49,7 @@ public partial class Monster_Normal : Monster
                     Effect(true);
                     attackString = GameManager.s_combobegin;
                     SoundManager.Play_Hit_Smash();
+                    Voice_Hit(true);
                     break;
                 case AttackType.Smash:
                     Set_HitState(HitState.Ground);
@@ -57,6 +58,7 @@ public partial class Monster_Normal : Monster
                     Effect(true);
                     attackString = GameManager.s_smash;
                     SoundManager.Play_Hit_Smash();
+                    Voice_Death();
                     break;
                 case AttackType.Combo:
                     Set_HitState(HitState.Air);
@@ -65,6 +67,7 @@ public partial class Monster_Normal : Monster
                     Effect(true);
                     attackString = GameManager.s_combobegin;
                     SoundManager.Play_Hit_Smash();
+                    Voice_Hit(true);
                     break;
                 default:
                     Set_HitState(HitState.Ground);
@@ -88,6 +91,7 @@ public partial class Monster_Normal : Monster
                 Effect(true);
                 attackString = GameManager.s_combofinish;
                 SoundManager.Play_Hit_Smash();
+                Voice_Death();
             }
             else
             {
@@ -97,6 +101,7 @@ public partial class Monster_Normal : Monster
                 Effect(false);
                 attackString = GameManager.s_truecombo;
                 SoundManager.Play_Hit_Normal();
+                Voice_Hit();
             }
         }
         else
@@ -136,8 +141,7 @@ public partial class Monster_Normal : Monster
         bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         bool isCombo = (attackType != AttackType.Normal && _hitState == HitState.Ground) 
                        || _hitState == HitState.Air || isAirSmash;
-        if (isCombo) p_blood_combo.transform.rotation = prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0);
-        Effect_Hit_Strong(isBloodBottom,isCombo);
+        Effect_Hit_Strong(isBloodBottom,isCombo,prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0));
         return true;
         void Effect(bool isStrong)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
@@ -7,12 +8,13 @@ using UnityEngine.Serialization;
 public partial class Hero : MonoBehaviour
 {
     [FoldoutGroup("Sound")] public LayerMask mapLayer;
-
     [FoldoutGroup("Sound")] public SoundData
         sound_footstep_concrete,
         sound_footstep_stone,
+        sound_footstep_grass,
         sound_footstep_concrete_turn,
         sound_footstep_stone_turn,
+        sound_footstep_grass_turn,
         sound_footstep_roll_begin,
         sound_footstep_roll_fin,
         sound_friction_cloth,
@@ -29,7 +31,8 @@ public partial class Hero : MonoBehaviour
         sound_voice_short;
 
     private float _time_footstep,_time_weapon_spawn,_time_weapon_despawn,_time_voice;
-
+    private List<Collider> grassColls = new List<Collider>();
+    private RaycastHit[] footstepHits = new RaycastHit[7];
     private void Setting_Sound()
     {
         SoundManager.Add(sound_voice_attack_normal);
@@ -52,35 +55,62 @@ public partial class Hero : MonoBehaviour
     {
         if (Time.unscaledTime - _time_footstep < 0.3f) return;
         _time_footstep = Time.unscaledTime;
-        bool isHit = Physics.Raycast(footPos + Vector3.up*0.5f, Vector3.down, 
-            out RaycastHit hit,1,mapLayer,QueryTriggerInteraction.Collide);
-        if (isHit)
+        Physics.RaycastNonAlloc(footPos + Vector3.up*0.75f, Vector3.down,footstepHits,1.25f,mapLayer);
+        float height = Mathf.NegativeInfinity;
+        SoundData sound= null;
+        if (grassColls.Count > 0) sound = sound_footstep_grass;
+        else
         {
-            if(hit.collider.CompareTag(GameManager.s_stone)) SoundManager.Play(sound_footstep_stone);
-            else if(hit.collider.CompareTag(GameManager.s_concrete)) SoundManager.Play(sound_footstep_concrete);
+            foreach (var hit in footstepHits)
+            {
+                if(hit.collider == null ||hit.point.y<height) continue;
+                if (hit.collider.CompareTag(GameManager.s_stone))
+                {
+                    sound = sound_footstep_stone;
+                    height = hit.point.y;
+                }
+                else if (hit.collider.CompareTag(GameManager.s_concrete))
+                {
+                    sound = sound_footstep_concrete;
+                    height = hit.point.y;
+                }
+            } 
         }
+        
+        if(sound!=null) SoundManager.Play(sound);
     }
     public void Sound_Footstep()
     {
-        Vector3 footPos = p_footstep_l.transform.position;
-        bool isHit = Physics.Raycast(footPos + Vector3.up*0.5f, Vector3.down, 
-            out RaycastHit hit,1,mapLayer,QueryTriggerInteraction.Collide);
-        if (isHit)
-        {
-            if(hit.collider.CompareTag(GameManager.s_stone)) SoundManager.Play(sound_footstep_stone);
-            else if(hit.collider.CompareTag(GameManager.s_concrete)) SoundManager.Play(sound_footstep_concrete);
-        }
+       Sound_Footstep(p_footstep_l.transform.position);
     }
     public void Sound_Footstep_Turn()
     {
         Vector3 footPos = p_footstep_l.transform.position;
-        bool isHit = Physics.Raycast(footPos + Vector3.up*0.5f, Vector3.down, 
-            out RaycastHit hit,1,mapLayer,QueryTriggerInteraction.Collide);
-        if (isHit)
+        
+        Physics.RaycastNonAlloc(footPos + Vector3.up*0.75f, Vector3.down,footstepHits,1.25f,mapLayer);
+        float height = Mathf.NegativeInfinity;
+        SoundData sound= null;
+        if (grassColls.Count > 0) sound = sound_footstep_grass_turn;
+        else
         {
-            if(hit.collider.CompareTag(GameManager.s_stone)) SoundManager.Play(sound_footstep_stone_turn);
-            else if(hit.collider.CompareTag(GameManager.s_concrete)) SoundManager.Play(sound_footstep_concrete_turn);
+            foreach (var hit in footstepHits)
+            {
+                if(hit.collider == null ||hit.point.y<height) continue;
+            
+                if (hit.collider.CompareTag(GameManager.s_stone))
+                {
+                    sound = sound_footstep_stone_turn;
+                    height = hit.point.y;
+                }
+                else if (hit.collider.CompareTag(GameManager.s_concrete))
+                {
+                    sound = sound_footstep_concrete_turn;
+                    height = hit.point.y;
+                }
+            }
         }
+       
+        if(sound!=null) SoundManager.Play(sound);
     }
 
     public void Sound_Voice_Attack_Normal()
@@ -108,5 +138,14 @@ public partial class Hero : MonoBehaviour
     public void Sound_GroundSmash()
     {
         SoundManager.Play(sound_combat_groundsmash);
+    }
+    //Grass
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag(GameManager.s_grass) && !grassColls.Contains(other)) grassColls.Add(other);
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.CompareTag(GameManager.s_grass) && grassColls.Contains(other)) grassColls.Remove(other);
     }
 }

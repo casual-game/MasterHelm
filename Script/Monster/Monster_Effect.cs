@@ -27,7 +27,8 @@ public partial class Monster : MonoBehaviour
         }
     }
     //Public
-    [FoldoutGroup("Effect")] public ParticleSystem p_spawn, p_smoke,p_blood_normal,p_blood_strong,p_blood_combo;
+    [FoldoutGroup("Effect")] public float particleScale = 1.0f;
+    [FoldoutGroup("Effect")] public ParticleSystem p_spawn;
     //Private
     protected Tween t_blink, t_punch;
     protected CustomMaterialController _customMaterialController;
@@ -67,7 +68,8 @@ public partial class Monster : MonoBehaviour
     //Effect
     public void Effect_Land()
     {
-        p_smoke.Play();
+        Transform t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,particleScale);
         Punch_Up(0.75f);
     }
     public void Effect_Hit_Normal()
@@ -79,18 +81,20 @@ public partial class Monster : MonoBehaviour
         
         
         Transform t = transform;
-        Vector3 currentPos = t.position;
-        p_blood_normal.Play();
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,
+            t.position + Vector3.up * 0.75f, t.rotation, particleScale);
     }
-    public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo)
+    public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo,Quaternion rot)
     {
         t_blink.Complete();
         t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.3f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        p_blood_normal.Play();
-        if(!isCombo) p_blood_strong.Play();
-        else p_blood_combo.Play();
+
+        Vector3 pos = transform.position + Vector3.up*0.75f;
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
+        if(!isCombo) ParticleManager.Play(ParticleManager.instance.pd_blood_strong,pos,rot, particleScale);
+        else ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
     }
     public void Effect_Hit_Counter()
     {
@@ -98,8 +102,12 @@ public partial class Monster : MonoBehaviour
         t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.5f,
             onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
             ,ease: Ease.InQuad);
-        p_blood_normal.Play();
-        p_blood_combo.Play();
+        
+        var t = transform;
+        Vector3 pos = t.position + Vector3.up*0.75f;
+        Quaternion rot = t.rotation;
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
     }
     //CustomMaterialController
     
@@ -110,7 +118,8 @@ public partial class Monster : MonoBehaviour
     //Animation Event
     public void FallDown()
     {
-        p_smoke.Play();
+        Transform t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,particleScale);
         Punch_Up_Compact(1.5f);
         Set_HitState(HitState.Recovery);
     }

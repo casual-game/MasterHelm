@@ -48,14 +48,13 @@ public partial class Hero : MonoBehaviour
     private TrailEffect trailEffect;
     //[FoldoutGroup("Particle")] public Material mat_superarmor;
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact,p_dust;
+    public ParticleSystem p_charge_begin, p_charge_fin, p_charge_Impact;
 
     [FoldoutGroup("Particle")][SerializeField]
     private ParticleSystem p_charge_main,p_charge_strongL,p_charge_strongR;
 
     [FoldoutGroup("Particle")] 
-    public ParticleSystem p_spawn,p_despawn
-        ,p_smoke,p_roll,p_change,p_footstep_l,p_footstep_r,p_blood_normal,p_blood_strong;
+    public ParticleSystem p_spawn,p_despawn,p_roll,p_change,p_footstep_l,p_footstep_r;
 
     [FoldoutGroup("Color")][ColorUsage(true,true)] 
     public Color c_hit_begin,c_hit_fin,c_evade_begin,c_evade_fin;
@@ -133,18 +132,26 @@ public partial class Hero : MonoBehaviour
     public void Effect_AttackParticle(int index)
     {
         if (_animator.IsInTransition(0) || !(HeroMoveState is MoveState.NormalAttack or MoveState.StrongAttack)) return;
-        var mainParticle = weapondata[_currentWeaponPack].attackParticles[index];
-        if (mainParticle == null) return;
-        if (_currentWeaponPack != null)
-        {
-            foreach (var sd in _currentWeaponPack.effectSounds) SoundManager.Play(sd);
-        }
+        if (_currentTrailData == null || !_currentTrailData.useCustomParticle) return;
+        if(_currentTrailData.customParticle_Sound != null) 
+            SoundManager.Play(_currentTrailData.customParticle_Sound);
         Transform t = transform;
-        mainParticle.transform.SetPositionAndRotation(t.position, t.rotation);
-        mainParticle.Play();
-
-        if (mainParticle.TryGetComponent(out ShakeTrigger shakeTrigger)) shakeTrigger.Shake();
-
+        if(_currentTrailData.customParticle_Particle != null) 
+            ParticleManager.Play(_currentTrailData.customParticle_Particle,t.position,t.rotation);
+        switch (_currentTrailData.customParticle_ShakeRatio)
+        {
+            default:
+                break;
+            case 1:
+                CamArm.instance.Tween_ShakeSmooth();
+                break;
+            case 2:
+                CamArm.instance.Tween_ShakeNormal_Core();
+                break;
+            case 3:
+                CamArm.instance.Tween_ShakeStrong_Core();
+                break;
+        }
     }
     public void Effect_Footstep_L()
     {
@@ -165,79 +172,46 @@ public partial class Hero : MonoBehaviour
     public void Effect_Smoke(float fwd = 0)
     {
         Transform t = transform;
-        p_smoke.transform.position = t.position + t.forward*fwd;
-        p_smoke.Play();
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + t.forward*fwd + Vector3.up*0.1f,t.rotation,1);
     }
     public void Effect_Hit_Normal()
     {
         Tween_Blink_Hit(1.75f);
-        p_blood_normal.Play();
+        var t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
     }
     public void Effect_Hit_Strong(bool isBloodBottom)
     {
         Tween_Blink_Hit(1.0f);
-        p_blood_normal.Play();
-        p_blood_strong.Play();
+        var t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_strong,t.position + Vector3.up*0.75f,t.rotation);
     }
     public void Effect_Hit_SuperArmor()
     {
-        p_blood_normal.Play();
-        p_blood_strong.Play();
+        var t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_strong,t.position + Vector3.up*0.75f,t.rotation);
     }
     public void Effect_Land()
     {
         Tween_Punch_Up(1.25f);
         Effect_Smoke();
         Sound_Footstep_Turn();
-        SoundManager.Play(sound_weapon_spawn);
-        SoundManager.Play(sound_friction_cloth);
     }
     //Particle
     public void Particle_Charge_Main()
     {
-        if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var key in weapondata.Keys)
-        {
-            if(!key.cancelableEffect) continue;
-            var particles = weapondata[key].attackParticles;
-            foreach (var particle in particles)
-            {
-                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
-        }
         p_charge_main.Play();
         Sound_Voice_Short();
     }
     public void Particle_Charge_L()
     {
-        if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        if(p_charge_strongR.isPlaying) p_charge_strongR.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var key in weapondata.Keys)
-        {
-            if(!key.cancelableEffect) continue;
-            var particles = weapondata[key].attackParticles;
-            foreach (var particle in particles)
-            {
-                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
-        }
         p_charge_strongL.Play();
         Sound_Voice_Short();
     }
     public void Particle_Charge_R()
     {
-        if(p_charge_strongL.isPlaying) p_charge_strongL.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        if(p_charge_main.isPlaying) p_charge_main.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-        foreach (var key in weapondata.Keys)
-        {
-            if(!key.cancelableEffect) continue;
-            var particles = weapondata[key].attackParticles;
-            foreach (var particle in particles)
-            {
-                if(particle.isPlaying) particle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
-        }
         p_charge_strongR.Play();
         Sound_Voice_Short();
     }
@@ -260,6 +234,11 @@ public partial class Hero : MonoBehaviour
         _superarmor = false;
         customMaterialController.Deactivate();
         SoundManager.Stop(sound_combat_superarmor);
+    }
+
+    public bool Get_SuperArmor()
+    {
+        return _superarmor;
     }
 
     

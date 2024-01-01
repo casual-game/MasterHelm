@@ -61,5 +61,6 @@ public partial class GameManager: MonoBehaviour
         s_concrete = "Concrete",
         s_stone = "Stone",
         s_sparkable = "Sparkable",
-        s_prop = "Prop";
+        s_prop = "Prop",
+        s_grass = "Grass";
 }

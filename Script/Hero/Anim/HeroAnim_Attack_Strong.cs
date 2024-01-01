@@ -30,8 +30,16 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         
         _hero.Equipment_Collision_Reset(_weaponPack);
         _hero.frameMain.MP_Use();
-        if(isLeft) _hero.Particle_Charge_L();
-        else _hero.Particle_Charge_R();
+        if (isLeft)
+        {
+            _hero.Particle_Charge_L();
+            _hero.Set_CurrentTrail(_hero.weaponPack_StrongL.playerAttackMotionData_Strong.TrailDatas[0]);
+        }
+        else
+        {
+            _hero.Particle_Charge_R();
+            _hero.Set_CurrentTrail(_hero.weaponPack_StrongR.playerAttackMotionData_Strong.TrailDatas[0]);
+        }
         CamArm.instance.Tween_Skill();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
         SoundManager.Play(_hero.sound_combat_skill);

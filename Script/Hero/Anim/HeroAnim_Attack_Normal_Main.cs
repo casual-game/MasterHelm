@@ -26,6 +26,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         SoundManager.Play(_hero.sound_friction_cloth);
         if (_hero.AttackIndex == 0)
         {
+            _hero.Set_CurrentTrail(_hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal[0].TrailDatas[0]);
             SoundManager.Play(_hero.sound_chain);
             _hero.Effect_Smoke(0.25f);
         }

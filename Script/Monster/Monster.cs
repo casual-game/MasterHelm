@@ -45,6 +45,7 @@ public partial class Monster : MonoBehaviour
         Setting_UI();
         Setting_Effect();
         Setting_AI();
+        Setting_Sound();
         Monsters.Add(this);
         DespawnEmmediately();
     }

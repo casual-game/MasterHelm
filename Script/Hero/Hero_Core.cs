@@ -278,8 +278,8 @@ public partial class Hero : MonoBehaviour
     {
         _falledTime = Time.time;
         Transform t = transform;
-        p_smoke.transform.SetPositionAndRotation(t.position + t.forward*-0.2f ,t.rotation);
-        p_smoke.Play();   
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,
+            t.position + t.forward*-0.2f + Vector3.up*0.1f,t.rotation,1);
     }
     
 

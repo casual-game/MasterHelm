@@ -5,5 +5,4 @@ using UnityEngine;
 public class ParticleData : ScriptableObject
 {
     public ParticleSystem particle;
-    public SoundData soundData;
 }

@@ -53,13 +53,10 @@ public partial class Hero : MonoBehaviour
         gameObject.SetActive(false);
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f), DelayType.DeltaTime);
         gameObject.SetActive(true);
-        p_dust.Simulate(1.5f);
-        p_dust.Play();
         Move_Nav(relativePos,rot);
         _spawned = true;
         _animator.Rebind();
         Tween_Blink_Evade(1.0f);
-        SoundManager.Play(sound_combat_chargefin);
         Sound_Voice_Short();
         //무기 설정
         var weaponpack = weapondata[weaponPack_Normal];

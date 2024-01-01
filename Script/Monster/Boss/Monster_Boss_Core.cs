@@ -100,7 +100,7 @@ public partial class Monster_Boss : Monster
                 return;
             }
             CamArm.instance.Tween_ShakeNormal();
-            Effect_Hit_Strong(true,false);
+            Effect_Hit_Strong(true,false,GameManager.Q_Identity);
             Punch_Down(1.5f);
         }
         void Effect_Strong_Groggy()
@@ -111,7 +111,7 @@ public partial class Monster_Boss : Monster
             Vector3 pos = transform.position;
             CamArm.instance.Tween_ShakeStrong();
             GameManager.Instance.Shockwave(pos);
-            Effect_Hit_Strong(false,true);
+            Effect_Hit_Strong(false,true,GameManager.Q_Identity);
             Punch_Down(1.0f);
         }
         void Effect_Strong_Counter(int damage)
@@ -119,7 +119,7 @@ public partial class Monster_Boss : Monster
             _hitStrongTime = Time.time;
             
             Vector3 pos = transform.position;
-            CamArm.instance.Tween_Impact(p_smoke,damage);
+            CamArm.instance.Tween_Impact(transform,particleScale,damage);
             //GameManager.Instance.Shockwave(pos);
             Effect_Hit_Counter();
             Hero.Blink(0.5f);
@@ -143,7 +143,7 @@ public partial class Monster_Boss : Monster
             Vector3 pos = transform.position;
             CamArm.instance.Tween_ShakeStrong();
             GameManager.Instance.Shockwave(pos);
-            Effect_Hit_Strong(false,true);
+            Effect_Hit_Strong(false,true,GameManager.Q_Identity);
             Punch_Down(1.0f);
                 
             _animBase.isFinished = true;
@@ -211,7 +211,8 @@ public partial class Monster_Boss : Monster
         CamArm.instance.Tween_ShakeDown();
         p_groundimpact.Play();
         p_spawn.Play();
-        p_smoke.Play();
+        var t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,particleScale);
         Punch_Down(1.0f);
     }
 }

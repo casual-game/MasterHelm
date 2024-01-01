@@ -19,7 +19,6 @@ public partial class Monster_Strong : Monster
     public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return false;
-        
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType_ground;
         string attackString;
@@ -51,7 +50,7 @@ public partial class Monster_Strong : Monster
                 Vector3 pos = transform.position;
                 CamArm.instance.Tween_ShakeStrong();
                 GameManager.Instance.Shockwave(pos);
-                Effect_Hit_Strong(false,true);
+                Effect_Hit_Strong(false,true,GameManager.Q_Identity);
                 Punch_Down(1.0f);
                 
                 _animBase.isFinished = true;
@@ -68,7 +67,7 @@ public partial class Monster_Strong : Monster
             else
             {
                 CamArm.instance.Tween_ShakeNormal();
-                Effect_Hit_Strong(false,false);
+                Effect_Hit_Strong(false,false,GameManager.Q_Identity);
                 Punch_Down(1.5f);
             }
         }

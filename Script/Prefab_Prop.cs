@@ -30,6 +30,8 @@ public class Prefab_Prop : MonoBehaviour
     private int _syncInt = 0,_syncedInt=0;
     private Monster _monster;
     private bool skipCurrentInteraction = false;
+
+    private Dictionary<Prop, TrailData> propDatas;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -112,6 +114,7 @@ public class Prefab_Prop : MonoBehaviour
         _interact_interactedTargets.Clear();
         _interact_savedTargets.Clear();
         _interact_currentTargets.Clear();
+        propDatas.Clear();
     }
     public void Collision_Skip()
     {
@@ -184,18 +187,30 @@ public class Prefab_Prop : MonoBehaviour
             trail.active = false;
             //trail.Clear();
         }
+        propDatas = new Dictionary<Prop, TrailData>();
     }
     private void OnTriggerEnter(Collider other)
     {
         //Prop 상호작용
         Vector3 thisPos = transform.position;
+        
+        
         if (other.CompareTag(GameManager.s_prop) && GetTrail())
         {
-            other.GetComponent<Prop>().Interact(other.transform.position-transform.position);
-            var position = other.ClosestPoint(thisPos);
-            ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+            var prop = other.GetComponent<Prop>();
+            TrailData trailData = Hero.instance.Get_TrailData();
+            bool contain = propDatas.ContainsKey(prop);
+            if (!contain || propDatas[prop] != trailData)
+            {
+                if(contain) propDatas[prop] = trailData;
+                else propDatas.Add(prop,trailData);
+                prop.Interact(other.transform.position-transform.position,Hero.instance.Get_SuperArmor());
+                var position = other.ClosestPoint(thisPos);
+                ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+            }
+            
         }
-        
         if (_isHero)
         {
             //Sparkle 상호작용
@@ -204,6 +219,7 @@ public class Prefab_Prop : MonoBehaviour
                 
                 var position = other.ClosestPoint(thisPos);
                 ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
             }
             //몬스터 상호작용
             if (!other.CompareTag(GameManager.s_monster)) return;

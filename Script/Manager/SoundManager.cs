@@ -8,11 +8,15 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(AudioSource))]
 public class SoundManager : MonoBehaviour
 {
-    private static SoundManager instance;
+    public static SoundManager instance;
     [TableList(AlwaysExpanded = true,ShowIndexLabels = true)][TitleGroup("수동 추가 사운드")]
     public List<SoundGroup> soundGroups = new List<SoundGroup>();
 
-    [TitleGroup("필수 사운드")] public SoundData sound_hit_normal,sound_hit_smash,sound_combat_sparkable;
+    [TitleGroup("필수 사운드")] public SoundData sound_hit_normal,
+        sound_hit_smash,
+        sound_combat_sparkable,
+        sound_interact_wood_normal,
+        sound_interact_wood_strong;
 
     private Dictionary<SoundData, SoundGroup> ingameData = new Dictionary<SoundData, SoundGroup>();
     public void Setting()

@@ -11,32 +11,44 @@ public partial class Hero : MonoBehaviour
     private void Setting_Equipment()
     {
         _sensor = GetComponentInChildren<RangeSensor>();
-        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)>();
+        weapondata = new Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield)>();
         //무기 추가
         AddWeaponPack(weaponPack_Normal,t_back,true);
         AddWeaponPack(weaponPack_StrongL,GameManager.Folder_Hero,false);
         AddWeaponPack(weaponPack_StrongR,GameManager.Folder_Hero,false);
-        //사운드 추가
-        if(weaponPack_Normal.effectSounds.Count>0) 
-            foreach (var sd in weaponPack_Normal.effectSounds) SoundManager.Add(sd);
-        if(weaponPack_StrongL.effectSounds.Count>0) 
-            foreach (var sd in weaponPack_StrongL.effectSounds) SoundManager.Add(sd);
-        if(weaponPack_StrongR.effectSounds.Count>0) 
-            foreach (var sd in weaponPack_StrongR.effectSounds) SoundManager.Add(sd);
+        //사운드,파티클 추가
         foreach (var motionData in weaponPack_Normal.PlayerAttackMotionDatas_Normal)
         {
             foreach (var td in motionData.TrailDatas)
             {
                 SoundManager.Add(td.soundData);
+                if (td.useCustomParticle)
+                {
+                    if(td.customParticle_Sound!=null) SoundManager.Add(td.customParticle_Sound);
+                    if(td.customParticle_Particle!=null) ParticleManager.Add(td.customParticle_Particle);
+                    if(!_attackParticles.Contains(td.customParticle_Particle)) _attackParticles.Add(td.customParticle_Particle);
+                }
             }
         }
         foreach (var td in weaponPack_StrongL.playerAttackMotionData_Strong.TrailDatas)
         {
             SoundManager.Add(td.soundData);
+            if (td.useCustomParticle)
+            {
+                if(td.customParticle_Sound!=null) SoundManager.Add(td.customParticle_Sound);
+                if(td.customParticle_Particle!=null) ParticleManager.Add(td.customParticle_Particle);
+                if(!_attackParticles.Contains(td.customParticle_Particle)) _attackParticles.Add(td.customParticle_Particle);
+            }
         }
         foreach (var td in weaponPack_StrongR.playerAttackMotionData_Strong.TrailDatas)
         {
             SoundManager.Add(td.soundData);
+            if (td.useCustomParticle)
+            {
+                if(td.customParticle_Sound!=null) SoundManager.Add(td.customParticle_Sound);
+                if(td.customParticle_Particle!=null) ParticleManager.Add(td.customParticle_Particle);
+                if(!_attackParticles.Contains(td.customParticle_Particle)) _attackParticles.Add(td.customParticle_Particle);
+            }
         }
         shield = Instantiate(shield);
         shield.Setting_Hero(_outlinable,true,t_shield,t_back);
@@ -44,15 +56,9 @@ public partial class Hero : MonoBehaviour
         {
             Prefab_Prop l = weaponPack.wepaon_L == null? null : Instantiate(weaponPack.wepaon_L);
             Prefab_Prop r = weaponPack.weapon_R == null? null : Instantiate(weaponPack.weapon_R);
-            List<ParticleSystem> attackParticles = new List<ParticleSystem>();
-            foreach (var p in weaponPack.attackEffects)
-            {
-                ParticleSystem attackParticle = Instantiate(p,GameManager.Folder_Hero);
-                attackParticles.Add(attackParticle);
-            }
             if(l!=null) l.Setting_Hero(_outlinable,canKeep,t_hand_l,detachT);
             if(r!=null) r.Setting_Hero(_outlinable,canKeep,t_hand_r,detachT);
-            weapondata.Add(weaponPack,(l,r,weaponPack.useShield,attackParticles));
+            weapondata.Add(weaponPack,(l,r,weaponPack.useShield));
         }
         
         //Animator의 ChargeEnterIndex용 변수 설정
@@ -93,10 +99,11 @@ public partial class Hero : MonoBehaviour
     
     //Private
     private int leftEnterIndex, rightEnterIndex;
-    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield,List<ParticleSystem> attackParticles)> weapondata;
+    private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
     private RangeSensor _sensor;
     private TrailData _currentTrailData;
+    private List<ParticleData> _attackParticles = new List<ParticleData>();
 
     
     //Getter
@@ -115,6 +122,11 @@ public partial class Hero : MonoBehaviour
     public int Get_RightEnterIndex()
     {
         return rightEnterIndex;
+    }
+
+    public TrailData Get_TrailData()
+    {
+        return _currentTrailData;
     }
     //Setter
     public void Set_CurrentTrail(TrailData traildata)
@@ -257,12 +269,10 @@ public partial class Hero : MonoBehaviour
     }
     public void Equipment_CancelEffect()
     {
-        foreach (var p in weapondata[weaponPack_Normal].attackParticles)
-            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
-        foreach (var p in weapondata[weaponPack_StrongL].attackParticles)
-            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
-        foreach (var p in weapondata[weaponPack_StrongR].attackParticles)
-            if(p.isPlaying) p.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+        foreach (var _ap in _attackParticles)
+        {
+            ParticleManager.Stop(_ap);
+        }
     }
     
 }
