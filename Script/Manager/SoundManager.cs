@@ -12,11 +12,14 @@ public class SoundManager : MonoBehaviour
     [TableList(AlwaysExpanded = true,ShowIndexLabels = true)][TitleGroup("수동 추가 사운드")]
     public List<SoundGroup> soundGroups = new List<SoundGroup>();
 
-    [TitleGroup("필수 사운드")] public SoundData sound_hit_normal,
+    [TitleGroup("필수 사운드")] public SoundData
+        sound_hit_normal,
         sound_hit_smash,
         sound_combat_sparkable,
         sound_interact_wood_normal,
-        sound_interact_wood_strong;
+        sound_interact_wood_strong,
+        sound_falldown,
+        sound_friction_cloth;
 
     private Dictionary<SoundData, SoundGroup> ingameData = new Dictionary<SoundData, SoundGroup>();
     public void Setting()
@@ -24,14 +27,14 @@ public class SoundManager : MonoBehaviour
         foreach (var group in soundGroups) ingameData.Add(group.soundData, group);
         instance = this;
     }
-    public static void Play(SoundData soundData)
+    public static void Play(SoundData soundData,float delay = 0)
     {
         if (!instance.ingameData.ContainsKey(soundData))
         {
             Debug.Log("해당 SoundData가 없습니다.");
             return;
         }
-        instance.ingameData[soundData].Play();
+        instance.ingameData[soundData].Play(delay);
     }
     public static void Stop(SoundData soundData)
     {
@@ -92,15 +95,6 @@ public class SoundManager : MonoBehaviour
             instance.soundGroups.Add(soundGroup);
             instance.ingameData.Add(soundData, soundGroup);
         }
-    }
-    //필수 사운드
-    public static void Play_Hit_Normal()
-    {
-        Play(instance.sound_hit_normal);
-    }
-    public static void Play_Hit_Smash()
-    {
-        Play(instance.sound_hit_smash);
     }
     //DEBUG
     public void DebugPlay(SingleSound clip)
@@ -165,20 +159,20 @@ public class SoundGroup
     [HideInInspector] public List<AudioSource> audioSources = new List<AudioSource>();
     [HideInInspector] public int audioIndex = 0;
     [Button]
-    public void Play()
+    public void Play(float delay)
     {
         audioIndex = (audioIndex + 1) % audioSources.Count;
         AudioSource source = audioSources[audioIndex];
         if (source.isPlaying) source.Stop();
         var singleSound = soundData.sounds[audioIndex % soundData.sounds.Count];
         //시작 시간
-        source.time = singleSound.clipRange.x * singleSound.clip.length;
+        source.time = singleSound.clipRange.x * (singleSound.clip.length + delay);
         source.pitch = 1.0f + Random.Range(singleSound.pitch.x, singleSound.pitch.y);
         //종료 시간
         double curDspTime = AudioSettings.dspTime;
         double clipDuration = (singleSound.clip.samples * 1.0f) / (singleSound.clip.frequency * 1.0f);
-        source.PlayScheduled(curDspTime + singleSound.delay);
-        source.SetScheduledEndTime(curDspTime + singleSound.delay +
+        source.PlayScheduled(curDspTime + singleSound.delay + delay);
+        source.SetScheduledEndTime(curDspTime + singleSound.delay + delay +
                                    clipDuration * (singleSound.clipRange.y - singleSound.clipRange.x));
         source.Play();
     }

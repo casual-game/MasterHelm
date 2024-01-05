@@ -122,5 +122,8 @@ public partial class Monster : MonoBehaviour
         ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,particleScale);
         Punch_Up_Compact(1.5f);
         Set_HitState(HitState.Recovery);
+        
+        SoundManager.Play(SoundManager.instance.sound_falldown);
+        SoundManager.Play(SoundManager.instance.sound_friction_cloth,0.125f);
     }
 }

@@ -18,9 +18,8 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
         startDeg = _hero.transform.rotation.eulerAngles.y;
         if (GameManager.Bool_Move)
         {
-            endDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                     CamArm.instance.transform.rotation.eulerAngles.y;
-            endDeg = -endDeg + 180;
+            endDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                    CamArm.instance.transform.rotation.eulerAngles.y+90;
         }
         else endDeg = startDeg;
         pattern = 0;
@@ -90,9 +89,8 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
             float jsDeg;
             if (GameManager.Bool_Move)
             {
-                jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                        CamArm.instance.transform.rotation.eulerAngles.y;
-                jsDeg = -jsDeg + 180;
+                jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                        CamArm.instance.transform.rotation.eulerAngles.y+90;
             }
             else jsDeg = heroT.rotation.eulerAngles.y;
             //pattern에 알맞은 동작

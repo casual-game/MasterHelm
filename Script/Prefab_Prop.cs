@@ -32,6 +32,7 @@ public class Prefab_Prop : MonoBehaviour
     private bool skipCurrentInteraction = false;
 
     private Dictionary<Prop, TrailData> propDatas;
+    private List<Collider> collDatas;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -115,6 +116,7 @@ public class Prefab_Prop : MonoBehaviour
         _interact_savedTargets.Clear();
         _interact_currentTargets.Clear();
         propDatas.Clear();
+        collDatas.Clear();
     }
     public void Collision_Skip()
     {
@@ -188,35 +190,33 @@ public class Prefab_Prop : MonoBehaviour
             //trail.Clear();
         }
         propDatas = new Dictionary<Prop, TrailData>();
+        collDatas = new List<Collider>();
     }
     private void OnTriggerEnter(Collider other)
     {
-        //Prop 상호작용
         Vector3 thisPos = transform.position;
-        
-        
-        if (other.CompareTag(GameManager.s_prop) && GetTrail())
-        {
-            var prop = other.GetComponent<Prop>();
-            TrailData trailData = Hero.instance.Get_TrailData();
-            bool contain = propDatas.ContainsKey(prop);
-            if (!contain || propDatas[prop] != trailData)
-            {
-                if(contain) propDatas[prop] = trailData;
-                else propDatas.Add(prop,trailData);
-                prop.Interact(other.transform.position-transform.position,Hero.instance.Get_SuperArmor());
-                var position = other.ClosestPoint(thisPos);
-                ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
-                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
-            }
-            
-        }
         if (_isHero)
         {
-            //Sparkle 상호작용
-            if (other.CompareTag(GameManager.s_sparkable) && GetTrail())
+            //Prop 상호작용
+            if (other.CompareTag(GameManager.s_prop) && GetTrail())
             {
-                
+                var prop = other.GetComponent<Prop>();
+                TrailData trailData = Hero.instance.Get_TrailData();
+                bool contain = propDatas.ContainsKey(prop);
+                if (!contain || propDatas[prop] != trailData)
+                {
+                    if(contain) propDatas[prop] = trailData;
+                    else propDatas.Add(prop,trailData);
+                    prop.Interact(other.transform.position-transform.position,Hero.instance.Get_SuperArmor());
+                    var position = other.ClosestPoint(thisPos);
+                    ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+                    SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+                }
+            }
+            //Sparkle 상호작용
+            if (other.CompareTag(GameManager.s_sparkable) && GetTrail() && !collDatas.Contains(other))
+            {
+                collDatas.Add(other);
                 var position = other.ClosestPoint(thisPos);
                 ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
                 SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
@@ -228,6 +228,16 @@ public class Prefab_Prop : MonoBehaviour
         }
         else
         {
+            //Sparkle,Prop 상호작용
+            bool isSparkable = other.CompareTag(GameManager.s_sparkable);
+            bool isProp = other.CompareTag(GameManager.s_prop);
+            if ((isSparkable || isProp) && GetTrail() && !collDatas.Contains(other))
+            {
+                collDatas.Add(other);
+                var position = other.ClosestPoint(thisPos);
+                ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
+                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+            }
             if (!other.CompareTag(GameManager.s_player)) return;
             if(!_interact_savedTargets.Contains(other))_interact_savedTargets.Add(other);
             if(!_interact_currentTargets.Contains(other))_interact_currentTargets.Add(other);

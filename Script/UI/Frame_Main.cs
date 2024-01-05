@@ -64,18 +64,18 @@ public class Frame_Main : MonoBehaviour
         frame_main.anchoredPosition = frameAnchoredPos;
         
         
-        s_hp = Sequence.Create().Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
-                0.6f, Ease.OutQuart, useUnscaledTime: true))
+        s_hp = Sequence.Create(useUnscaledTime:true).Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
+                0.6f, Ease.OutQuart))
             .Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
-                0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: lerpDelay))
+                0.5f, Ease.InOutSine, startDelay: lerpDelay))
             .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
             {
                 hp_CurrentRatio = f;
                 tmp_hp.text = currenthp + "/" + maxhp + " (" + Mathf.RoundToInt(f * 100) + "%)";
-            }, ease: Ease.OutQuart, useUnscaledTime: true))
-            .Group(Tween.Color(i_hp_lerp, c_lerp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
-            .Group(Tween.Color(tmp_hp, c_tmp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
-            .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+            }, ease: Ease.OutQuart))
+            .Group(Tween.Color(i_hp_lerp, c_lerp_main, 0.75f, ease: Ease.InOutQuart))
+            .Group(Tween.Color(tmp_hp, c_tmp_main, 0.75f, ease: Ease.InOutQuart))
+            .Group(Tween.Custom(0,1,0.5f,onValueChange: newVal =>
             {
                 Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 3;
                 frame_main.anchoredPosition = frameAnchoredPos + RandomVec;
@@ -99,25 +99,25 @@ public class Frame_Main : MonoBehaviour
         frame_main.anchoredPosition = frameAnchoredPos;
         
         
-        s_hp = Sequence.Create();
+        s_hp = Sequence.Create(useUnscaledTime:true);
         //회복 불가능하면 시간만 갱신
         s_hp.Group(Tween.UISizeDelta(i_hp_lerp.rectTransform, new Vector2(width_lerp, i_hplerp_height),
-            0.5f, Ease.InOutSine, useUnscaledTime: true, startDelay: 3.0f));
+            0.5f, Ease.InOutSine, startDelay: 3.0f));
         //회복 가능하면 회복, 불가능하면 넘김
         if (canGain)
         {
             i_hp_lerp.color = c_lerp_hit;
             tmp_hp.color = c_tmp_hit;
             s_hp.Group(Tween.UISizeDelta(i_hp_main.rectTransform, new Vector2(width_main, i_hp_height),
-                    0.6f, Ease.OutQuart, useUnscaledTime: true))
+                    0.6f, Ease.OutQuart))
                 .Group(Tween.Custom(hp_CurrentRatio, ratio, 0.6f, onValueChange: f =>
                 {
                     hp_CurrentRatio = f;
                     tmp_hp.text = currenthp + "/" + maxhp + " (" + Mathf.RoundToInt(f * 100) + "%)";
-                }, ease: Ease.OutQuart, useUnscaledTime: true))
-                .Group(Tween.Color(i_hp_lerp, c_lerp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
-                .Group(Tween.Color(tmp_hp, c_tmp_main, 0.75f, ease: Ease.InOutQuart, useUnscaledTime: true))
-                .Group(Tween.Custom(0, 1, 0.5f, useUnscaledTime: true, onValueChange: newVal =>
+                }, ease: Ease.OutQuart))
+                .Group(Tween.Color(i_hp_lerp, c_lerp_main, 0.75f, ease: Ease.InOutQuart))
+                .Group(Tween.Color(tmp_hp, c_tmp_main, 0.75f, ease: Ease.InOutQuart))
+                .Group(Tween.Custom(0, 1, 0.5f, onValueChange: newVal =>
                 {
                     Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2 - 2 * newVal) * 3;
                     frame_main.anchoredPosition = frameAnchoredPos + RandomVec;
@@ -133,7 +133,7 @@ public class Frame_Main : MonoBehaviour
         int targetIndex = Mathf.Clamp(mp_Slot_CurrentCapacity / mp_Slot_Capacity,0,2);
         float width = i_mp_width * (mp_Slot_CurrentCapacity - mp_Slot_Capacity*targetIndex) / (1.0f*mp_Slot_Capacity);
         //Change Image,Tween
-        s_mp = Sequence.Create();
+        s_mp = Sequence.Create(useUnscaledTime:true);
         for (int i = 0; i <= 2; i++)
         {
             if (i == targetIndex)
@@ -143,19 +143,19 @@ public class Frame_Main : MonoBehaviour
                 else i_mp_slots[i].sprite = sprite_mp_charging;
                 
                 s_mp.Group(Tween.UISizeDelta(i_mp_slots[i].rectTransform, new Vector2(width, 20.3274f),
-                    0.5f, Ease.OutQuart, useUnscaledTime: true));
+                    0.5f, Ease.OutQuart));
             }
             else if(i<targetIndex)
             {
                 i_mp_slots[i].sprite = sprite_mp_charged;
                 s_mp.Group(Tween.UISizeDelta(i_mp_slots[i].rectTransform, new Vector2(i_mp_width, 20.3274f),
-                    0.2f, Ease.OutQuart, useUnscaledTime: true));
+                    0.2f, Ease.OutQuart));
             }
             else
             {
                 i_mp_slots[i].sprite = sprite_mp_charged;
                 s_mp.Group(Tween.UISizeDelta(i_mp_slots[i].rectTransform, new Vector2(0, 20.3274f),
-                    0.2f, Ease.OutQuart, useUnscaledTime: true));
+                    0.2f, Ease.OutQuart));
             }
         }
         

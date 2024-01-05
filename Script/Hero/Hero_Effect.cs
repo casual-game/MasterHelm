@@ -193,11 +193,26 @@ public partial class Hero : MonoBehaviour
         ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
         ParticleManager.Play(ParticleManager.instance.pd_blood_strong,t.position + Vector3.up*0.75f,t.rotation);
     }
+    //애니메이션 이벤트
+    public void FallDown()
+    {
+        _falledTime = Time.time;
+        Transform t = transform;
+        ParticleManager.Play(ParticleManager.instance.pd_smoke,
+            t.position + t.forward*-0.2f + Vector3.up*0.1f,t.rotation,1);
+        SoundManager.Play(SoundManager.instance.sound_falldown);
+        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(sound_chain,0.25f);
+    }
     public void Effect_Land()
     {
         Tween_Punch_Up(1.25f);
         Effect_Smoke();
         Sound_Footstep_Turn();
+        
+        SoundManager.Play(SoundManager.instance.sound_falldown);
+        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(sound_chain,0.25f);
     }
     //Particle
     public void Particle_Charge_Main()
@@ -235,7 +250,6 @@ public partial class Hero : MonoBehaviour
         customMaterialController.Deactivate();
         SoundManager.Stop(sound_combat_superarmor);
     }
-
     public bool Get_SuperArmor()
     {
         return _superarmor;

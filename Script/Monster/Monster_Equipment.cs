@@ -7,7 +7,6 @@ public partial class Monster : MonoBehaviour
 {
     //Public
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield;
-    
     //Private
     private TrailData_Monster _currentTrailData;
     //Get,Set
@@ -48,6 +47,11 @@ public partial class Monster : MonoBehaviour
     }
     public void Equipment_UpdateTrail(bool weaponL,bool weaponR,bool shield)
     {
+        bool newL = _weaponL!=null && !_weaponL.GetTrail() && weaponL;
+        bool newR = _weaponR!=null && !_weaponR.GetTrail() && weaponR;
+        bool newS = _shield!=null && !_shield.GetTrail() && shield;
+        if ((newL || newR || newS) && Get_CurrentTrail().soundData!=null) SoundManager.Play(Get_CurrentTrail().soundData);
+        
         if (_weaponL != null) _weaponL.SetTrail(weaponL);
         if (_weaponR != null) _weaponR.SetTrail(weaponR);
         if (_shield != null) _shield.SetTrail(shield);

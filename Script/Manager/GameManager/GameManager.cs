@@ -22,10 +22,12 @@ public partial class GameManager : MonoBehaviour
         Instance = this;
         FindObjectOfType<SoundManager>().Setting();
         FindObjectOfType<ParticleManager>().Setting();
+        FindObjectOfType<CamArm>().Setting();
         Setting_Resource();
         Setting_UI();
         Setting_Shockwave();
         Setting_AI();
+        Setting_Area();
     }
     public void LateUpdate()
     {

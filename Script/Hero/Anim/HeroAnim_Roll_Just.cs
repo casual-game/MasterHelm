@@ -30,6 +30,10 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
         _hero.Move_Nav(Vector3.zero, targetRot);
         CamArm.instance.Tween_CamAttackVec(false);
         pattern = 1;
+        CamArm.instance.Tween_CamAttackVec(true);
+        SoundManager.Play(_hero.sound_slomo);
+        SoundManager.Play(_hero.sound_spawn);
+        _hero.Sound_Voice_Attack_Normal();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -60,6 +64,7 @@ public class HeroAnim_Roll_Just : HeroAnim_Base
             _hero.Set_RolledTime();
             _hero.Deactivate_CustomMaterial();
             animator.SetBool(GameManager.s_roll,false);
+            CamArm.instance.Tween_CamAttackVec(false);
         }
     }
 }

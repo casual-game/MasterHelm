@@ -87,6 +87,11 @@ public class MonsterPattern
             pattern_n_3_transitionduration, pattern_n_3));
         if(pattern_n_4.Count>0) stateData.Add((pattern_n_4_endratio, 
             pattern_n_4_transitionduration, pattern_n_4));
+        
+        foreach (var data in stateData)
+        {
+            foreach (var trailData in data.dataMonster) if(trailData.soundData!=null) SoundManager.Add(trailData.soundData);
+        }
     }
     /// <summary>
     /// 각각의 traildata 가리키는 pointer를 다음 순번으로 이동시킵니다.

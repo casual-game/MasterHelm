@@ -22,8 +22,6 @@ public partial class Hero : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1.0f);
         _outlineTarget.CutoutThreshold = 1;
         gameObject.SetActive(false);
-        
-        Test1();
     }
     //Private
     private bool _spawned = false;
@@ -34,30 +32,34 @@ public partial class Hero : MonoBehaviour
     private Material _material;
     private OutlineTarget _outlineTarget;
     [Button]
-    public void Test1()
+    public void Test_Spawn()
     {
       Spawn(GameManager.V3_Zero,transform.rotation).Forget();   
     }
     [Button]
-    public void Test2()
+    public void Test_Despawn_Death()
     {
         Despawn().Forget();   
     }
-    
+
+    [Button]
+    public void Test_Despawn_Move()
+    {
+        
+    }
     async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot)
     {
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;
-        CamArm.instance.Tween_FadeIn();
         gameObject.SetActive(false);
-        await UniTask.Delay(TimeSpan.FromSeconds(1.0f), DelayType.DeltaTime);
         gameObject.SetActive(true);
         Move_Nav(relativePos,rot);
         _spawned = true;
         _animator.Rebind();
         Tween_Blink_Evade(1.0f);
         Sound_Voice_Short();
+        SoundManager.Play(sound_spawn);
         //무기 설정
         var weaponpack = weapondata[weaponPack_Normal];
         if(weaponpack.weaponL!=null) weaponpack.weaponL.Spawn();
@@ -91,7 +93,6 @@ public partial class Hero : MonoBehaviour
     async UniTaskVoid Despawn()
     {
         _animator.updateMode = AnimatorUpdateMode.UnscaledTime;
-        CamArm.instance.Tween_FadeOut();
         GameManager.Instance.Shockwave(transform.position + Vector3.up);
         Equipment_Equip(null,false,2,2);
         //기본 설정

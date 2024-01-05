@@ -17,7 +17,6 @@ public partial class Hero : MonoBehaviour
         sound_footstep_grass_turn,
         sound_footstep_roll_begin,
         sound_footstep_roll_fin,
-        sound_friction_cloth,
         sound_chain,
         sound_combat_chargebegin,
         sound_combat_chargefin,
@@ -28,7 +27,11 @@ public partial class Hero : MonoBehaviour
         sound_weapon_despawn,
         sound_voice_attack_normal,
         sound_voice_attack_strong,
-        sound_voice_short;
+        sound_voice_short,
+        sound_voice_hit_normal,
+        sound_voice_hit_strong,
+        sound_spawn,
+        sound_slomo;
 
     private float _time_footstep,_time_weapon_spawn,_time_weapon_despawn,_time_voice;
     private List<Collider> grassColls = new List<Collider>();
@@ -38,6 +41,9 @@ public partial class Hero : MonoBehaviour
         SoundManager.Add(sound_voice_attack_normal);
         SoundManager.Add(sound_voice_attack_strong);
         SoundManager.Add(sound_voice_short);
+        SoundManager.Add(sound_voice_hit_normal);
+        SoundManager.Add(sound_voice_hit_strong);
+        SoundManager.Add(sound_slomo);
     }
     private void Sound_Weapon_Spawn()
     {
@@ -113,9 +119,9 @@ public partial class Hero : MonoBehaviour
         if(sound!=null) SoundManager.Play(sound);
     }
 
-    public void Sound_Voice_Attack_Normal()
+    public void Sound_Voice_Attack_Normal(bool force = false)
     {
-        if (Time.unscaledTime - _time_voice < 0.75f) return;
+        if (Time.unscaledTime - _time_voice < 0.75f && !force) return;
         _time_voice = Time.unscaledTime;
         SoundManager.Play(sound_voice_attack_normal);
     }

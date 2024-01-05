@@ -81,6 +81,8 @@ public partial class Monster : MonoBehaviour
         _animator.SetBool(GameManager.s_spawn,Random.Range(0,2)==1);
         _isAlive = true;
         p_spawn.Play();
+        SoundManager.Play(sd_spawn);
+        Voice_Attack();
         Move_Nav(relativePos,rot);
         ActivateUI();
         
@@ -113,6 +115,7 @@ public partial class Monster : MonoBehaviour
         await UniTask.Delay(TimeSpan.FromSeconds(deathDealy), DelayType.DeltaTime);
         Equipment_Unequip();
         p_spawn.Play();
+        SoundManager.Play(sd_spawn);
         while (!_isAlive && _dissolveRatio<1)
         {
             _dissolveRatio += Time.deltaTime*dissolveSpeed;

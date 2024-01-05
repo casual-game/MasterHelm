@@ -23,9 +23,8 @@ public class HeroAnim_Ladder_Move : HeroAnim_Base
         if (!GameManager.Bool_Move) targetSpeed = 0;
         else
         {
-            float jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                          CamArm.instance.transform.rotation.eulerAngles.y;
-            jsDeg = -jsDeg + 180;
+            float jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                          CamArm.instance.transform.rotation.eulerAngles.y+90;
             float delta = Mathf.DeltaAngle(jsDeg, _ladder.transform.rotation.eulerAngles.y);
             delta = Mathf.Abs(delta);
             if (delta > 90) targetSpeed = 1;

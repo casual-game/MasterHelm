@@ -40,9 +40,8 @@ public class HeroAnim_Move : HeroAnim_Base
             _hero.Set_SpeedRatio(targetSpeed);
             animator.SetFloat(GameManager.s_speed,_heroData.moveCurve.Evaluate(_hero.Get_SpeedRatio()));
             //조이스틱 각도 계산
-            float jsDeg = Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                          CamArm.instance.transform.rotation.eulerAngles.y;
-            jsDeg = -jsDeg + 180;
+            float jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                          CamArm.instance.transform.rotation.eulerAngles.y+90;
             //플레이어 각도와의 차이 계산
             float degDiff = -mt.rotation.eulerAngles.y+jsDeg;
             while (degDiff < -180) degDiff += 360;

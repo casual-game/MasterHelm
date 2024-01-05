@@ -24,6 +24,7 @@ public class MonsterAnim_Attack : MonsterAnim_Base
         _endRatio = _pattern.Pointer_GetData_EndRatio();
         _finishState = false;
         Setting_Data(animator,true);
+        _monster.Voice_Attack();
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

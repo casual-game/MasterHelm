@@ -9,9 +9,11 @@ public partial class Monster : MonoBehaviour
     {
         SoundManager.Add(sd_hit);
         SoundManager.Add(sd_death);
+        SoundManager.Add(sd_attack);
+        SoundManager.Add(sd_spawn);
     }
     //Public
-    [FoldoutGroup("Sound")] public SoundData sd_hit, sd_death;
+    [FoldoutGroup("Sound")] public SoundData sd_hit, sd_death,sd_attack,sd_spawn;
     //Private
     private float voiceDelay = 2.0f;
     private float lastVoicedTime = -100;
@@ -29,7 +31,13 @@ public partial class Monster : MonoBehaviour
         lastVoicedTime = Time.unscaledTime;
         SoundManager.Play(sd_hit);
     }
-
+    public void Voice_Attack(bool force = false)
+    {
+        if (!force && Time.unscaledTime - lastVoicedTime < voiceDelay) return;
+        lastVoicedTime = Time.unscaledTime;
+        SoundManager.Play(sd_attack);
+    }
+    
     public void Voice_Death()
     {
         lastVoicedTime = Time.unscaledTime;

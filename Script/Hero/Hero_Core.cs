@@ -198,6 +198,8 @@ public partial class Hero : MonoBehaviour
             _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
             Tween_Punch_Down(1.4f);
             CamArm.instance.Tween_ShakeNormal_Hero();
+            SoundManager.Play(sound_voice_hit_normal);
+            SoundManager.Play(SoundManager.instance.sound_hit_normal);
         }
         else
         {
@@ -209,6 +211,8 @@ public partial class Hero : MonoBehaviour
             _animator.SetInteger(GameManager.s_hit_type,(int)trailData.hitType);
             Tween_Punch_Down(1.1f);
             CamArm.instance.Tween_ShakeStrong_Hero();
+            SoundManager.Play(sound_voice_hit_strong);
+            SoundManager.Play(SoundManager.instance.sound_hit_smash);
         }
         bool isBloodBottom = trailData.hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);
@@ -273,14 +277,7 @@ public partial class Hero : MonoBehaviour
             return;
         }
     }
-    //애니메이션 이벤트
-    public void FallDown()
-    {
-        _falledTime = Time.time;
-        Transform t = transform;
-        ParticleManager.Play(ParticleManager.instance.pd_smoke,
-            t.position + t.forward*-0.2f + Vector3.up*0.1f,t.rotation,1);
-    }
+    
     
 
     
