@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
-[HideMonoScript]
 public partial class GameManager : MonoBehaviour
 {
     //Static
@@ -23,6 +22,7 @@ public partial class GameManager : MonoBehaviour
         FindObjectOfType<SoundManager>().Setting();
         FindObjectOfType<ParticleManager>().Setting();
         FindObjectOfType<CamArm>().Setting();
+        FindObjectOfType<Hero>().Setting();
         Setting_Resource();
         Setting_UI();
         Setting_Shockwave();

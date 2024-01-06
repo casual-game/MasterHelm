@@ -12,11 +12,7 @@ using Random = UnityEngine.Random;
 public partial class Hero : MonoBehaviour
 {
     public static Hero instance;
-    private void Start()
-    {
-        Setting();
-    }
-    private void Setting()
+    public void Setting()
     {
         _animator = GetComponent<Animator>();
         _agent = GetComponent<NavMeshAgent>();
@@ -130,6 +126,12 @@ public partial class Hero : MonoBehaviour
     public void Move_Normal(Vector3 nextPos,Quaternion nextRot)
     {
         transform.SetPositionAndRotation(nextPos, nextRot);
+    }
+
+    public void Move_Warp(Vector3 nextPos,Quaternion nextRot)
+    {
+        _agent.Warp(nextPos);
+        transform.rotation = nextRot;
     }
     
 }

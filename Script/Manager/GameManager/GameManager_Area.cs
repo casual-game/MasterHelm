@@ -11,80 +11,74 @@ public partial class GameManager : MonoBehaviour
     private void Setting_Area()
     {
         CamArm.instance.Set_FollowTarget(false);
-        
+        CamArm.instance.transform.SetPositionAndRotation(
+            Room1.startPoint.position + Room1.addVec,Quaternion.Euler(0,Room1.degree,0));
     }
-    [Button]
-    public void Test()
-    {
-        print("1");
-        //카메라 첫 위치 설정
-        SetCamT(cam_crossfade_3.transform,Room3,CamArm.instance.transform);
-        SetCamT(cam_crossfade_2.transform,Room2,transform);
-        SetCamT(cam_crossfade_1.transform,Room1,transform);
-        //기타 설정
-        _seqarea = Sequence.Create(useUnscaledTime: true);
-        float duration = 3.0f;
-        float transition = 1.0f;
-        Color endColor = new Color(1, 1, 1, 0);
-        raw_crossfade_3.color = Color.white;
-        raw_crossfade_2.color = Color.white;
-        raw_crossfade_1.color = Color.white;
-        CamArm.instance.transform.position = Room1.overviewFin.position;
-        CamArm.instance.transform.rotation = Quaternion.Euler(0,Room3.degree,0);
-        //시퀸스 시작
-        _seqarea = Sequence.Create();
-        //Room3 -> Room2
-        _seqarea.Chain(Tween.Position(CamArm.instance.transform,
-            Room3.overviewFin.position, Room3.overviewBegin.position, duration,ease: Ease.InOutSine));
-        _seqarea.Group(Tween.Custom(0, 1,transition, startDelay: duration-transition, 
-            onValueChange: ratio => { raw_crossfade_3.color = Color.Lerp(Color.white,endColor, ratio); }));
-        _seqarea.ChainCallback(() =>
-        {
-            cam_crossfade_3.transform.SetParent(transform);
-            SetCamT(cam_crossfade_2.transform,Room2,CamArm.instance.transform);
-        });
-        //Room2 -> Room1
-        _seqarea.Chain(Tween.Position(CamArm.instance.transform,
-            Room2.overviewFin.position, Room2.overviewBegin.position, duration,ease: Ease.InOutSine));
-        _seqarea.Group(Tween.Custom(0, 1,transition, startDelay: duration-transition, 
-            onValueChange: ratio => { raw_crossfade_2.color = Color.Lerp(Color.white,endColor, ratio); }));
-        _seqarea.ChainCallback(() =>
-        {
-            cam_crossfade_2.transform.SetParent(transform);
-            SetCamT(cam_crossfade_1.transform,Room1,CamArm.instance.transform);
-        });
-        //Room1 -> 종료지점
-        _seqarea.Chain(Tween.Position(CamArm.instance.transform,
-            Room1.overviewFin.position, Room1.overviewBegin.position, duration,ease: Ease.InOutSine));
-        _seqarea.Group(Tween.Custom(0, 1,transition, startDelay: duration-transition, 
-            onValueChange: ratio => { raw_crossfade_1.color = Color.Lerp(Color.white,endColor, ratio); }));
-        _seqarea.OnComplete(() =>
-        {
-            cam_crossfade_1.transform.SetParent(transform);
-        });
-        
-        void SetCamT(Transform camT,Room_Area room,Transform finalParent)
-        {
-            CamArm.instance.transform.position = room.overviewFin.position;
-            CamArm.instance.transform.rotation = Quaternion.Euler(0,room.degree,0);
-            camT.SetParent(CamArm.instance.mainCam.transform);
-            camT.SetLocalPositionAndRotation(V3_Zero,Q_Identity);
-            camT.SetParent(finalParent);
-        }
-    }
+    
     [TitleGroup("인게임 구역 인스펙터")]
     [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
     public ParticleSystem areaParticle;
-    [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
-    public RawImage raw_crossfade_1, raw_crossfade_2,raw_crossfade_3;
-    [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
-    public Camera cam_crossfade_1, cam_crossfade_2,cam_crossfade_3;
-
 
     [TabGroup("인게임 구역 인스펙터/AreaUI", "구역 설정", SdfIconType.Map)]
     public Room_Area Room1, Room2, Room3;
 
-    private Sequence _seqarea;
+    private Sequence _s_areaparticle;
+
+    [Button]
+    public void Enter_Title()
+    {
+        
+    }
+    [Button]
+    public void Title_Ingame()
+    {
+        Hero.instance.gameObject.SetActive(false);
+        CamArm.instance.Set_FollowTarget(false);
+        areaParticle.transform.position = Room1.startPoint.position + Vector3.up*1.0f;
+        areaParticle.Play();
+        CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
+        CamArm.instance.Tween_FadeIn();
+        _s_areaparticle = Sequence.Create(useUnscaledTime: true)
+            .ChainDelay(0.9f)
+            .ChainCallback(() =>
+            {
+                Hero.instance.Spawn(Room1.startPoint.position, Quaternion.Euler(0, Room1.degree+45, 0));
+                CamArm.instance.Set_FollowTarget(true);
+                CamArm.instance.Tween_ShakeNormal();
+                areaParticle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            });
+    }
+
+    [Button]
+    public void Area1_Area2()
+    {
+        float duration = 2.5f;
+        CamArm.instance.Set_FollowTarget(false);
+        
+        Hero.instance.Despawn_Move().Forget();
+        Vector3 startPos = Hero.instance.transform.position + Vector3.up;
+        Vector3 endPos = Room2.startPoint.position;
+        Quaternion camEndRot = Quaternion.Euler(0,Room2.degree,0);
+        
+        areaParticle.transform.position = startPos;
+        areaParticle.Play();
+        _s_areaparticle.Stop();
+        _s_areaparticle = Sequence.Create(useUnscaledTime:true)
+            .ChainDelay(0.5f)
+            .Chain(Tween.Position(areaParticle.transform, endPos + Vector3.up, duration, Ease.InOutQuart))
+            .Group(Tween.Position(CamArm.instance.transform, endPos, duration, Ease.InOutCubic))
+            .Group(Tween.Rotation(CamArm.instance.transform, camEndRot, duration, Ease.InOutCubic))
+            .OnComplete(() =>
+            {
+                Hero.instance.Spawn(endPos, camEndRot);
+                CamArm.instance.Set_FollowTarget(true);
+                CamArm.instance.Tween_ShakeNormal();
+                areaParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            });
+    }
+    
+    
+    
     #if UNITY_EDITOR
     void OnDrawGizmos()
     {
@@ -143,7 +137,7 @@ public class Room_Area
     [LabelText("구역 크기")] public Vector2Int size = new Vector2Int(6,6);
     [LabelText("추가 벡터")] public Vector3 addVec;
     [LabelText("구역 색상")][Space(12.0f)][ColorPalette] public Color color;
-    [BoxGroup("points")] public Transform startPoint, overviewBegin, overviewFin;
+    [LabelText("시작 카메라 구역")] public Transform startPoint;
 	
     
 

@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Beautify.Universal;
+using LeTai.TrueShadow;
 using PrimeTween;
 using Sirenix.OdinInspector;
 using SSCS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class CamArm : MonoBehaviour
 {
@@ -23,6 +26,10 @@ public class CamArm : MonoBehaviour
     [FoldoutGroup("Effect/data")] public Material m_radialblur,m_speedline;
     [FoldoutGroup("Effect/data")] public Color vignette_NormalColor, vignette_HitColor;
     [FoldoutGroup("Effect/data")] public CloudShadowsProfile cloudShadows;
+
+    [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public Image i_title_line, i_titile_bg;
+    [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public TMP_Text tmp_title;
+    [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public CanvasGroup cg1, cg2;
     //Private
     private Vector3 _camBossVec,_camAttackVec;
     private float _camAttackVecDist,_zoomAttackVecFinalRatio = 1;
@@ -95,65 +102,94 @@ public class CamArm : MonoBehaviour
     public void Tween_FadeIn()
     {
         s_fade.Stop();
-        cloudShadows.cloudsThickness = 10.0f;
-        cloudShadows.cloudsOpacity = 1.0f;
-        cloudShadows.coverage = 1.0f;
-        _cams[0].orthographicSize = orthographicSize + 1.5f;
-        _cams[1].orthographicSize = orthographicSize + 1.5f;
-        BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0.0f;
-        
-        //Tween.Delay(this, 0.5f + delay, (() => Tween_Radial(0.5f)), true);
-        Tween_Chromatic(0.03f,2.5f,Ease.OutCirc,0.5f);
-        //Stop
-        t_time.Stop();
+        CanvasGroup cg = tmp_title.GetComponent<CanvasGroup>();
+        Color tmpColor = new Color(250.0f / 255.0f, 185.0f / 255.0f, 122.0f / 255.0f, 1.0f);
+        Color tmpFinColor = tmpColor;
+        tmpFinColor.a = 0;
+        cloudShadows.cloudsOpacity = 0.4f;
+        cloudShadows.coverage = 0.5f;
+        _cams[0].orthographicSize = orthographicSize + 2.0f;
+        _cams[1].orthographicSize = orthographicSize + 2.0f;
+        BeautifySettings.settings.blurIntensity.value = 2.0f;
+        i_title_line.transform.localScale = Vector3.one;
+        i_titile_bg.transform.localScale = Vector3.one;
+        tmp_title.transform.localScale = Vector3.one;
+        i_title_line.color = Color.white;
+        i_titile_bg.color = Color.white;
+        tmp_title.color = tmpColor;
+        cg.alpha = 1;
+        cg1.alpha = 0;
+        cg2.alpha = 0;
+        cg1.enabled = true;
+        cg2.enabled = true;
+        tmp_title.gameObject.SetActive(true);
+        cg1.transform.localScale = Vector3.one*1.25f;
+        cg2.transform.localScale = Vector3.one*1.25f;
         Time.timeScale = 1.0f;
+        
+        
         float duration = 1.5f;
         Ease ease = Ease.InOutQuart;
         s_fade = Sequence.Create(useUnscaledTime: true)
-            .Chain(Tween.Custom(10.0f, 15.0f, duration, onValueChange: thickness =>
+            //구름
+            .Chain(Tween.Custom(1.0f, 0.03f, duration,
+                onValueChange: opacity => cloudShadows.cloudsOpacity = opacity, ease))
+            .Group(Tween.Custom(0.5f, 0.25f, duration,
+                onValueChange: coverage => cloudShadows.coverage = coverage, ease))
+            //블러
+            .Group(Tween.Custom(2.0f, 0.0f, duration, onValueChange: blur
+                => BeautifySettings.settings.blurIntensity.value = blur))
+            //카메라
+            .Group(Tween.CameraOrthographicSize(_cams[0], orthographicSize, 1.55f, ease:Ease.InOutQuint))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, 1.55f, ease:Ease.InOutQuint))
+            //글자
+            .Group(Tween.Scale(i_title_line.transform, new Vector3(0, 1, 1), 0.75f, startDelay: 0.0f,
+                ease: Ease.InBack))
+            .Group(Tween.Alpha(i_title_line, 0, 0.5f, startDelay: 0.0f))
+            .Group(Tween.Scale(i_titile_bg.transform, 0.6f, 0.875f, startDelay: 0.0f, ease: Ease.InBack))
+            .Group(Tween.Alpha(i_titile_bg, 0, 0.25f, startDelay: 0.625f))
+            .Group(Tween.Scale(tmp_title.transform, 0.5f, 0.75f, startDelay: 0.125f, ease: Ease.InBack))
+            .Group(Tween.Alpha(cg, 0, 0.25f, startDelay: 0.625f))
+            //CanvasGroup
+            .Group(Tween.Scale(cg1.transform, 1.0f, 0.875f, startDelay: 0.425f, ease: Ease.InOutQuint))
+            .Group(Tween.Scale(cg2.transform, 1.0f, 0.875f, startDelay: 0.425f, ease: Ease.InOutQuint))
+            .Group(Tween.Alpha(cg1, 1, 0.5f, startDelay: 0.5f))
+            .Group(Tween.Alpha(cg2, 1, 0.5f, startDelay: 0.5f))
+            .OnComplete(() =>
             {
-                cloudShadows.cloudsThickness = thickness;
-            }, ease))
-            .Group(Tween.Custom(1.0f, 0.015f, duration, onValueChange: opacity =>
-            {
-                cloudShadows.cloudsOpacity = opacity;
-            }, ease))
-            .Group(Tween.Custom(1.0f, 0.5f, duration, onValueChange: coverage =>
-            {
-                cloudShadows.coverage = coverage;
-            }, ease))
-            .Group(Tween.CameraOrthographicSize(_cams[0], orthographicSize, duration, ease))
-            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, duration, ease));
+                tmp_title.gameObject.SetActive(false);
+                cg1.enabled = false;
+                cg2.enabled = false;
+            });
     }
     [Button]
     public void Tween_FadeOut()
     {
         s_fade.Stop();
-        s_zoom.Complete();
-        Tween_Radial(1.0f,0.2f);
-        Tween_Vignette(0.15f,1.0f,1.5f,vignette_HitColor,vignette_NormalColor);
-        Tween_Shake(0.375f,45,GameManager.V3_One * 0.25f,Ease.OutSine);
-        Tween_Chromatic(0.04f,2.5f,Ease.OutCirc);
-        
-        float duration = 1.5f,cloudDelay = 0.2f;
-        Ease ease = Ease.InOutQuad;
-        s_fade = Sequence.Create(useUnscaledTime: true)
-            .ChainDelay(1.0f)
-            .Chain(Tween.Custom(15.0f, 10.0f, duration, onValueChange: thickness =>
-            {
-                cloudShadows.cloudsThickness = thickness;
-            }, ease,startDelay:cloudDelay))
-            .Group(Tween.Custom(0.015f, 1.0f, duration, onValueChange: opacity =>
-            {
-                cloudShadows.cloudsOpacity = opacity;
-            }, ease,startDelay:cloudDelay))
-            .Group(Tween.Custom(0.5f, 1.0f, duration, onValueChange: coverage =>
-            {
-                cloudShadows.coverage = coverage;
-            }, ease,startDelay:cloudDelay))
-            .Group(Tween.CameraOrthographicSize(_cams[0], orthographicSize + 1.5f, duration, ease))
-            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize + 1.5f, duration, ease));
-
+        CanvasGroup cg = tmp_title.GetComponent<CanvasGroup>();
+        Color tmpColor = new Color(250.0f / 255.0f, 185.0f / 255.0f, 122.0f / 255.0f, 1.0f);
+        Color tmpFinColor = tmpColor;
+        tmpFinColor.a = 0;
+        cloudShadows.cloudsOpacity = 0.4f;
+        cloudShadows.coverage = 0.5f;
+        _cams[0].orthographicSize = orthographicSize + 2.0f;
+        _cams[1].orthographicSize = orthographicSize + 2.0f;
+        BeautifySettings.settings.blurIntensity.value = 2.0f;
+        i_title_line.transform.localScale = Vector3.one;
+        i_titile_bg.transform.localScale = Vector3.one;
+        tmp_title.transform.localScale = Vector3.one;
+        i_title_line.color = Color.white;
+        i_titile_bg.color = Color.white;
+        tmp_title.color = tmpColor;
+        cg.alpha = 1;
+        cg1.alpha = 0;
+        cg2.alpha = 0;
+        cg1.enabled = true;
+        cg2.enabled = true;
+        tmp_title.gameObject.SetActive(true);
+        cg1.transform.localScale = Vector3.one*1.3f;
+        cg2.transform.localScale = Vector3.one*1.3f;
+        Time.timeScale = 1.0f;
     }
     public void Tween_ShakeStrong()
     {
@@ -256,6 +292,15 @@ public class CamArm : MonoBehaviour
         Tween_Stop(0.2f,0.65f,Ease.InExpo);
         Tween_Shake(1.0f,32,GameManager.V3_One * 0.1f,Ease.InExpo);
         Tween_Chromatic(0.035f,1.0f,Ease.InQuad);
+    }
+    public void Tween_SkillLong()
+    {
+        Tween_Radial(0.5f,0.075f);
+        Tween_Vignette(0.25f,0.8f,0.5f);
+        Tween_Frame(0.25f,0.8f,0.5f);
+        Tween_Speedline(0.25f,0.3f,2.0f,new Color(1,1,1,10.0f/255.0f),0.675f);
+        //Tween_Shake(2.0f,64,GameManager.V3_One * 0.1f,Ease.InExpo);
+        Tween_Chromatic(0.035f,2.0f,Ease.InQuad);
     }
     public void Tween_ResetTimescale()
     {
