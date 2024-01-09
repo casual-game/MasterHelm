@@ -11,7 +11,6 @@ public class HeroAnim_Move : HeroAnim_Base
         animator.SetBool(GameManager.s_leftstate,false);
         if(doPreInput) _hero.Core_PreInput();
     }
-
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);

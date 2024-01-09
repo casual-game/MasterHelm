@@ -109,7 +109,7 @@ public partial class Monster : MonoBehaviour
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
         _isAlive = false;
-        _animator.SetBool(GameManager.s_death,true);
+        _animator.SetBool(GameManager.s_force,true);
         await UniTask.Delay(TimeSpan.FromSeconds(1.25f), DelayType.DeltaTime);
         DeactivateUI();
         await UniTask.Delay(TimeSpan.FromSeconds(deathDealy), DelayType.DeltaTime);
@@ -147,7 +147,7 @@ public partial class Monster : MonoBehaviour
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
         _isAlive = false;
-        _animator.SetBool(GameManager.s_death,true);
+        _animator.SetBool(GameManager.s_force,true);
         DeactivateUI();
         Equipment_Unequip();
         p_spawn.Play();

@@ -13,6 +13,7 @@ public partial class GameManager : MonoBehaviour
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(
             Room1.startPoint.position + Room1.addVec,Quaternion.Euler(0,Room1.degree,0));
+        _dragon = GetComponentInChildren<Dragon>();
     }
     
     [TitleGroup("인게임 구역 인스펙터")]
@@ -23,6 +24,7 @@ public partial class GameManager : MonoBehaviour
     public Room_Area Room1, Room2, Room3;
 
     private Sequence _s_areaparticle;
+    private Dragon _dragon;
 
     [Button]
     public void Enter_Title()
@@ -76,7 +78,11 @@ public partial class GameManager : MonoBehaviour
                 areaParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             });
     }
-    
+    [Button]
+    public void Test_Mount()
+    {
+        
+    }
     
     
     #if UNITY_EDITOR

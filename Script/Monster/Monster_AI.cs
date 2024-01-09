@@ -92,7 +92,7 @@ public partial class Monster : MonoBehaviour
     public string patternName = "TripleSwing";
     public void AI_Pattern()
     {
-        if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_death)) return;
+        if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_force)) return;
         
         var p = _patterns[patternName];
         p.pattern.Pointer_Reset();

@@ -30,7 +30,6 @@ public partial class Hero : MonoBehaviour
         Setting_Sound();
         frameMain = FindObjectOfType<Frame_Main>();
         frameMain.Setting(heroData.HP,heroData.MP_Slot_Capacity);
-
         instance = this;
     }
     

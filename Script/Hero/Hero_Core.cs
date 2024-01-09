@@ -256,7 +256,7 @@ public partial class Hero : MonoBehaviour
         bool canRoll = HeroMoveState != MoveState.Hit && HeroMoveState != MoveState.Roll
                                                       && HeroMoveState != MoveState.RollJust
                                                       && !_animator.GetBool(GameManager.s_hit)
-                                                      && !_animator.GetBool(GameManager.s_death);
+                                                      && !_animator.GetBool(GameManager.s_force);
         /*
         if (isTimting)
         {

@@ -15,7 +15,8 @@ public partial class GameManager: MonoBehaviour
         s_ladder = "Ladder",
         s_ladder_speed = "Ladder_Speed",
         s_transition = "Transition",
-        s_death = "Death",
+        s_forcetransition = "ForceTransition",
+        s_force = "Force",
         s_isair = "IsAir",
         s_hit = "Hit",
         s_hit_additive = "Hit_Additive",
@@ -62,5 +63,11 @@ public partial class GameManager: MonoBehaviour
         s_stone = "Stone",
         s_sparkable = "Sparkable",
         s_prop = "Prop",
-        s_grass = "Grass";
+        s_grass = "Grass",
+        s_call = "Call",
+        s_flight = "Flight",
+        s_flight_x = "Flight_X",
+        s_flight_y = "Flight_Y",
+        s_turn_l = "Turn_L",
+        s_turn_r = "Turn_R";
 }

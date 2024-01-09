@@ -31,7 +31,7 @@ public partial class Hero : MonoBehaviour
     private Vector3 _shadowScale;
     private Material _material;
     private OutlineTarget _outlineTarget;
-    [Button]
+    
     public void Test_Spawn()
     {
       Spawn(transform.position,transform.rotation).Forget();   
@@ -41,12 +41,26 @@ public partial class Hero : MonoBehaviour
     {
         Despawn().Forget();   
     }
-
-    [Button]
     public void Test_Despawn_Move()
     {
         Despawn_Move().Forget();
     }
+
+    public void Mount()
+    {
+        _animator.SetInteger(GameManager.s_state_type,1);
+        _animator.SetBool(GameManager.s_force,true);
+        _animator.SetTrigger(GameManager.s_forcetransition);
+    }
+
+    public void Desmount()
+    {
+        _animator.SetInteger(GameManager.s_state_type,2);
+        _animator.SetBool(GameManager.s_force,true);
+        _animator.SetTrigger(GameManager.s_forcetransition);
+    }
+    
+    
     public async UniTaskVoid Spawn(Vector3 nextPos,Quaternion nextRot)
     {
         AdvancedDissolveProperties.Cutout.Standard.
@@ -97,7 +111,9 @@ public partial class Hero : MonoBehaviour
         Equipment_Equip(null,false,2,2);
         //기본 설정
         _spawned = false;
-        _animator.SetBool(GameManager.s_death,true);
+        _animator.SetInteger(GameManager.s_state_type,0);
+        _animator.SetBool(GameManager.s_force,true);
+        _animator.SetTrigger(GameManager.s_forcetransition);
         //Blood,Effect
         Tween_Punch_Down(0.75f);
         Tween_Blink_Hit(1.0f);
