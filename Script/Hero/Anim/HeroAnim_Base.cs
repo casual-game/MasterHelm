@@ -214,14 +214,28 @@ public class HeroAnim_Base : StateMachineBehaviour
             }
         }
     }
-    protected void Set_Roll(Animator animator)
+
+    protected void Set_Cancel(Animator animator)
     {
-        
-        //기본
-        if (_hero.HeroMoveState == Hero.MoveState.Roll || _hero.HeroMoveState == Hero.MoveState.RollJust) return;
-        _hero.Set_HeroMoveState(Hero.MoveState.Roll);
         _hero.Deactivate_CustomMaterial();
         CamArm.instance.Tween_ResetTimescale();
+        animator.SetBool(GameManager.s_leftstate,false);
+        animator.SetBool(GameManager.s_hit,false);
+        animator.ResetTrigger(GameManager.s_state_change);
+        _hero.Set_AttackIndex(-1);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongL,false,false,false);
+        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongR,false,false,false);
+        _hero.Equipment_Equip(null);
+        _hero.Equipment_CancelEffect();
+    }
+    protected void Set_Roll(Animator animator)
+    {
+        //기본
+        if (_hero.HeroMoveState == Hero.MoveState.Roll || _hero.HeroMoveState == Hero.MoveState.RollJust) return;
+        Set_Cancel(animator);
+        isFinished = true;
+        _hero.Set_HeroMoveState(Hero.MoveState.Roll);
         animator.SetBool(GameManager.s_roll,true);
         animator.SetTrigger(GameManager.s_rolltransition);
         //저스트 구르기인지 확인, 저스트 관련 데이터 저장
@@ -267,16 +281,6 @@ public class HeroAnim_Base : StateMachineBehaviour
             else rollState = 3;
             animator.SetInteger(GameManager.s_state_type,rollState);
         }
-        animator.SetBool(GameManager.s_leftstate,false);
-        animator.SetBool(GameManager.s_hit,false);
-        animator.ResetTrigger(GameManager.s_state_change);
-        _hero.Set_AttackIndex(-1);
-        _hero.Equipment_UpdateTrail(_hero.weaponPack_Normal,false,false,false);
-        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongL,false,false,false);
-        _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongR,false,false,false);
-        _hero.Equipment_Equip(null);
-        _hero.Equipment_CancelEffect();
-        isFinished = true;
     }
     
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AmplifyShaderEditor;
 using RootMotion.FinalIK;
 using UnityEngine;
 
@@ -23,6 +24,7 @@ public partial class Hero : MonoBehaviour
     }
     
     //Private
+    public bool _btnAttack = false;
     private LookAtIK _lookAtIK;
     private Transform _lookDisplayT,_lookTargetT;
     private Transform _lookIcon;
@@ -41,6 +43,8 @@ public partial class Hero : MonoBehaviour
     //Event
     private void E_BTN_Attack_Pressed()
     {
+        if (!_spawned) return;
+        _btnAttack = true;
         bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         if (canChargeMotion)
         {
@@ -59,6 +63,8 @@ public partial class Hero : MonoBehaviour
     }
     private void E_BTN_Attack_Released()
     {
+        if (!_spawned || !_btnAttack) return;
+        _btnAttack = false;
         //파티클, 애니메이션 원상복구
         _animator.SetBool(GameManager.s_charge_normal,false);
         p_charge_begin.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -78,6 +84,7 @@ public partial class Hero : MonoBehaviour
     }
     private void E_BTN_Attack_PressedUpdate()
     {
+        if (!_spawned || !_btnAttack) return;
         bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         Quaternion myRot = transform.rotation;
         //공격 조이스틱 각도 계산,Display 회전
@@ -147,6 +154,7 @@ public partial class Hero : MonoBehaviour
     }
     private void E_BTN_Attack_ReleasedUpdate()
     {
+        if (!_spawned|| _btnAttack) return;
         bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         float eulery = transform.rotation.eulerAngles.y;
         float targetDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AmazingAssets.AdvancedDissolve;
 using Cysharp.Threading.Tasks;
 using EPOOutline;
+using PrimeTween;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -21,16 +22,16 @@ public partial class Hero : MonoBehaviour
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1.0f);
         _outlineTarget.CutoutThreshold = 1;
-        gameObject.SetActive(false);
     }
     //Private
-    private bool _spawned = false;
+    [HideInInspector] public bool _spawned = false;
     private float _dissolveRatio;
     private float _dissolveSpeed_Spawn = 1.5f,_dissolveSpeed_Despawn = 2.0f;
     private Transform _shadow;
     private Vector3 _shadowScale;
-    private Material _material;
+    public Material _material;
     private OutlineTarget _outlineTarget;
+    private Sequence _seqMount;
     
     public void Test_Spawn()
     {
@@ -45,19 +46,74 @@ public partial class Hero : MonoBehaviour
     {
         Despawn_Move().Forget();
     }
-
     public void Mount()
     {
-        _animator.SetInteger(GameManager.s_state_type,1);
-        _animator.SetBool(GameManager.s_force,true);
-        _animator.SetTrigger(GameManager.s_forcetransition);
+        _spawned = false;
+        transform.SetParent(null);
+        Transform t = transform, dt = Dragon.instance.transform;
+        Vector3 startPos = t.position, endPos = dt.position + Vector3.back;
+        Quaternion startRot = t.rotation, endRot = dt.rotation * Quaternion.Euler(0, 90, 0);
+        _seqMount.Stop();
+        _seqMount = Sequence.Create();
+        _seqMount.Chain(Tween.Custom(0, 1, 0.3f, onValueChange: ratio =>
+        {
+            Vector3 pos = Vector3.Lerp(startPos, endPos, ratio);
+            Quaternion rot = Quaternion.Lerp(startRot, endRot, ratio);
+            Move_Warp(pos, rot);
+        }));
+        _seqMount.ChainCallback(() =>
+        {
+            _animator.SetInteger(GameManager.s_125ms,3);
+            _animator.SetInteger(GameManager.s_state_type, 1);
+            _animator.SetBool(GameManager.s_force, true);
+            _animator.SetTrigger(GameManager.s_forcetransition);
+            transform.SetParent(Dragon.instance.sitPoint);
+        });
     }
-
+    public void MountInstantly()
+    {
+        _spawned = false;
+        Transform dt = Dragon.instance.transform;
+        Vector3 endPos = dt.position + Vector3.back;
+        Quaternion endRot = dt.rotation * Quaternion.Euler(0, 90, 0);
+        Move_Warp(endPos, endRot);
+        _animator.SetInteger(GameManager.s_125ms,1);
+        _animator.SetInteger(GameManager.s_state_type, 3);
+        _animator.SetBool(GameManager.s_force, true);
+        _animator.SetTrigger(GameManager.s_forcetransition);
+        transform.SetParent(Dragon.instance.sitPoint);
+    }
     public void Desmount()
     {
-        _animator.SetInteger(GameManager.s_state_type,2);
-        _animator.SetBool(GameManager.s_force,true);
-        _animator.SetTrigger(GameManager.s_forcetransition);
+        Transform t = transform;
+        t.SetParent(null);
+        //Sequence
+        Vector3 startPos = t.position;
+        Quaternion startRot = t.rotation;
+        Vector3 endPos = Dragon.instance.sitPoint.position + Dragon.instance.transform.rotation*Vector3.left*1.5f;
+        Quaternion endRot = Dragon.instance.sitPoint.rotation * Quaternion.Euler(0, -89, 0);
+        _seqMount.Stop();
+        _seqMount = Sequence.Create();
+        _seqMount.Chain(Tween.Custom(0, 1, 0.2f, onValueChange: ratio =>
+        {
+            Vector3 pos = Vector3.Lerp(startPos,endPos,ratio);
+            Quaternion rot = Quaternion.Lerp(startRot,endRot,ratio);
+            Move_Warp(pos,rot);
+        },Ease.OutCirc));
+        
+        _animator.Rebind();
+        _animator.SetBool(GameManager.s_force,false);
+        Tween_Blink_Evade(1.0f);
+        Tween_Punch_Up_Compact(1.0f);
+        p_spawn.Play();
+        Sound_Voice_Short();
+        SoundManager.Play(sound_spawn);
+       
+        
+        CamArm.instance.Tween_Radial(0.5f,0.1f);
+        CamArm.instance.Tween_ShakeNormal_Core();
+        GameManager.Instance.Shockwave(transform.position + Vector3.up);
+        CamArm.instance.Set_FollowTarget(true);
     }
     
     
@@ -104,6 +160,22 @@ public partial class Hero : MonoBehaviour
             _shadow.localScale = _shadowScale; 
         }
     }
+
+    public void SpawnInstantly()
+    {
+        gameObject.SetActive(false);
+        gameObject.SetActive(true);
+        _animator.Rebind();
+        var weaponpack = weapondata[weaponPack_Normal];
+        if(weaponpack.weaponL!=null) weaponpack.weaponL.Spawn();
+        if(weaponpack.weaponR!=null) weaponpack.weaponR.Spawn();
+        shield.Spawn();
+        AdvancedDissolveProperties.Cutout.Standard.
+            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0.0f);
+        _outlineTarget.CutoutThreshold = 0;
+        _shadow.localScale = _shadowScale; 
+    }
+        
     public async UniTaskVoid Despawn()
     {
         _animator.updateMode = AnimatorUpdateMode.UnscaledTime;
@@ -111,6 +183,7 @@ public partial class Hero : MonoBehaviour
         Equipment_Equip(null,false,2,2);
         //기본 설정
         _spawned = false;
+        _animator.SetInteger(GameManager.s_125ms,0);
         _animator.SetInteger(GameManager.s_state_type,0);
         _animator.SetBool(GameManager.s_force,true);
         _animator.SetTrigger(GameManager.s_forcetransition);

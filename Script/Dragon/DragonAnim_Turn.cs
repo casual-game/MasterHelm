@@ -9,7 +9,6 @@ public class DragonAnim_Turn : DragonAnim_Base
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         ratio = Mathf.Abs(_dragon.degDiff / 180.0f);
-        Debug.Log(ratio);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

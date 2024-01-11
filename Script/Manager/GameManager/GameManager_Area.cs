@@ -13,18 +13,21 @@ public partial class GameManager : MonoBehaviour
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(
             Room1.startPoint.position + Room1.addVec,Quaternion.Euler(0,Room1.degree,0));
-        _dragon = GetComponentInChildren<Dragon>();
+        _dragon.gameObject.SetActive(true);
+        _dragon.Setting();
+        _dragon.gameObject.SetActive(false);
     }
     
     [TitleGroup("인게임 구역 인스펙터")]
     [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
     public ParticleSystem areaParticle;
 
+    [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
+    public Dragon _dragon;
     [TabGroup("인게임 구역 인스펙터/AreaUI", "구역 설정", SdfIconType.Map)]
     public Room_Area Room1, Room2, Room3;
 
-    private Sequence _s_areaparticle;
-    private Dragon _dragon;
+    private Sequence _seqIngame;
 
     [Button]
     public void Enter_Title()
@@ -34,56 +37,28 @@ public partial class GameManager : MonoBehaviour
     [Button]
     public void Title_Ingame()
     {
-        Hero.instance.gameObject.SetActive(false);
         CamArm.instance.Set_FollowTarget(false);
-        areaParticle.transform.position = Room1.startPoint.position + Vector3.up*1.0f;
-        areaParticle.Play();
         CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
         CamArm.instance.Tween_FadeIn();
-        _s_areaparticle = Sequence.Create(useUnscaledTime: true)
-            .ChainDelay(0.9f)
+        
+        _seqIngame.Stop();
+        _seqIngame = Sequence.Create(useUnscaledTime: true);
+        _seqIngame.ChainDelay(0.5f)
             .ChainCallback(() =>
             {
-                Hero.instance.Spawn(Room1.startPoint.position, Quaternion.Euler(0, Room1.degree+45, 0));
-                CamArm.instance.Set_FollowTarget(true);
-                CamArm.instance.Tween_ShakeNormal();
-                areaParticle.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+                _dragon.Call(Room1.startPoint.position +  (Room1.startPoint.rotation*Quaternion.Euler(0,45,0))*Vector3.back*1.5f);
+                Hero.instance.SpawnInstantly();
+                Hero.instance.MountInstantly();
             });
+        
+        
     }
-
     [Button]
     public void Area1_Area2()
     {
-        float duration = 2.5f;
         CamArm.instance.Set_FollowTarget(false);
-        
-        Hero.instance.Despawn_Move().Forget();
-        Vector3 startPos = Hero.instance.transform.position + Vector3.up;
-        Vector3 endPos = Room2.startPoint.position;
-        Quaternion camEndRot = Quaternion.Euler(0,Room2.degree,0);
-        
-        areaParticle.transform.position = startPos;
-        areaParticle.Play();
-        _s_areaparticle.Stop();
-        _s_areaparticle = Sequence.Create(useUnscaledTime:true)
-            .ChainDelay(0.5f)
-            .Chain(Tween.Position(areaParticle.transform, endPos + Vector3.up, duration, Ease.InOutQuart))
-            .Group(Tween.Position(CamArm.instance.transform, endPos, duration, Ease.InOutCubic))
-            .Group(Tween.Rotation(CamArm.instance.transform, camEndRot, duration, Ease.InOutCubic))
-            .OnComplete(() =>
-            {
-                Hero.instance.Spawn(endPos, camEndRot);
-                CamArm.instance.Set_FollowTarget(true);
-                CamArm.instance.Tween_ShakeNormal();
-                areaParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            });
+        _dragon.MoveDestination(Room1,Room2);
     }
-    [Button]
-    public void Test_Mount()
-    {
-        
-    }
-    
     
     #if UNITY_EDITOR
     void OnDrawGizmos()

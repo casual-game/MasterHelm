@@ -213,6 +213,8 @@ public partial class Hero : MonoBehaviour
         SoundManager.Play(SoundManager.instance.sound_falldown);
         SoundManager.Play(SoundManager.instance.sound_friction_cloth);
         SoundManager.Play(sound_chain,0.25f);
+        
+        _spawned = true;
     }
     //Particle
     public void Particle_Charge_Main()

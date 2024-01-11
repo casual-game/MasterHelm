@@ -31,6 +31,7 @@ public partial class Hero : MonoBehaviour
         frameMain = FindObjectOfType<Frame_Main>();
         frameMain.Setting(heroData.HP,heroData.MP_Slot_Capacity);
         instance = this;
+        gameObject.SetActive(false);
     }
     
     //Public
