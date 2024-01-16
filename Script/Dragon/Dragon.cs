@@ -155,7 +155,7 @@ public class Dragon : MonoBehaviour
             .Chain(Tween.Custom(0, 1, duration, onValueChange: ratio =>
             {
                 //이동
-                float height = Mathf.Clamp01(-4 * ratio * ratio + 4 * ratio);
+                float height = 2.0f*Mathf.Clamp01(-4 * ratio * ratio + 4 * ratio);
                 anim.SetFloat(GameManager.s_flight_y, 0.65f - ratio);
                 Vector3 movePos = Vector3.Lerp(pos, endPos, flightCurve.Evaluate(ratio));
                 movePos.y = height * distance * 0.2f;

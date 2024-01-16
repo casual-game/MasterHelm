@@ -109,30 +109,24 @@ public partial class CamArm : MonoBehaviour
         seqRound.Stop();
         cg_Clear.gameObject.SetActive(true);
         g_Clear_bg.rectTransform.sizeDelta = new Vector2(g_Clear_bg.rectTransform.sizeDelta.x, 600);
-        g_Round_Clear_Num.rectTransform.localScale = Vector3.one*0.6f;
-        g_Round_Clear_Num.rectTransform.localScale = Vector3.one*0.6f;
-        float textRatio = 1.25f;
+        g_Round_Clear_Num.transform.localScale = Vector3.one*0.6f;
+        g_Round_Clear_Text.transform.localScale = Vector3.one*0.6f;
         pi_Clear.Play();
         //
         seqRound = Sequence.Create(cycleMode: CycleMode.Yoyo, cycles: 2)
+            .Group(Tween.Delay(0.25f,()=> pi_Round.Play()))
             .Group(Tween.Alpha(cg_Clear, 0, 1, 0.25f))
             //BG
             .Group(Tween.Scale(cg_Clear.transform, 0.6f, 1.0f,
                 0.425f, startDelay: 0.0f, ease: Ease.OutBack))
-            //Text
+            //Text,Num
             .Group(Tween.Scale(g_Round_Clear_Num.transform, 0.6f, 1.0f,
-                0.375f, startDelay: 0.125f, ease: Ease.OutBack))
-            .Group(Tween.Alpha(g_Round_Clear_Num, 0.0f, 1.0f,
-                0.25f * textRatio, startDelay: 0.125f))
-            //Num
+                0.375f, startDelay: 0.0f, ease: Ease.OutBack))
             .Group(Tween.Scale(g_Round_Clear_Text.transform, 0.6f, 1.0f,
-                0.375f, startDelay: 0.25f, ease: Ease.OutBack))
-            .Group(Tween.Alpha(g_Round_Clear_Text, 0.0f, 1.0f,
-                0.2f * textRatio, startDelay: 0.25f))
+                0.375f, startDelay: 0.125f, ease: Ease.OutBack))
             //BG 내리기
-            .ChainDelay(0.125f)
-            .Chain(Tween.UISizeDelta(g_Clear_bg.rectTransform,
-                new Vector2(g_Clear_bg.rectTransform.sizeDelta.x, 840), 0.5f, Ease.InOutBack))
+            .Group(Tween.UISizeDelta(g_Clear_bg.rectTransform, new Vector2(g_Clear_bg.rectTransform.sizeDelta.x, 840), 
+                0.75f, Ease.InOutBack,startDelay: 0.0f))
             //Delay
             .ChainDelay(1.1f)
             .OnComplete(() => cg_Round.gameObject.SetActive(false));

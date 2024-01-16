@@ -69,5 +69,7 @@ public partial class GameManager: MonoBehaviour
         s_flight_x = "Flight_X",
         s_flight_y = "Flight_Y",
         s_turn_l = "Turn_L",
-        s_turn_r = "Turn_R";
+        s_turn_r = "Turn_R",
+        s_greyscaleblend = "_GreyscaleBlend",
+        s_alphaoutlinecolor = "_AlphaOutlineColor";
 }

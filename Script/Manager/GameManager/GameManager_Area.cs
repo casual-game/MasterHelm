@@ -56,6 +56,7 @@ public partial class GameManager : MonoBehaviour
     [Button]
     public void Area1_Area2()
     {
+        CamArm.instance.UI_Clear();
         CamArm.instance.Set_FollowTarget(false);
         _dragon.MoveDestination(Room1,Room2);
     }
