@@ -32,7 +32,7 @@ public class MasterHelm_DevTool : MonoBehaviour
             print(arr.transform.parent.gameObject.name + " -> " + arr.gameObject.name);
         }
     }
-    [ToggleGroup("use_2",0,"AtlasUpdater")]public bool use_2 = false;
+    [ToggleGroup("use_2",0,"AtlasUpdater")] public bool use_2 = false;
     [ToggleGroup("use_2",0,"AtlasUpdater")] public List<Sprite> excludeList = new List<Sprite>();
     [ToggleGroup("use_2",0,"AtlasUpdater")] public List<GameObject> searchList = new List<GameObject>();
     [ToggleGroup("use_2",0,"AtlasUpdater")] public SpriteAtlas atlas;
@@ -52,6 +52,18 @@ public class MasterHelm_DevTool : MonoBehaviour
                 && !excludeList.Contains(image.sprite)) sprites.Add(image.sprite);
         }
         atlas.Add(sprites.ToArray());
+    }
+    [ToggleGroup("use_3", 0, "DeactivateRaycastTarget")] public bool use_3 = false;
+    [ToggleGroup("use_3", 0, "DeactivateRaycastTarget")] [Button]
+    public void DeactivateRaycastTarget()
+    {
+        int count = 0;
+        foreach (var image in GetComponentsInChildren<Image>(true))
+        {
+            count++;
+            image.raycastTarget = false;
+        }
+        print(count+"개의 이미지의 RaycastTarget 비활성화!");
     }
     #endif
 }
