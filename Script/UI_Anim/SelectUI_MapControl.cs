@@ -21,6 +21,7 @@ public partial class SelectUI : MonoBehaviour
    private Vector2 moveVec = Vector2.zero;
    private bool _isControlling = false;
    private BoxCollider controllableArea;
+   private bool canDrag = true;
 
    private int StageMax()
    {
@@ -38,23 +39,27 @@ public partial class SelectUI : MonoBehaviour
    }
    public void E_PointerDown(PointerEventData data)
    {
+      if (!canDrag) return;
       moveVec = data.delta;
       _isControlling = true;
       MoveMap();
    }
    public void E_PointerUp(PointerEventData data)
    {
+      if (!canDrag) return;
       moveVec = data.delta;
       _isControlling = false;
       MoveMap();
    }
    public void E_Drag(PointerEventData data)
    {
+      if (!canDrag) return;
       moveVec = data.delta;
       MoveMap();
    }
    public void E_PointerClick(PointerEventData data)
    {
+      if (!canDrag) return;
       if((data.pressPosition - data.position).sqrMagnitude > 400) return;
       if (_stageStart)
       {

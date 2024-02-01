@@ -17,6 +17,7 @@ public partial class SelectUI : MonoBehaviour
     [FoldoutGroup("Main")] public CloudShadows cloud;
     [FoldoutGroup("Main")] public UIElement_Tip tip;
     [FoldoutGroup("Main")] public UIElement_Frame frame;
+    [FoldoutGroup("Main")] public SideUI sideUI;
     
     [FoldoutGroup("StageStart")] public CanvasGroup ssVignetteCanvasGroup,ssMainCanvasGroup,ssStartBtnCanvasGroup,
         ssMission1CanvasGroup,ssMission2CanvasGroup,ssMission3CanvasGroup;
@@ -27,13 +28,14 @@ public partial class SelectUI : MonoBehaviour
     private Tween _tBlur,_tPurkinje;
     private Sequence _seqStageStart,_seqStarBlink;
     private string _strStart = "플레이!";
-    private bool _stageStart = false;
+    private bool _stageStart = false,_stageStartPanel = false;
     
 
     public void Start()
     {
         Setting_MapControl();
         frame.Setting();
+        sideUI.Setting();
         
         _stageStart = true;
         cloud.profile.coverage = 1;
@@ -42,8 +44,8 @@ public partial class SelectUI : MonoBehaviour
         foreach (var cam in cams) cam.orthographicSize = 6.5f;
         moveVec = Vector2.zero;
         MoveMap(true);
+        Select_Start();
     }
-    [Button]
     public void Select_Start()
     {
         _seqStageStart.Stop();
@@ -66,11 +68,13 @@ public partial class SelectUI : MonoBehaviour
         _seqStageStart.Group(Tween.Delay(0.5f, () => frame.Reveal(1)));
         _seqStageStart.OnComplete(() => _stageStart = false);
     }
+    //진짜 이펙트
     public void StageStart_Enter(StageBanner banner)
     {
-        if (_seqStageStart.isAlive) return;
+        if (_seqStageStart.isAlive || _stageStart || sideUI.IsUsing()) return;
         moveVec = Vector2.zero;
         _stageStart = true;
+        _stageStartPanel = true;
         _seqStageStart.Complete();
         _seqStarBlink.Complete();
         Transform tSsMainCanvasGroup = ssMainCanvasGroup.transform,
@@ -104,12 +108,12 @@ public partial class SelectUI : MonoBehaviour
         Vector3 beginPos = camT.position, endPos = ClampVec(banner.transform.position);
         float duration = Mathf.Clamp((beginPos - endPos).magnitude/7.5f, 0.5f, 0.75f);
         endPos.y = beginPos.y;
+        sideUI.Ingame_Deactivate(duration);
         _seqStageStart.Chain(Tween.Custom(0,1,duration,onValueChange: ratio =>
         {
             Vector3 pos = Vector3.Lerp(beginPos,endPos,ratio);
             MoveMap(pos);
         },Ease.InOutCubic));
-        //foreach (var cam in cams) _seqStageStart.Group(Tween.CameraOrthographicSize(cam, 4.5f, 0.75f, Ease.InOutQuart));
         //카메라,색감
         for (int i = 0; i < cams.Count; i++)
         {
@@ -141,8 +145,10 @@ public partial class SelectUI : MonoBehaviour
     }
     public void StageStart_Exit()
     {
-        if (_seqStageStart.isAlive) return;
+        if (_seqStageStart.isAlive || !_stageStart) return;
+        sideUI.Ingame_Activate(0.125f);
         _stageStart = false;
+        _stageStartPanel = false;
         _seqStageStart.Complete();
         ssMainCanvasGroup.transform.localScale = Vector3.one;
         ssVignetteCanvasGroup.alpha = 1;
@@ -155,6 +161,8 @@ public partial class SelectUI : MonoBehaviour
         ssMission2CanvasGroup.transform.localScale = Vector3.one*0.5f;
         ssMission3CanvasGroup.transform.localScale = Vector3.one*0.5f;
         ssTmp.text = _strStart;
+        moveVec = Vector2.zero;
+        float startOrthosize = cams[0].orthographicSize;
         foreach (var image in ssRaycastTarget)
         {
             image.raycastTarget = false;
@@ -164,7 +172,11 @@ public partial class SelectUI : MonoBehaviour
         _seqStageStart = Sequence.Create();
         _seqStageStart.timeScale = 1.1f;
         //카메라
-        foreach (var cam in cams) _seqStageStart.Group(Tween.CameraOrthographicSize(cam, 5.0f, 1.0f, Ease.InOutQuart));
+        _seqStageStart.Group(Tween.Custom(startOrthosize,5.0f,1.0f,onValueChange: os =>
+        {
+            foreach (var cam in cams) cam.orthographicSize = os;
+            MoveMap();
+        },Ease.InOutQuart));
         Tween_Purkinje(0.75f,0.0f,0);
         //도전과제
         float missionDelay = 0.25f;
@@ -200,6 +212,10 @@ public partial class SelectUI : MonoBehaviour
             MoveMap(pos);
         },Ease.InOutCubic));
         _seqStageStart.ChainCallback(()=> _stageStart = false);
+    }
+    public void StageStart_SetInteract(bool interactable)
+    {
+        canDrag = interactable;
     }
     public void Tween_Blur(float duration,float strength,float delay)
     {

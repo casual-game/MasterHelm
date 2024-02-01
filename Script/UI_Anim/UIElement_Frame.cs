@@ -43,8 +43,8 @@ public class UIElement_Frame : MonoBehaviour
         
         seqFrame = Sequence.Create();
         seqFrame.Chain(Tween.Alpha(cgMain, 1,0.25f));
-        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameUp, apUp, 0.5f, Ease.OutCirc));
-        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameDown, apDown, 0.5f, Ease.OutCirc));
+        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameUp, apUp, 0.5f, Ease.OutQuart));
+        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameDown, apDown, 0.5f, Ease.OutQuart));
 
         seqFrame.Group(Tween.Scale(cgTitle.transform, 1, 0.375f, Ease.OutBack));
         seqFrame.Group(Tween.Alpha(cgTitle, 1,0.5f));
@@ -62,8 +62,8 @@ public class UIElement_Frame : MonoBehaviour
         seqFrame.Group(Tween.Scale(cgTitle.transform, 1, 0.375f, Ease.OutBack,startDelay:0.25f));
         seqFrame.Group(Tween.Alpha(cgTitle, 0,0.5f,startDelay:0.5f));
         
-        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameUp, apUpHide, 0.5f, Ease.InCirc,startDelay:0.375f));
-        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameDown, apDownHide, 0.5f, Ease.InCirc,startDelay:0.375f));
+        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameUp, apUpHide, 0.5f, Ease.InQuart,startDelay:0.375f));
+        seqFrame.Group(Tween.UIAnchoredPosition(rectTFrameDown, apDownHide, 0.5f, Ease.InQuart,startDelay:0.375f));
         seqFrame.Group(Tween.Alpha(cgMain, 0,0.25f,startDelay:0.875f));
         seqFrame.ChainCallback(() => gameObject.SetActive(false));
     }
