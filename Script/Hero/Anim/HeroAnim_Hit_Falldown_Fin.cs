@@ -12,7 +12,7 @@ public class HeroAnim_Hit_Falldown_Fin : HeroAnim_Base
         animator.SetBool(GameManager.s_hit,false);
         _hero.Core_ResetRollInput();
         SoundManager.Play(_hero.sound_voice_short);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth,0.125f);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth,0.125f);
         SoundManager.Play(_hero.sound_chain,0.375f);
     }
 

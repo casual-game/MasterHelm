@@ -210,7 +210,7 @@ public class Prefab_Prop : MonoBehaviour
                     prop.Interact(other.transform.position-transform.position,Hero.instance.Get_SuperArmor());
                     var position = other.ClosestPoint(thisPos);
                     ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
-                    SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_combat_sparkable);
                 }
             }
             //Sparkle 상호작용
@@ -219,7 +219,7 @@ public class Prefab_Prop : MonoBehaviour
                 collDatas.Add(other);
                 var position = other.ClosestPoint(thisPos);
                 ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
-                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+                SoundManager.Play(SoundContainer_Ingame.instance.sound_combat_sparkable);
             }
             //몬스터 상호작용
             if (!other.CompareTag(GameManager.s_monster)) return;
@@ -236,7 +236,7 @@ public class Prefab_Prop : MonoBehaviour
                 collDatas.Add(other);
                 var position = other.ClosestPoint(thisPos);
                 ParticleManager.Play(ParticleManager.instance.pd_sparkle,position,GameManager.Q_Identity);
-                SoundManager.Play(SoundManager.instance.sound_combat_sparkable);
+                SoundManager.Play(SoundContainer_Ingame.instance.sound_combat_sparkable);
             }
             if (!other.CompareTag(GameManager.s_player)) return;
             if(!_interact_savedTargets.Contains(other))_interact_savedTargets.Add(other);

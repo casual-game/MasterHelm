@@ -23,7 +23,7 @@ public class HeroAnim_Attack_Normal_Main : HeroAnim_Base
         animator.SetBool(GameManager.s_leftstate,_hero.CurrentAttackMotionData.playerAttackType_End == PlayerAttackType.LeftState);
         _hero.Equipment_Equip(_hero.weaponPack_Normal);
         _hero.Equipment_Collision_Reset(_hero.weaponPack_Normal);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
         if (_hero.AttackIndex == 0)
         {
             _hero.Set_CurrentTrail(_hero.weaponPack_Normal.PlayerAttackMotionDatas_Normal[0].TrailDatas[0]);

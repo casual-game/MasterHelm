@@ -199,7 +199,7 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down(1.4f);
             CamArm.instance.Tween_ShakeNormal_Hero();
             SoundManager.Play(sound_voice_hit_normal);
-            SoundManager.Play(SoundManager.instance.sound_hit_normal);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_normal);
         }
         else
         {
@@ -212,7 +212,7 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down(1.1f);
             CamArm.instance.Tween_ShakeStrong_Hero();
             SoundManager.Play(sound_voice_hit_strong);
-            SoundManager.Play(SoundManager.instance.sound_hit_smash);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
         }
         bool isBloodBottom = trailData.hitType is HitType.Normal or HitType.Bound or HitType.Stun;
         Effect_Hit_Strong(isBloodBottom);

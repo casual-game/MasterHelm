@@ -43,7 +43,7 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
         CamArm.instance.Tween_Skill();
         Set_LookAt(ref _hero.Get_LookT(), ref _hero.Get_LookF(),_hero.AttackIndex ==0);
         SoundManager.Play(_hero.sound_combat_skill);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

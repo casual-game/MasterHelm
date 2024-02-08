@@ -18,6 +18,7 @@ public partial class SelectUI : MonoBehaviour
     [FoldoutGroup("Main")] public UIElement_Tip tip;
     [FoldoutGroup("Main")] public UIElement_Frame frame;
     [FoldoutGroup("Main")] public SideUI sideUI;
+    [FoldoutGroup("Main")] public SoundManager soundManager;
     
     [FoldoutGroup("StageStart")] public CanvasGroup ssVignetteCanvasGroup,ssMainCanvasGroup,ssStartBtnCanvasGroup,
         ssMission1CanvasGroup,ssMission2CanvasGroup,ssMission3CanvasGroup;
@@ -36,6 +37,7 @@ public partial class SelectUI : MonoBehaviour
         Setting_MapControl();
         frame.Setting();
         sideUI.Setting();
+        soundManager.Setting();
         
         _stageStart = true;
         cloud.profile.coverage = 1;
@@ -49,6 +51,8 @@ public partial class SelectUI : MonoBehaviour
     public void Select_Start()
     {
         _seqStageStart.Stop();
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_page_close,0.5f);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_sideui_close);
         _stageStart = true;
         cloud.profile.coverage = 1;
         cloud.profile.cloudsOpacity = 1;
@@ -114,12 +118,24 @@ public partial class SelectUI : MonoBehaviour
             Vector3 pos = Vector3.Lerp(beginPos,endPos,ratio);
             MoveMap(pos);
         },Ease.InOutCubic));
+        _seqStageStart.Group(Tween.Delay(0, 
+            () =>
+            {
+                BgmManager.instance.BgmLowpass(true);
+                SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+                if(Vector3.SqrMagnitude(beginPos-endPos)>1)
+                    SoundManager.Play(SoundContainer_StageSelect.instance.sound_page_open,0.125f);
+            }));
         //카메라,색감
         for (int i = 0; i < cams.Count; i++)
         {
             if(i==0) _seqStageStart.Chain(Tween.CameraOrthographicSize(cams[i], 3.5f, 0.75f, Ease.InOutQuart));
             else  _seqStageStart.Group(Tween.CameraOrthographicSize(cams[i], 3.5f, 0.75f, Ease.InOutQuart));
         }
+        _seqStageStart.Group(Tween.Delay(0, () =>
+        {
+            SoundManager.Play(SoundContainer_StageSelect.instance.sound_stage_selected,0.25f);
+        }));
         Tween_Purkinje(0.75f,0.75f,duration);
         Tween_Blur(0.5f,0.75f,duration);
         //패널 생성
@@ -146,6 +162,8 @@ public partial class SelectUI : MonoBehaviour
     public void StageStart_Exit()
     {
         if (_seqStageStart.isAlive || !_stageStart) return;
+        BgmManager.instance.BgmLowpass(false);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         sideUI.Ingame_Activate(0.125f);
         _stageStart = false;
         _stageStartPanel = false;
@@ -177,6 +195,8 @@ public partial class SelectUI : MonoBehaviour
             foreach (var cam in cams) cam.orthographicSize = os;
             MoveMap();
         },Ease.InOutQuart));
+        _seqStageStart.Group(Tween.Delay(0.25f, 
+            () => SoundManager.Play(SoundContainer_StageSelect.instance.sound_page_close)));
         Tween_Purkinje(0.75f,0.0f,0);
         //도전과제
         float missionDelay = 0.25f;
@@ -197,6 +217,8 @@ public partial class SelectUI : MonoBehaviour
     public void StageStart_JustMove(StageBanner banner)
     {
         if (_seqStageStart.isAlive) return;
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_clickfailed,0.375f);
         moveVec = Vector2.zero;
         _stageStart = true;
         _seqStageStart.Complete();
@@ -204,7 +226,7 @@ public partial class SelectUI : MonoBehaviour
         _seqStageStart.timeScale = 1.1f;
         //카메라 이동
         Vector3 beginPos = camT.position, endPos = ClampVec(banner.transform.position);
-        float duration = Mathf.Clamp((beginPos - endPos).magnitude/7.5f, 0.5f, 0.75f);
+        float duration = Mathf.Clamp((beginPos - endPos).magnitude/10.0f, 0.5f, 0.75f);
         endPos.y = beginPos.y;
         _seqStageStart.Chain(Tween.Custom(0,1,duration,onValueChange: ratio =>
         {

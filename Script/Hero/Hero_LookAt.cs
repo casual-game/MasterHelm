@@ -48,7 +48,7 @@ public partial class Hero : MonoBehaviour
         bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
         if (canChargeMotion)
         {
-            SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
             SoundManager.Play(sound_combat_chargebegin);
             Sound_Voice_Short();
             _animator.SetBool(GameManager.s_charge_normal,true);

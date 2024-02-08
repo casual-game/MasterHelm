@@ -200,8 +200,8 @@ public partial class Hero : MonoBehaviour
         Transform t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_smoke,
             t.position + t.forward*-0.2f + Vector3.up*0.1f,t.rotation,1);
-        SoundManager.Play(SoundManager.instance.sound_falldown);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_falldown);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
         SoundManager.Play(sound_chain,0.25f);
     }
     public void Effect_Land()
@@ -210,8 +210,8 @@ public partial class Hero : MonoBehaviour
         Effect_Smoke();
         Sound_Footstep_Turn();
         
-        SoundManager.Play(SoundManager.instance.sound_falldown);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_falldown);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
         SoundManager.Play(sound_chain,0.25f);
         
         _spawned = true;

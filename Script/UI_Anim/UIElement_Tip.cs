@@ -21,6 +21,7 @@ public class UIElement_Tip : MonoBehaviour
         canvasGroup.alpha = 0;
         
         _seqTip = Sequence.Create(cycles:2,cycleMode: CycleMode.Yoyo);
+        _seqTip.ChainDelay(0.375f);
         _seqTip.Chain(Tween.Scale(transform, 1.0f, 0.375f, Ease.OutBack));
         _seqTip.Group(Tween.Alpha(canvasGroup, 1, 0.25f));
         _seqTip.ChainDelay(0.5f);

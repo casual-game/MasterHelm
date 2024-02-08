@@ -20,7 +20,7 @@ public class Prop_Breakable : Prop
         base.Interact_Normal(forceVec);
         if (Time.unscaledTime - sound_wood_normal_time > 0.3f)
         {
-            SoundManager.Play(SoundManager.instance.sound_interact_wood_normal);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_interact_wood_normal);
             sound_wood_normal_time = Time.unscaledTime;
         }
     }
@@ -35,7 +35,7 @@ public class Prop_Breakable : Prop
         }
         if (Time.unscaledTime - sound_wood_strong_time > 0.3f)
         {
-            SoundManager.Play(SoundManager.instance.sound_interact_wood_strong);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_interact_wood_strong);
             sound_wood_strong_time = Time.unscaledTime;
         }
         ParticleManager.Play(ParticleManager.instance.pd_break, transform.position,GameManager.Q_Identity);

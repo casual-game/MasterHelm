@@ -9,6 +9,7 @@ using UnityEngine.Serialization;
 public partial class SelectUI : MonoBehaviour
 {
    [FoldoutGroup("MapControl")] public List<StageBanner> banners = new List<StageBanner>();
+   [FoldoutGroup("MapControl")] public AudioSource windSource;
    [PropertyRange(0, "StageMax")] public int currentStage = 0,selectedStage = 0;
    [FoldoutGroup("MapControl")] public List<Transform> farObjects = new List<Transform>();
    [FoldoutGroup("MapControl")] public float farObjectCheckDist = 25.0f,farObjectMoveDist = 5.0f;
@@ -135,7 +136,6 @@ public partial class SelectUI : MonoBehaviour
       pos.x = Mathf.Clamp(pos.x, center.x-size.x+mapWidth*0.5f, center.x+size.x-mapWidth*0.5f);
       pos.z = Mathf.Clamp(pos.z, center.z-size.z+mapHeight*0.5f, center.z+size.z-mapHeight*0.5f);
       camT.position = pos;
-
       foreach (var farObject in farObjects)
       {
          Vector3 farObjectPos = farObjectsPos[farObject];
@@ -154,6 +154,9 @@ public partial class SelectUI : MonoBehaviour
          foPos.y = farObjectPos.y;
          farObject.position = foPos;
       }
+
+      float speed = Mathf.Clamp(finalMoveVec.magnitude / Time.deltaTime,0,10);
+      windSource.volume = Mathf.Lerp(windSource.volume, speed*0.0625f, Time.deltaTime * 6.5f);
    }
 
    public void MoveMap(Vector3 pos)

@@ -1,4 +1,4 @@
-using System.Collections;
+ using System.Collections;
 using System.Collections.Generic;
 using Beautify.Universal;
 using PrimeTween;
@@ -9,13 +9,16 @@ using UnityEngine.UI;
 
 public partial class SideUI : MonoBehaviour
 {
+    
     [FoldoutGroup("Common")] public Transform decoProp, decoRoot, decoShadow;
     [FoldoutGroup("Common")] public RectTransform rtBtnShop,rtBtnBook;
     [FoldoutGroup("Common")] public Button btnShop, btnBook;
     [FoldoutGroup("Common")] public CanvasGroup cgDeco;
     [FoldoutGroup("Common")] public UnityEvent eFrameHide, eFrameActiavte,eMoveCam;
     [FoldoutGroup("Common")] public List<Camera> cams = new List<Camera>();
-
+    [FoldoutGroup("Audio")] public BgmManager bgmManager;
+    [FoldoutGroup("Audio")] public BgmData bgmSelect, bgmSideUI;
+    private bool _firstSideUI;
     private Sequence _seqDeco,_seqCam,_seqIngame;
     private Tween _tBlur;
     private bool _deco = false;
@@ -30,6 +33,10 @@ public partial class SideUI : MonoBehaviour
         bookAnchoredPosHide = bookAnchoredPos;
         bookAnchoredPosHide.x = 0;
         Setting_Shop();
+        Setting_Book();
+        _firstSideUI = true;
+        bgmManager.Setting();
+        bgmManager.PlayBGM(bgmSelect,true);
     }
 
     public bool IsUsing()

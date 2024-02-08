@@ -123,7 +123,7 @@ public partial class Monster : MonoBehaviour
         Punch_Up_Compact(1.5f);
         Set_HitState(HitState.Recovery);
         
-        SoundManager.Play(SoundManager.instance.sound_falldown);
-        SoundManager.Play(SoundManager.instance.sound_friction_cloth,0.125f);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_falldown);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth,0.125f);
     }
 }
