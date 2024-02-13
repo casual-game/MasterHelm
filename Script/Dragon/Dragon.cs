@@ -32,6 +32,7 @@ public class Dragon : MonoBehaviour
         _outlineTarget = GetComponent<Outlinable>().OutlineTargets[0];
         instance = this;
     }
+    //반복 함수
     public void Activate()
     {
         gameObject.SetActive(true);
@@ -60,21 +61,22 @@ public class Dragon : MonoBehaviour
             _outlineTarget.CutoutThreshold = dissolve;
         },startDelay: delay).OnComplete(()=> gameObject.SetActive(false));
     }
-    
-    [Button]
-    public void Call(Vector3 pos)
+    //핵심 함수
+    public void Call()
     {
+        //초기화
         _seq.Complete();
         destination = null;
-        transform.rotation = Quaternion.Euler(0,-90,0);
-        Vector3 beginPos = pos + new Vector3(7.5f, 5, 0);
-        Vector3 landPos = pos;
-        
+        var mountData = Get_MountData(1.5f, GameManager.Instance.Get_Room());
+        Vector3 endPos = mountData.pos;
+        Vector3 startPos = endPos + mountData.rot*new Vector3(0, 5, -7.5f);
+        transform.SetPositionAndRotation(startPos,mountData.rot);
+        //생성
         Activate();
         anim.SetTrigger(GameManager.s_call);
-        
+        //시퀸스
         _seq = Sequence.Create();
-        _seq.Chain(Tween.Position(transform, beginPos, landPos, 1.0f, Ease.InOutSine))
+        _seq.Chain(Tween.Position(transform, startPos, endPos, 1.0f, Ease.InOutSine))
             .Group(Tween.Delay(0.65f, () => anim.SetTrigger(GameManager.s_transition)))
             .ChainDelay(2.0f)
             .ChainCallback(() =>
@@ -89,27 +91,26 @@ public class Dragon : MonoBehaviour
             .Group(Tween.Custom(0.0f, -0.375f, 1.5f, onValueChange: 
             val => anim.SetFloat(GameManager.s_flight_x, val),ease:Ease.InSine));
     }
-    [Button]
     public void MoveDestination(Room_Area currentRoom,Room_Area targetRoom)
     {
+        bool moved = false;
         destination = targetRoom.startPoint;
         _seq.Complete();
         Transform t = transform;
-        Vector3 pos = Hero.instance.transform.position +
-                      (currentRoom.startPoint.rotation * Quaternion.Euler(0, 45, 0)) * Vector3.back * 1.5f;
-        Vector3 beginPos = pos + new Vector3(7.5f, 5, 0);
-        t.SetPositionAndRotation(beginPos,Quaternion.Euler(0,-90,0));
-        
+        //마운트 위치로 이동
+        var mountData = Get_MountData(1.5f, currentRoom, Hero.instance.transform);
+        Vector3 mountPos = mountData.pos;
+        Vector3 beginPos = mountPos + mountData.rot*new Vector3(0, 5, -7.5f);
+        t.SetPositionAndRotation(beginPos,mountData.rot);
         Activate();
         anim.SetTrigger(GameManager.s_call);
-        //플레이어 위치로 이동
         _seq = Sequence.Create();
-        _seq.Chain(Tween.Position(t, beginPos, pos, 1.0f, Ease.InOutSine))
+        _seq.Chain(Tween.Position(t, beginPos, mountPos, 1.0f, Ease.InOutSine))
             .Group(Tween.Delay(0.65f, () => anim.SetTrigger(GameManager.s_transition)))
             .ChainDelay(1.0f);
-        //회전
-        Vector3 endPos = targetRoom.startPoint.position + targetRoom.startPoint.rotation * Vector3.left* 1.5f;
-        Vector3 distvec = endPos - pos;
+        //회전(마운트는 애니매이션 이벤트로 실행.)
+        var dismountData = Get_DismountData(1.5f, targetRoom);
+        Vector3 distvec = dismountData.pos - mountPos;
         distvec.y = 0;
         degDiff = Mathf.Atan2(distvec.x, distvec.z) * Mathf.Rad2Deg - t.rotation.eulerAngles.y;
         while (degDiff < -180) degDiff += 360;
@@ -140,7 +141,7 @@ public class Dragon : MonoBehaviour
             anim.SetFloat(GameManager.s_flight_y, 0);
             _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_flight));
         });
-        float speed = 6.5f;
+        float speed = 7.5f;
         float distance = distvec.magnitude;
         float duration = distance / speed;
         Vector3 lookVec = distvec;
@@ -154,24 +155,32 @@ public class Dragon : MonoBehaviour
             })
             .Chain(Tween.Custom(0, 1, duration, onValueChange: ratio =>
             {
-                //이동
-                float height = 2.0f*Mathf.Clamp01(-4 * ratio * ratio + 4 * ratio);
-                anim.SetFloat(GameManager.s_flight_y, 0.65f - ratio);
-                Vector3 movePos = Vector3.Lerp(pos, endPos, flightCurve.Evaluate(ratio));
-                movePos.y = height * distance * 0.2f;
-                Vector3 addVec = Vector3.down*2.5f*flightAddvecCurve.Evaluate(ratio);
-                movePos += addVec;
-                //회전
-                var moveRot = Quaternion.Lerp(t.rotation, Quaternion.LookRotation(lookVec), 3 * Time.deltaTime);
-                //적용
-                t.SetPositionAndRotation(movePos, moveRot);
-            }))
-            .Group(Tween.Delay(duration -0.5f, () =>
+                if (!moved)
+                {
+                    //이동
+                    anim.SetFloat(GameManager.s_flight_y, 0.65f - ratio);
+                    Vector3 movePos = Vector3.Lerp(mountPos, dismountData.pos, flightCurve.Evaluate(ratio));
+                    Vector3 addVec = Vector3.up*3.5f*flightAddvecCurve.Evaluate(ratio);
+                    movePos += addVec;
+                    //회전
+                    var moveRot = Quaternion.Lerp(t.rotation, Quaternion.LookRotation(lookVec), 3 * Time.deltaTime);
+                    //적용
+                    t.SetPositionAndRotation(movePos, moveRot);
+                    //애니메이션
+                    bool lateEnough = ratio>0.875f && transform.position.y-dismountData.pos.y<0.5f;
+                    if (lateEnough)
+                    {
+                        moved = true;
+                        Arrival();
+                    }
+                }
+            }).OnComplete(() =>
             {
-                destination = null;
-                FlyAway(2.0f);
-                CamArm.instance.Set_FollowTarget(true);
-                anim.SetTrigger(GameManager.s_transition);
+                if (!moved)
+                {
+                    moved = true;
+                    Arrival();
+                } 
             }))
             .Group(Tween.Custom(0, 1, duration, onValueChange: ratio =>
             {
@@ -186,8 +195,14 @@ public class Dragon : MonoBehaviour
                 }
             }));
 
+        void Arrival()
+        {
+            anim.SetTrigger(GameManager.s_transition);
+            destination = null;
+            CamArm.instance.Set_FollowTarget(true);
+            FlyAway(2.0f);
+        }
     }
-
     public void FlyAway(float delay)
     {
         _seq.Stop();
@@ -205,13 +220,11 @@ public class Dragon : MonoBehaviour
             .Group(Tween.Custom(0.0f, -0.375f, 1.5f, onValueChange:
                 val => anim.SetFloat(GameManager.s_flight_x, val), ease: Ease.InSine));
     }
-
-    [Button]
     public void MoveFin()
     {
         anim.SetTrigger(GameManager.s_transition);
     }
-
+    //애니메이션 이벤트
     public void Desmount()
     {
         if (destination == null)
@@ -220,15 +233,38 @@ public class Dragon : MonoBehaviour
             Hero.instance.Desmount();
         }
     }
-
     public void Mount()
     {
         if (destination != null) Hero.instance.Mount();
     }
-
     public void Effect_Land()
     {
         Transform t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,1.0f);
+    }
+
+    public (Vector3 pos, Quaternion rot) Get_MountData(float dist,Room_Area area)
+    {
+        Transform point = area.startPoint;
+        Quaternion _r = point.rotation * Quaternion.Euler(0,135,0);
+        Vector3 _p = point.position + point.rotation * Quaternion.Euler(0, 45, 0)*Vector3.back*dist;
+
+        return (_p, _r);
+    }
+    public (Vector3 pos, Quaternion rot) Get_DismountData(float dist,Room_Area area)
+    {
+        Transform point = area.startPoint;
+        Quaternion _r = point.rotation * Quaternion.Euler(0,135,0);
+        Vector3 _p = point.position + point.rotation * Quaternion.Euler(0, 0, 0)*Vector3.back*dist;
+
+        return (_p, _r);
+    }
+    public (Vector3 pos, Quaternion rot) Get_MountData(float dist,Room_Area area,Transform target)
+    {
+        Quaternion roomRot = area.startPoint.rotation;
+        Quaternion _r = roomRot * Quaternion.Euler(0,135,0);
+        Vector3 _p = target.position + roomRot * Quaternion.Euler(0, 45, 0)*Vector3.back*dist;
+
+        return (_p, _r);
     }
 }

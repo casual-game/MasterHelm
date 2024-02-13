@@ -51,8 +51,9 @@ public partial class Hero : MonoBehaviour
         _spawned = false;
         transform.SetParent(null);
         Transform t = transform, dt = Dragon.instance.transform;
-        Vector3 startPos = t.position, endPos = dt.position + Vector3.back;
-        Quaternion startRot = t.rotation, endRot = dt.rotation * Quaternion.Euler(0, 90, 0);
+        Quaternion dtRot = dt.rotation;
+        Vector3 startPos = t.position, endPos = dt.position + dtRot * Vector3.left;
+        Quaternion startRot = t.rotation, endRot = dtRot * Quaternion.Euler(0, 90, 0);
         _seqMount.Stop();
         _seqMount = Sequence.Create();
         _seqMount.Chain(Tween.Custom(0, 1, 0.3f, onValueChange: ratio =>
@@ -74,8 +75,9 @@ public partial class Hero : MonoBehaviour
     {
         _spawned = false;
         Transform dt = Dragon.instance.transform;
-        Vector3 endPos = dt.position + Vector3.back;
-        Quaternion endRot = dt.rotation * Quaternion.Euler(0, 90, 0);
+        Quaternion dtRot = dt.rotation;
+        Vector3 endPos = dt.position + dtRot * Vector3.left;
+        Quaternion endRot = dtRot * Quaternion.Euler(0, 90, 0);
         Move_Warp(endPos, endRot);
         _animator.SetInteger(GameManager.s_125ms,1);
         _animator.SetInteger(GameManager.s_state_type, 3);

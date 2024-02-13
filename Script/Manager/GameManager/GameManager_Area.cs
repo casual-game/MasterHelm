@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using AtmosphericHeightFog;
 using PrimeTween;
 using Sirenix.OdinInspector;
 using UnityEditor;
@@ -16,27 +17,31 @@ public partial class GameManager : MonoBehaviour
         _dragon.gameObject.SetActive(true);
         _dragon.Setting();
         _dragon.gameObject.SetActive(false);
+        roomIndex = 0;
+        heightFog.fogHeightEnd = Get_Room().startPoint.position.y - 3.75f;
     }
     
     [TitleGroup("인게임 구역 인스펙터")]
     [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
-    public ParticleSystem areaParticle;
-
+    public HeightFogGlobal heightFog;
     [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
     public Dragon _dragon;
     [TabGroup("인게임 구역 인스펙터/AreaUI", "구역 설정", SdfIconType.Map)]
     public Room_Area Room1, Room2, Room3;
+    private int roomIndex = 0;
 
     private Sequence _seqIngame;
+    private Tween _tFog;
 
     [Button]
     public void Enter_Title()
     {
-        
+        CamArm.instance.Tween_FadeOut();
     }
     [Button]
     public void Title_Ingame()
     {
+        roomIndex = 0;
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
         CamArm.instance.Tween_FadeIn();
@@ -46,21 +51,33 @@ public partial class GameManager : MonoBehaviour
         _seqIngame.ChainDelay(0.5f)
             .ChainCallback(() =>
             {
-                _dragon.Call(Room1.startPoint.position +  (Room1.startPoint.rotation*Quaternion.Euler(0,45,0))*Vector3.back*1.5f);
+                _dragon.Call();
                 Hero.instance.SpawnInstantly();
                 Hero.instance.MountInstantly();
             });
         
         
     }
+    public Room_Area Get_Room()
+    {
+        if (roomIndex == 0) return Room1;
+        else if (roomIndex == 1) return Room2;
+        else return Room3;
+    }
     [Button]
-    public void Area1_Area2()
+    public void MoveRoom()
     {
         CamArm.instance.UI_Clear();
         CamArm.instance.Set_FollowTarget(false);
-        _dragon.MoveDestination(Room1,Room2);
+        Room_Area startRoom = Get_Room();
+        roomIndex++;
+        Room_Area endRoom = Get_Room();
+        _dragon.MoveDestination(startRoom,endRoom);
+        _tFog.Stop();
+        _tFog = Tween.Custom(heightFog.fogHeightEnd, endRoom.startPoint.position.y - 3.75f,
+            2.0f, onValueChange: heightEnd => heightFog.fogHeightEnd = heightEnd);
+
     }
-    
     #if UNITY_EDITOR
     void OnDrawGizmos()
     {

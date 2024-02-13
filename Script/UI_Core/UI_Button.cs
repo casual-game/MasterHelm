@@ -23,7 +23,6 @@ public class UI_Button : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        print("PPAP");
         s_interact.Complete();
         s_interact = Sequence.Create()
             .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * -3.0f,

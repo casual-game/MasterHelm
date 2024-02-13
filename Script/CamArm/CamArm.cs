@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AtmosphericHeightFog;
 using Beautify.Universal;
 using LeTai.TrueShadow;
 using PrimeTween;
@@ -26,7 +27,7 @@ public partial class CamArm : MonoBehaviour
     [FoldoutGroup("Effect/data")] public Material m_radialblur,m_speedline;
     [FoldoutGroup("Effect/data")] public Color vignette_NormalColor, vignette_HitColor;
     [FoldoutGroup("Effect/data")] public CloudShadowsProfile cloudShadows;
-
+    [FoldoutGroup("Effect/data")] public Texture blurMask;
     [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public Image i_title_line, i_titile_bg;
     [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public TMP_Text tmp_title;
     [TitleGroup("Fade")] [FoldoutGroup("Fade/data")] public CanvasGroup cg1, cg2;
@@ -126,6 +127,7 @@ public partial class CamArm : MonoBehaviour
         tmp_title.gameObject.SetActive(true);
         cg1.transform.localScale = Vector3.one*1.5f;
         cg2.transform.localScale = Vector3.one*1.5f;
+        BeautifySettings.settings.blurMask.value = null;
         Time.timeScale = 1.0f;
         
         
@@ -133,9 +135,9 @@ public partial class CamArm : MonoBehaviour
         Ease ease = Ease.InOutQuart;
         s_fade = Sequence.Create(useUnscaledTime: true)
             //구름
-            .Chain(Tween.Custom(1.0f, 0.03f, duration,
+            .Chain(Tween.Custom(1.0f, 0.00f, duration,
                 onValueChange: opacity => cloudShadows.cloudsOpacity = opacity, ease))
-            .Group(Tween.Custom(0.5f, 0.25f, duration,
+            .Group(Tween.Custom(1.0f, 0.5f, duration*0.8f,
                 onValueChange: coverage => cloudShadows.coverage = coverage, ease))
             //블러
             .Group(Tween.Custom(2.0f, 0.0f, duration, onValueChange: blur
@@ -155,18 +157,23 @@ public partial class CamArm : MonoBehaviour
             .Group(Tween.Alpha(cg, 0, 0.25f * textRatio, startDelay: 0.625f+textAddDelay)); 
         //CanvasGroup
         float canvasRatio = 0.9f;
-        float canvasAddDelay = -0.125f;
+        float canvasAddDelay = -0.2f;
         s_fade
             .Group(Tween.Scale(cg1.transform, 1.0f, 0.875f*canvasRatio, startDelay: 0.625f+canvasAddDelay, ease: Ease.InOutQuint))
             .Group(Tween.Scale(cg2.transform, 1.0f, 0.875f*canvasRatio, startDelay: 0.625f+canvasAddDelay, ease: Ease.InOutQuint))
             .Group(Tween.Alpha(cg1, 1, 0.5f*canvasRatio, startDelay: 0.5f+canvasAddDelay))
-            .Group(Tween.Alpha(cg2, 1, 0.5f*canvasRatio, startDelay: 0.5f+canvasAddDelay))
+            .Group(Tween.Alpha(cg2, 1, 0.5f*canvasRatio, startDelay: 0.5f+canvasAddDelay));
+        s_fade
+            .ChainCallback(()=>BeautifySettings.settings.blurMask.value = blurMask)
+            .Chain(Tween.Custom(0.0f, 0.4f, 0.25f, onValueChange: blur
+                => BeautifySettings.settings.blurIntensity.value = blur))
             .OnComplete(() =>
             {
                 tmp_title.gameObject.SetActive(false);
                 cg1.enabled = false;
                 cg2.enabled = false;
             });
+        Tween_Chromatic(0.05f,1.55f,Ease.InOutQuint);
     }
     [Button]
     public void Tween_FadeOut()
@@ -176,11 +183,12 @@ public partial class CamArm : MonoBehaviour
         Color tmpColor = new Color(250.0f / 255.0f, 185.0f / 255.0f, 122.0f / 255.0f, 1.0f);
         Color tmpFinColor = tmpColor;
         tmpFinColor.a = 0;
-        cloudShadows.cloudsOpacity = 0.4f;
-        cloudShadows.coverage = 0.5f;
+        cloudShadows.cloudsOpacity = 1.0f;
+        cloudShadows.coverage = 1.0f;
         _cams[0].orthographicSize = orthographicSize + 2.0f;
         _cams[1].orthographicSize = orthographicSize + 2.0f;
         BeautifySettings.settings.blurIntensity.value = 2.0f;
+        BeautifySettings.settings.blurMask.value = null;
         i_title_line.transform.localScale = Vector3.one;
         i_titile_bg.transform.localScale = Vector3.one;
         tmp_title.transform.localScale = Vector3.one;
