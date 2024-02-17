@@ -8,18 +8,26 @@ using UnityEngine.UI;
 
 public class UI_Inventory : MonoBehaviour
 {
+    public enum InventoryState
+    {
+        Weapon=0,Resource=1,Badge=2
+    }
+    public SaveManager saveManager;
+    
     public RectTransform rectT;
-
+    public List<InventorySlot> slots = new List<InventorySlot>();
     public List<Image> _slotImages = new List<Image>();
     public List<CanvasGroup> _slotCanvasGroups = new List<CanvasGroup>();
     private Sequence _seqInventory;
+    private InventoryState _state;
     public void Setting()
     {
-        
         gameObject.SetActive(false);
+        _state = InventoryState.Weapon;
+        UpdateItemIndex(0);
+        UpdateState(InventoryState.Weapon);
     }
     
-    [Button]
     public void FitUI()
     {
         var rect = rectT.rect;
@@ -42,7 +50,7 @@ public class UI_Inventory : MonoBehaviour
     {
         _seqInventory.Stop();
         foreach (var slot in _slotImages) slot.transform.localScale = Vector3.one*0.75f;
-        foreach (var slot in _slotImages) slot.color = Color.clear;
+        //foreach (var slot in _slotImages) slot.color = Color.clear;
         foreach (var slot in _slotCanvasGroups) slot.alpha = 0;
         gameObject.SetActive(true);
         
@@ -54,8 +62,8 @@ public class UI_Inventory : MonoBehaviour
             {
                 _seqInventory.Group(Tween.Scale(_slotImages[h * 3 + w].transform, 1, 
                     duration, Ease.OutCubic,startDelay: startDelay));
-                _seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
-                    duration, Ease.OutSine,startDelay: startDelay));
+                //_seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
+                    //duration, Ease.OutSine,startDelay: startDelay));
                 _seqInventory.Group(Tween.Alpha(_slotCanvasGroups[h * 3 + w],1,
                     duration, Ease.OutCubic,startDelay: startDelay));
             }
@@ -63,8 +71,19 @@ public class UI_Inventory : MonoBehaviour
             startDelay += delay;
         }
     }
-    [Button]
-    public void Reroll()
+    public void Reroll_Weapon()
+    {
+        Reroll(InventoryState.Weapon);
+    }
+    public void Reroll_Resource()
+    {
+        Reroll(InventoryState.Resource);
+    }
+    public void Reroll_Badge()
+    {
+        Reroll(InventoryState.Badge);
+    }
+    private void Reroll(InventoryState inventoryState)
     {
         Close(0.15f,0.05f,true);
         float startDelay = 0.3f;
@@ -72,18 +91,18 @@ public class UI_Inventory : MonoBehaviour
         {
             for (int w = 0; w < 3; w++)
             {
+                _seqInventory.Group(Tween.Delay(startDelay, () => UpdateState(inventoryState)));
                 _seqInventory.Group(Tween.Scale(_slotImages[h * 3 + w].transform, 1, 
                     0.15f, Ease.OutCubic,startDelay: startDelay));
-                _seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
-                    0.15f, Ease.OutSine,startDelay: startDelay));
+                //_seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
+                  //  0.15f, Ease.OutSine,startDelay: startDelay));
                 _seqInventory.Group(Tween.Alpha(_slotCanvasGroups[h * 3 + w],1,
                     0.15f, Ease.OutCubic,startDelay: startDelay));
             }
             startDelay += 0.05f;
         }
     }
-    [Button]
-    public void Page()
+    private void Page()
     {
         _seqInventory.Stop();
         transform.localScale = Vector3.one;
@@ -95,7 +114,7 @@ public class UI_Inventory : MonoBehaviour
     {
         _seqInventory.Stop();
         foreach (var slot in _slotImages) slot.transform.localScale = Vector3.one;
-        foreach (var slot in _slotImages) slot.color = Color.white;
+        //foreach (var slot in _slotImages) slot.color = Color.white;
         foreach (var slot in _slotCanvasGroups) slot.alpha = 1;
         
         
@@ -117,5 +136,43 @@ public class UI_Inventory : MonoBehaviour
         }
 
         if(!activate) _seqInventory.OnComplete(() => gameObject.SetActive(false));
+    }
+
+    private void UpdateItemIndex(int page = 0)
+    {
+        for(int i=0; i<slots.Count; i++)
+        {
+            slots[i].tmpIndex.text = ((page + 1) * (i + 1)).ToString();
+        }
+    }
+    public void UpdateState(InventoryState inventoryState)
+    {
+        _state = inventoryState;
+        switch (_state)
+        {
+            case InventoryState.Weapon:
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    var slot = slots[i];
+                    if(saveManager.weaponSaveDatas.Count>i) slot.UpdateData(saveManager.weaponSaveDatas[i]);
+                    else slot.ClearData();
+                }
+                break;
+            case InventoryState.Resource:
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    var slot = slots[i];
+                    if(saveManager.resourceSaveDatas.Count>i) slot.UpdateData(saveManager.resourceSaveDatas[i]);
+                    else slot.ClearData();
+                }
+                break;
+            case InventoryState.Badge:
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    var slot = slots[i];
+                    slot.ClearData();
+                }
+                break;
+        }
     }
 }
