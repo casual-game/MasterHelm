@@ -6,8 +6,11 @@ using UnityEngine;
 public class Item_Resource : ScriptableObject
 {
     [TitleGroup("Setting")] public Sprite icon;
-    [TitleGroup("Setting")] public float left,right,top,bottom;
-    [TitleGroup("Setting")] public Vector3 scale = Vector3.one;
+    [TitleGroup("Inventory")] public float left,right,top,bottom;
+    [TitleGroup("Inventory")] public Vector3 scale = Vector3.one;
+    [TitleGroup("Shop")] public float sleft,sright,stop,sbottom;
+    [TitleGroup("Shop")] public Vector3 sscale = Vector3.one;
+    [TitleGroup("Shop")] public bool isSpecial = false;
     
     [TitleGroup("Data")]public string title; 
     [TitleGroup("Data")][TextArea] public string info;
