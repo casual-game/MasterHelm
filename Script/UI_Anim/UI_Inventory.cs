@@ -40,10 +40,10 @@ public class UI_Inventory : MonoBehaviour
         isBtnForgeOrigin = true;
         isBGOriginSelectActivated = false;
         isBGForgeForgeActivated = false;
-        //장비 저장 데이터 반영
-        slotWeaponMain.ChangeData(saveManager.equipWeaponMain);
-        slotWeaponSkillL.ChangeData(saveManager.equipWeaponSkillL);
-        slotWeaponSkillR.ChangeData(saveManager.equipWeaponSkillR);
+        //착용 장비 저장 데이터 반영
+        slotWeaponMain.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponMain));
+        slotWeaponSkillL.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponSkillL));
+        slotWeaponSkillR.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponSkillR));
     }
     //인벤토리 부분 제어
     public void FitUI()
@@ -225,15 +225,17 @@ public class UI_Inventory : MonoBehaviour
         //Info 교체
         if (state == InventoryState.Weapon)
         {
-            tmpItemTitle.text = saveManager.weaponSaveDatas[index].weapon.title;
+            var weapon = saveManager.GetWeapon(saveManager.weaponSaveDatas[index].weaponIndex);
+            tmpItemTitle.text = weapon.title;
             tmpItemInfo.text = String.Empty;
-            twItemInfo.ShowText(saveManager.weaponSaveDatas[index].weapon.info);
+            twItemInfo.ShowText(weapon.info);
         }
         else if (state == InventoryState.Resource)
         {
-            tmpItemTitle.text = saveManager.resourceSaveDatas[index].resource.title;
+            var resource = saveManager.GetResource(saveManager.resourceSaveDatas[index].resourceIndex);
+            tmpItemTitle.text = resource.title;
             tmpItemInfo.text = String.Empty;
-            twItemInfo.ShowText(saveManager.resourceSaveDatas[index].resource.info);
+            twItemInfo.ShowText(resource.info);
         }
         fitterItemTitle.SetLayoutHorizontal();
         //Info 시퀸스
@@ -254,7 +256,7 @@ public class UI_Inventory : MonoBehaviour
             }
             else
             {
-                if(!saveManager.forgeWeaponDatas.Contains(data.weapon)) ShowBtnGroup_AddForge();
+                if(!saveManager.forgeWeaponDatas.Contains(data.weaponIndex)) ShowBtnGroup_AddForge();
                 else ShowBtnGroup_GoForge();
                 RemoveBtnGroup_OriginSelect();
             }
@@ -481,8 +483,8 @@ public class UI_Inventory : MonoBehaviour
         seqEquip.Chain(Tween.PunchScale(equipFlagT, Vector3.one * -0.1f,0.25f,2));
     }
     //기타
-    public void Tip_NotReady()
+    public void Popup_Dev()
     {
-        tip.Tip_NotReady();
+        PopupManager.instance.Popup_Dev();
     }
 }

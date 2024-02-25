@@ -11,12 +11,12 @@ public class ForgeSaved : MonoBehaviour
     public RectTransform saveFrame,title;
     public List<CanvasGroup> cgList = new List<CanvasGroup>();
     public Sequence seqFS;
+    public List<ForgeSavedSlot> slots = new List<ForgeSavedSlot>();
     
     [HideInInspector] public bool forgeOpened = false;
-    [Button]
-    public void FitUI()
+    public void Setting()
     {
-        
+        //FitUI
         int blocksCount = 4;
         float spaceRatio = 3*Mathf.Clamp01(0.6f-(saveFrame.rect.x/saveFrame.rect.y));
         float widthSpace = 32;
@@ -47,9 +47,18 @@ public class ForgeSaved : MonoBehaviour
         title.position = saveRects[3].position;
         title.anchoredPosition = new Vector2(0, title.anchoredPosition.y);
         title.sizeDelta = saveRects[3].sizeDelta;
+        
+        UpdateData();
+        gameObject.SetActive(false);
     }
 
-    [Button]
+    public void UpdateData()
+    {
+        for (int i = 0; i < SaveManager.instance.forgeWeaponDatas.Count; i++)
+        {
+            slots[i].SetItem(SaveManager.instance.GetWeapon(SaveManager.instance.forgeWeaponDatas[i]));
+        }
+    }
     public void Show(float delay)
     {
         if (forgeOpened) return;
@@ -69,8 +78,6 @@ public class ForgeSaved : MonoBehaviour
             seqFS.Group(Tween.Alpha(cg, 1, 0.2f, startDelay: delay));
         }
     }
-
-    [Button]
     public void Hide()
     {
         if (!forgeOpened) return;
@@ -90,6 +97,4 @@ public class ForgeSaved : MonoBehaviour
 
         seqFS.OnComplete(() => gameObject.SetActive(false));
     }
-    
-    
 }

@@ -5,100 +5,155 @@ using PrimeTween;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PopupManager : MonoBehaviour
 {
-    public Image imgPurchase, imgSuccess, imgDebugError;
-    public CanvasGroup cgPurchase, cgSuccess, cgDebugError;
-    public Transform tPurchaseText, tSuccessText, tDebugErrorText;
-    private Sequence _seqPurchase, _seqSuccess, _seqDebugError;
-    private Vector2 v2Purchase, v2Success, v2DebugError;
+    public static PopupManager instance;
+    [FoldoutGroup("Main")] public GameObject block;
+    
+    [FoldoutGroup("Create")] public Image imgCreate,createBG;
+    [FoldoutGroup("Create")] public CanvasGroup cgCreate;
+    [FoldoutGroup("Create")] public TMP_Text tCreateText,tCreateInfoText;
+    [FoldoutGroup("Create")] public Transform btnCoin, btnGem;
+
+    [FoldoutGroup("Positive")] public Image imgPositive;
+    [FoldoutGroup("Positive")] public CanvasGroup cgPositive;
+    [FoldoutGroup("Positive")] public TMP_Text tPositiveText;
+
+    [FoldoutGroup("Negative")] public Image imgNegative;
+    [FoldoutGroup("Negative")] public CanvasGroup cgNegative;
+    [FoldoutGroup("Negative")] public TMP_Text tNegativeText;
+    
+    private Sequence _seqCreate, _seqPositive, _seqNegative;
+    private Vector2 v2Create, v2Positive, v2Negative;
+    private Item_Weapon _createdWeapon = null;
 
     public void Awake()
     {
-        v2Purchase = imgPurchase.rectTransform.sizeDelta;
-        v2Success = imgSuccess.rectTransform.sizeDelta;
-        v2DebugError = imgDebugError.rectTransform.sizeDelta;
+        v2Create = imgCreate.rectTransform.sizeDelta;
+        v2Positive = imgPositive.rectTransform.sizeDelta;
+        v2Negative = imgNegative.rectTransform.sizeDelta;
+        instance = this;
+        createBG.color = Color.clear;
+        createBG.gameObject.SetActive(false);
     }
 
     [Button]
-    public void Purchase_Begin()
+    public void Create_Begin(bool isGem,Item_Weapon weapon)
     {
-        _seqPurchase.Stop();
-        cgPurchase.gameObject.SetActive(true);
-        Vector2 sizeDelta = v2Purchase;
+        _seqCreate.Stop();
+        _createdWeapon = weapon;
+        block.SetActive(true);
+        cgCreate.gameObject.SetActive(true);
+        createBG.gameObject.SetActive(true);
+        btnCoin.gameObject.SetActive(!isGem);
+        btnGem.gameObject.SetActive(isGem);
+        Vector2 sizeDelta = v2Create;
         sizeDelta.y *= 0.5f;
-        imgPurchase.rectTransform.sizeDelta = sizeDelta;
-        tPurchaseText.localScale = Vector3.one*1.5f;
-        cgPurchase.alpha = 0;
-        
-        _seqPurchase = Sequence.Create();
-        _seqPurchase.timeScale = 1.5f;
-        _seqPurchase.Chain(Tween.Alpha(cgPurchase, 1, 0.25f));
-        _seqPurchase.Group(Tween.UISizeDelta(imgPurchase.rectTransform, v2Purchase, 0.5f,Ease.OutCirc));
-        _seqPurchase.Group(Tween.Scale(tPurchaseText, 1.0f, 0.5f, Ease.OutCirc));
+        imgCreate.rectTransform.sizeDelta = sizeDelta;
+        tCreateText.transform.localScale = Vector3.one*1.625f;
+        cgCreate.alpha = 0;
+        tCreateText.text = "제작: " + _createdWeapon.title;
+        tCreateInfoText.text = "공격력: " + _createdWeapon.power + "\n체력: " + _createdWeapon.hp;
+        _seqCreate = Sequence.Create();
+        _seqCreate.timeScale = 1.25f;
+        _seqCreate.Chain(Tween.Alpha(cgCreate, 1, 0.5f));
+        _seqCreate.Group(Tween.UISizeDelta(imgCreate.rectTransform, v2Create, 1.0f,Ease.InOutCirc));
+        _seqCreate.Group(Tween.Scale(tCreateText.transform, 1.0f, 1.0f, Ease.InOutExpo));
+        _seqCreate.Group(Tween.Color(createBG, new Color(0,0,0,0.9215f), 0.375f));
         
     }
 
     [Button]
-    public void Purchase_Fin()
+    public void Create_Fin(bool success)
     {
-        _seqPurchase.Stop();
-        cgPurchase.gameObject.SetActive(true);
-        Vector2 sizeDelta = v2Purchase;
+        if (_seqCreate.isAlive) return;
+        _seqCreate.Stop();
+        cgCreate.gameObject.SetActive(true);
+        Vector2 sizeDelta = v2Create;
         sizeDelta.y *= 0.5f;
-        imgPurchase.rectTransform.sizeDelta = v2Purchase;
-        tPurchaseText.localScale = Vector3.one;
-        cgPurchase.alpha = 1;
+        imgCreate.rectTransform.sizeDelta = v2Create;
+        tCreateText.transform.localScale = Vector3.one;
+        cgCreate.alpha = 1;
         
-        _seqPurchase = Sequence.Create();
-        _seqPurchase.timeScale = 1.5f;
-        _seqPurchase.Chain(Tween.Alpha(cgPurchase, 0, 0.2f,startDelay:0.2f));
-        _seqPurchase.Group(Tween.UISizeDelta(imgPurchase.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
-        _seqPurchase.OnComplete(() => cgPurchase.gameObject.SetActive(false));
+        _seqCreate = Sequence.Create();
+        _seqCreate.timeScale = 2.5f;
+        _seqCreate.Chain(Tween.Alpha(cgCreate, 0, 0.2f,startDelay:0.2f));
+        _seqCreate.Group(Tween.UISizeDelta(imgCreate.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
+        _seqCreate.Group(Tween.Color(createBG, Color.clear, 0.4f));
+        _seqCreate.OnComplete(() =>
+        {
+            block.SetActive(false);
+            createBG.gameObject.SetActive(false);
+            cgCreate.gameObject.SetActive(false);
+        });
+        if (success)
+        {
+            Success("'"+_createdWeapon.title+"' 1개 획득!");
+        }
     }
 
     [Button]
-    public void Success()
+    public void Success(string str)
     {
-        _seqSuccess.Stop();
-        cgSuccess.gameObject.SetActive(true);
-        Vector2 sizeDelta = v2Success;
+        if (_seqNegative.isAlive || _seqPositive.isAlive) return;
+        tPositiveText.text = str;
+        _seqPositive.Stop();
+        cgPositive.gameObject.SetActive(true);
+        block.SetActive(true);
+        Vector2 sizeDelta = v2Positive;
         sizeDelta.y *= 0.5f;
-        imgSuccess.rectTransform.sizeDelta = sizeDelta;
-        tSuccessText.localScale = Vector3.one*1.5f;
-        cgSuccess.alpha = 0;
+        imgPositive.rectTransform.sizeDelta = sizeDelta;
+        tPositiveText.transform.localScale = Vector3.one*1.5f;
+        cgPositive.alpha = 0;
         
-        _seqSuccess = Sequence.Create();
-        _seqSuccess.timeScale = 1.5f;
-        _seqSuccess.Chain(Tween.Alpha(cgSuccess, 1, 0.25f));
-        _seqSuccess.Group(Tween.UISizeDelta(imgSuccess.rectTransform, v2Success, 0.5f,Ease.OutCirc));
-        _seqSuccess.Group(Tween.Scale(tSuccessText, 1.0f, 0.5f, Ease.OutCirc));
-        _seqSuccess.ChainDelay(1.5f);
-        _seqSuccess.Chain(Tween.Alpha(cgSuccess, 0, 0.2f,startDelay:0.2f));
-        _seqSuccess.Group(Tween.UISizeDelta(imgSuccess.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
-        _seqSuccess.OnComplete(() => cgSuccess.gameObject.SetActive(false));
+        _seqPositive = Sequence.Create();
+        _seqPositive.timeScale = 1.5f;
+        _seqPositive.Chain(Tween.Alpha(cgPositive, 1, 0.25f));
+        _seqPositive.Group(Tween.UISizeDelta(imgPositive.rectTransform, v2Positive, 0.5f,Ease.OutCirc));
+        _seqPositive.Group(Tween.Scale(tPositiveText.transform, 1.0f, 0.5f, Ease.OutCirc));
+        _seqPositive.ChainDelay(1.5f);
+        _seqPositive.Chain(Tween.Alpha(cgPositive, 0, 0.2f,startDelay:0.2f));
+        _seqPositive.Group(Tween.UISizeDelta(imgPositive.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
+        _seqPositive.OnComplete(() =>
+        {
+            block.SetActive(false);
+            cgPositive.gameObject.SetActive(false);
+        });
     }
     [Button]
-    public void DebugError()
+    public void Negative(string str)
     {
-        _seqDebugError.Stop();
-        cgDebugError.gameObject.SetActive(true);
-        Vector2 sizeDelta = v2DebugError;
+        if (_seqNegative.isAlive || _seqPositive.isAlive) return;
+        tNegativeText.text = str;
+        _seqNegative.Stop();
+        cgNegative.gameObject.SetActive(true);
+        block.SetActive(true);
+        Vector2 sizeDelta = v2Negative;
         sizeDelta.y *= 0.5f;
-        imgDebugError.rectTransform.sizeDelta = sizeDelta;
-        tDebugErrorText.localScale = Vector3.one*1.5f;
-        cgDebugError.alpha = 0;
+        imgNegative.rectTransform.sizeDelta = sizeDelta;
+        tNegativeText.transform.localScale = Vector3.one*1.5f;
+        cgNegative.alpha = 0;
         
-        _seqDebugError = Sequence.Create();
-        _seqDebugError.timeScale = 1.5f;
-        _seqDebugError.Chain(Tween.Alpha(cgDebugError, 1, 0.25f));
-        _seqDebugError.Group(Tween.UISizeDelta(imgDebugError.rectTransform, v2DebugError, 0.5f,Ease.OutCirc));
-        _seqDebugError.Group(Tween.Scale(tDebugErrorText, 1.0f, 0.5f, Ease.OutCirc));
-        _seqDebugError.ChainDelay(1.5f);
-        _seqDebugError.Chain(Tween.Alpha(cgDebugError, 0, 0.2f,startDelay:0.2f));
-        _seqDebugError.Group(Tween.UISizeDelta(imgDebugError.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
-        _seqDebugError.OnComplete(() => cgDebugError.gameObject.SetActive(false));
+        _seqNegative = Sequence.Create();
+        _seqNegative.timeScale = 1.5f;
+        _seqNegative.Chain(Tween.Alpha(cgNegative, 1, 0.25f));
+        _seqNegative.Group(Tween.UISizeDelta(imgNegative.rectTransform, v2Negative, 0.5f,Ease.OutCirc));
+        _seqNegative.Group(Tween.Scale(tNegativeText.transform, 1.0f, 0.5f, Ease.OutCirc));
+        _seqNegative.ChainDelay(1.0f);
+        _seqNegative.Chain(Tween.Alpha(cgNegative, 0, 0.2f,startDelay:0.2f));
+        _seqNegative.Group(Tween.UISizeDelta(imgNegative.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
+        _seqNegative.OnComplete(() =>
+        {
+            block.SetActive(false);
+            cgNegative.gameObject.SetActive(false);
+        });
+    }
+
+    public void Popup_Dev()
+    {
+        Negative("아직 개발중인 컨텐츠입니다.");
     }
 }

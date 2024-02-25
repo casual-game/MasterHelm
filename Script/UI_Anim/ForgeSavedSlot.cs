@@ -16,17 +16,12 @@ public class ForgeSavedSlot : MonoBehaviour
     public Image imgIcon,imgLocked;
     public ForgeBlueprint forgeBlueprint;
     public List<ForgeSavedSlot> slots = new List<ForgeSavedSlot>();
-    public Item_Weapon debugWeapon;
     public SaveManager saveManager;
     
     
     private Item_Weapon _itemWeapon;
     private Sequence _seqSlot;
 
-    public void Start()
-    {
-        SetItem(debugWeapon);
-    }
     public void Selected()
     {
         _seqSlot.Stop();
@@ -64,14 +59,30 @@ public class ForgeSavedSlot : MonoBehaviour
             imgIcon.rectTransform.localScale = weapon.scale;
             int requireNum = weapon.bpCount1 + weapon.bpCount2 + weapon.bpCount3;
             int currentNum=0;
-            if (weapon.bpWeapon1 != null) currentNum += saveManager.weaponDataLinker[weapon.bpWeapon1].count;
-            else currentNum += saveManager.resourceDataLinker[weapon.bpResource1].count;
-            if (weapon.bpWeapon2 != null) currentNum += saveManager.weaponDataLinker[weapon.bpWeapon2].count;
-            else currentNum += saveManager.resourceDataLinker[weapon.bpResource2].count;
-            if (weapon.bpWeapon3 != null) currentNum += saveManager.weaponDataLinker[weapon.bpWeapon3].count;
-            else currentNum += saveManager.resourceDataLinker[weapon.bpResource3].count;
-            tmpMakeRatio.text = Mathf.RoundToInt(100 * ((float)currentNum) / ((float)requireNum)).ToString()+"%";
+            //1
+            if (weapon.bpWeapon1 != null) currentNum += 
+                Mathf.Min(saveManager.weaponDataLinker[weapon.bpWeapon1].count,weapon.bpCount1);
+            else currentNum += 
+                Mathf.Min(saveManager.resourceDataLinker[weapon.bpResource1].count,weapon.bpCount1);
+            //2
+            if (weapon.bpWeapon2 != null) currentNum += 
+                Mathf.Min(saveManager.weaponDataLinker[weapon.bpWeapon2].count,weapon.bpCount2);
+            else currentNum += 
+                Mathf.Min(saveManager.resourceDataLinker[weapon.bpResource2].count,weapon.bpCount2);
+            //3
+            if (weapon.bpWeapon3 != null) currentNum += 
+                Mathf.Min(saveManager.weaponDataLinker[weapon.bpWeapon3].count,weapon.bpCount3);
+            else currentNum += 
+                Mathf.Min(saveManager.resourceDataLinker[weapon.bpResource3].count,weapon.bpCount3);
+            
+            int percentage = Mathf.RoundToInt(100 * ((float)currentNum) / ((float)requireNum));
+            if (percentage < 100) tmpMakeRatio.text = Mathf.Clamp(percentage, 0, 100) + "%";
+            else tmpMakeRatio.text = "준비됨";
         }
     }
 
+    public bool CheckWeapon(Item_Weapon target)
+    {
+        return target == _itemWeapon;
+    }
 }

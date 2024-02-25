@@ -16,12 +16,15 @@ public class SaveManager : MonoBehaviour
         strForgeWeaponsData = "ForgeWeaponData",
         strEquipWeaponMainData = "EquipWeaponMainData",
         strEquipWeaponSkillLData = "EquipWeaponSkillLData",
-        strEquipWeaponSkillRData = "EquipWeaponSkillRData";
+        strEquipWeaponSkillRData = "EquipWeaponSkillRData",
+        strCoinData = "CoinData",
+        strGemData = "GemData";
     public Item_Database itemDatabase;
     public List<WeaponSaveData> weaponSaveDatas = new List<WeaponSaveData>();
     public List<ResourceSaveData> resourceSaveDatas = new List<ResourceSaveData>();
-    public List<Item_Weapon> forgeWeaponDatas = new List<Item_Weapon>();
-    public Item_Weapon equipWeaponMain,equipWeaponSkillL,equipWeaponSkillR;
+    public List<int> forgeWeaponDatas = new List<int>();
+    public int equipWeaponMain,equipWeaponSkillL,equipWeaponSkillR;
+    public int coin, gem;
 
 
     public Dictionary<Item_Resource, ResourceSaveData> resourceDataLinker =
@@ -36,50 +39,60 @@ public class SaveManager : MonoBehaviour
     {
         instance = this;
         Load();
+        Save();
         resourceDataLinker = new Dictionary<Item_Resource, ResourceSaveData>();
         weaponDataLinker = new Dictionary<Item_Weapon, WeaponSaveData>();
-        foreach (var rsd in resourceSaveDatas) resourceDataLinker.Add(rsd.resource,rsd);
-        foreach (var wsd in weaponSaveDatas) weaponDataLinker.Add(wsd.weapon,wsd);
+        foreach (var rsd in resourceSaveDatas) resourceDataLinker.Add(itemDatabase.resources[rsd.resourceIndex],rsd);
+        foreach (var wsd in weaponSaveDatas) weaponDataLinker.Add(itemDatabase.weapons[wsd.weaponIndex],wsd);
     }
     private void Load()
     {
+        //인벤토리
         if (ES3.KeyExists(strResourceSaveData)) resourceSaveDatas = ES3.Load<List<ResourceSaveData>>(strResourceSaveData);
         else
         {
             resourceSaveDatas = new List<ResourceSaveData>();
             for(int i=0;i<itemDatabase.resources.Count; i++)
             {
-                var itemResource = itemDatabase.resources[i];
                 int count = 0;
                 var state = InventorySlot.SlotState.Locked;
-                resourceSaveDatas.Add(new ResourceSaveData(itemResource, count,state));
+                resourceSaveDatas.Add(new ResourceSaveData(i, count,state));
             }
         }
-        
         if (ES3.KeyExists(strWeaponSaveData)) weaponSaveDatas = ES3.Load<List<WeaponSaveData>>(strWeaponSaveData);
         else
         {
             weaponSaveDatas = new List<WeaponSaveData>();
             for(int i=0;i<itemDatabase.weapons.Count; i++)
             {
-                var itemWeapon = itemDatabase.weapons[i];
                 int count = i < 3 ? 1 : 0;
                 var state = i < 3 ? InventorySlot.SlotState.Opened : InventorySlot.SlotState.Locked;
-                weaponSaveDatas.Add(new WeaponSaveData(itemWeapon, count,state));
+                weaponSaveDatas.Add(new WeaponSaveData(i, count,state));
             }
         }
-
-        if (ES3.KeyExists(strForgeWeaponsData)) forgeWeaponDatas = ES3.Load<List<Item_Weapon>>(strForgeWeaponsData);
-        else forgeWeaponDatas = new List<Item_Weapon>();
-
-        if (ES3.KeyExists(strEquipWeaponMainData)) equipWeaponMain = ES3.Load<Item_Weapon>(strEquipWeaponMainData);
-        else equipWeaponMain = weaponSaveDatas[0].weapon;
-        
-        if (ES3.KeyExists(strEquipWeaponSkillLData)) equipWeaponSkillL = ES3.Load<Item_Weapon>(strEquipWeaponSkillLData);
-        else equipWeaponSkillL = weaponSaveDatas[1].weapon;
-        
-        if (ES3.KeyExists(strEquipWeaponSkillRData)) equipWeaponSkillR = ES3.Load<Item_Weapon>(strEquipWeaponSkillRData);
-        else equipWeaponSkillR = weaponSaveDatas[2].weapon;
+        //대장간
+        if (ES3.KeyExists(strForgeWeaponsData)) forgeWeaponDatas = ES3.Load<List<int>>(strForgeWeaponsData);
+        else
+        {
+            forgeWeaponDatas = new List<int>();
+            for (int i = 0; i < 3; i++)
+            {
+                print("newnew");
+                forgeWeaponDatas.Add(i);
+            }
+        }
+        //착용장비
+        if (ES3.KeyExists(strEquipWeaponMainData)) equipWeaponMain = ES3.Load<int>(strEquipWeaponMainData);
+        else equipWeaponMain = weaponSaveDatas[0].weaponIndex;
+        if (ES3.KeyExists(strEquipWeaponSkillLData)) equipWeaponSkillL = ES3.Load<int>(strEquipWeaponSkillLData);
+        else equipWeaponSkillL = weaponSaveDatas[1].weaponIndex;
+        if (ES3.KeyExists(strEquipWeaponSkillRData)) equipWeaponSkillR = ES3.Load<int>(strEquipWeaponSkillRData);
+        else equipWeaponSkillR = weaponSaveDatas[2].weaponIndex;
+        //돈
+        if (ES3.KeyExists(strCoinData)) coin = ES3.Load<int>(strCoinData);
+        else coin = 9999;
+        if (ES3.KeyExists(strGemData)) coin = ES3.Load<int>(strGemData);
+        else gem = 9999;
     }
     private void Save()
     {
@@ -90,31 +103,40 @@ public class SaveManager : MonoBehaviour
         ES3.Save(strEquipWeaponSkillLData,equipWeaponSkillL);
         ES3.Save(strEquipWeaponSkillRData,equipWeaponSkillR);
     }
+
+    public Item_Weapon GetWeapon(int index)
+    {
+        return itemDatabase.weapons[index];
+    }
+
+    public Item_Resource GetResource(int index)
+    {
+        return itemDatabase.resources[index];
+    }
     [Button]
     public void ClearData()
     {
         if(ES3.KeyExists(strWeaponSaveData)) ES3.DeleteKey(strWeaponSaveData);
         if(ES3.KeyExists(strResourceSaveData)) ES3.DeleteKey(strResourceSaveData);
+        if(ES3.KeyExists(strForgeWeaponsData)) ES3.DeleteKey(strForgeWeaponsData);
+        if(ES3.KeyExists(strEquipWeaponMainData)) ES3.DeleteKey(strEquipWeaponMainData);
+        if(ES3.KeyExists(strEquipWeaponSkillLData)) ES3.DeleteKey(strEquipWeaponSkillLData);
+        if(ES3.KeyExists(strEquipWeaponSkillRData)) ES3.DeleteKey(strEquipWeaponSkillRData);
+        if(ES3.KeyExists(strCoinData)) ES3.DeleteKey(strCoinData);
+        if(ES3.KeyExists(strGemData)) ES3.DeleteKey(strGemData);
     }
+    //인벤토리
     [Button]
-    public void FindResource(Item_Resource resource)
+    public void Resource_Add(Item_Resource resource,int count)
     {
-        var saveData = resourceDataLinker[resource];
-        if (saveData.slotState != InventorySlot.SlotState.Locked) return;
-        saveData.slotState = InventorySlot.SlotState.Found;
-        Save();
-    }
-    [Button]
-    public void AddResource(Item_Resource resource,int count)
-    {
-        if (count <= 0) return;
-        var saveData = resourceDataLinker[resource];
-        saveData.slotState = InventorySlot.SlotState.Opened;
+        if (count < 0) return;
+        ResourceSaveData saveData = resourceDataLinker[resource];
         saveData.count += count;
+        if(saveData.count ==0) saveData.slotState = InventorySlot.SlotState.Found;
+        else saveData.slotState = InventorySlot.SlotState.Opened;
         Save();
     }
-    [Button]
-    public bool RemoveResource(Item_Resource resource,int count)
+    public bool Resource_Remove(Item_Resource resource,int count)
     {
         var saveData = resourceDataLinker[resource];
         if (saveData.slotState == InventorySlot.SlotState.Locked) return false;
@@ -127,24 +149,16 @@ public class SaveManager : MonoBehaviour
         return true;
     }
     [Button]
-    public void FindWeapon(Item_Weapon weapon)
+    public void Weapon_Add(Item_Weapon weapon,int count)
     {
+        if (count < 0) return;
         var saveData = weaponDataLinker[weapon];
-        if (saveData.slotState != InventorySlot.SlotState.Locked) return;
-        saveData.slotState = InventorySlot.SlotState.Found;
-        Save();
-    }
-    [Button]
-    public void AddWeapon(Item_Weapon weapon,int count)
-    {
-        if (count <= 0) return;
-        var saveData = weaponDataLinker[weapon];
-        saveData.slotState = InventorySlot.SlotState.Opened;
         saveData.count += count;
+        if(saveData.count ==0) saveData.slotState = InventorySlot.SlotState.Found;
+        else saveData.slotState = InventorySlot.SlotState.Opened;
         Save();
     }
-    [Button]
-    public bool RemoveWeapon(Item_Weapon weapon,int count)
+    public bool Weapon_Remove(Item_Weapon weapon,int count)
     {
         var saveData = weaponDataLinker[weapon];
         if (saveData.slotState == InventorySlot.SlotState.Locked) return false;
@@ -156,39 +170,81 @@ public class SaveManager : MonoBehaviour
         Save();
         return true;
     }
-
-    [Button]
-    public bool AddForge(Item_Weapon weapon)
+    //대장간
+    public bool Forge_Add(Item_Weapon weapon)
     {
-        if (forgeWeaponDatas.Count<maxForgeCount && !forgeWeaponDatas.Contains(weapon))
+        int index = itemDatabase.weapons.IndexOf(weapon);
+        if (forgeWeaponDatas.Count<maxForgeCount && !forgeWeaponDatas.Contains(index))
         {
-            forgeWeaponDatas.Add(weapon);
+            forgeWeaponDatas.Add(index);
             Save();
             return true;
         }
         else return false;
     }
-    [Button]
-    public bool RemoveForge(Item_Weapon weapon)
+    public bool Forge_Remove(Item_Weapon weapon)
     {
-        if (forgeWeaponDatas.Contains(weapon))
+        int index = itemDatabase.weapons.IndexOf(weapon);
+        if (forgeWeaponDatas.Contains(index))
         {
-            forgeWeaponDatas.Remove(weapon);
+            forgeWeaponDatas.Remove(index);
             Save();
             return true;
         }
         else return false;
     }
-
+    //착용
     public void EquipUpdate(Item_Weapon main,Item_Weapon skillL,Item_Weapon skillR)
     {
-        equipWeaponMain = main;
-        equipWeaponSkillL = skillL;
-        equipWeaponSkillR = skillR;
+        equipWeaponMain = itemDatabase.weapons.IndexOf(main);
+        equipWeaponSkillL = itemDatabase.weapons.IndexOf(skillL);
+        equipWeaponSkillR = itemDatabase.weapons.IndexOf(skillR);
         Save();
     }
-    
-    
+    //돈
+    public void Coin_Add(int value)
+    {
+        coin += value;
+        Save();
+    }
+    public bool Coin_Remove(int value)
+    {
+        if (coin <= value) return false;
+        else
+        {
+            coin -= value;
+            Save();
+            return true;
+        }
+    }
+    public void Gem_Add(int value)
+    {
+        gem += value;
+        Save();
+    }
+    public bool Gem_Remove(int value)
+    {
+        if (gem <= value) return false;
+        else
+        {
+            gem -= value;
+            Save();
+            return true;
+        }
+    }
+
+    [Button]
+    public void SetDebugSetting()
+    {
+        Resource_Add(itemDatabase.resources[0],0);
+        Resource_Add(itemDatabase.resources[1],25);
+        Resource_Add(itemDatabase.resources[2],5);
+        Resource_Add(itemDatabase.resources[3],30);
+        Resource_Add(itemDatabase.resources[4],15);
+        Resource_Add(itemDatabase.resources[5],25);
+        Resource_Add(itemDatabase.resources[7],0);
+        Save();
+    }
     public void LoadAdressables(string tag)
     {
         Addressables.LoadAssetAsync<Item_Resource>(tag).Completed +=
@@ -213,10 +269,10 @@ public class SaveData
 [System.Serializable]
 public class WeaponSaveData: SaveData
 {
-    public Item_Weapon weapon;
-    public WeaponSaveData(Item_Weapon _weapon,int _count,InventorySlot.SlotState _slotState)
+    public int weaponIndex;
+    public WeaponSaveData(int _weaponIndex,int _count,InventorySlot.SlotState _slotState)
     {
-        weapon = _weapon;
+        weaponIndex = _weaponIndex;
         count = _count;
         slotState = _slotState;
     }
@@ -224,10 +280,10 @@ public class WeaponSaveData: SaveData
 [System.Serializable]
 public class ResourceSaveData: SaveData
 {
-    public Item_Resource resource;
-    public ResourceSaveData(Item_Resource _resource,int _count,InventorySlot.SlotState _slotState)
+    public int resourceIndex;
+    public ResourceSaveData(int _resourceIndex,int _count,InventorySlot.SlotState _slotState)
     {
-        resource = _resource;
+        resourceIndex = _resourceIndex;
         count = _count;
         slotState = _slotState;
     }

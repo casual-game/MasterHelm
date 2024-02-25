@@ -20,12 +20,15 @@ public partial class SideUI : MonoBehaviour
     [FoldoutGroup("Shop")] public ForgeSaved forgeSaved;
     [FoldoutGroup("Shop")] public ForgeBlueprint forgeBP;
     [FoldoutGroup("Shop")] public RawImage rtHero;
+    [FoldoutGroup("Shop")] public RectTransform rtMoney;
+    [FoldoutGroup("Shop")] public TMP_Text tmpCoin, tmpGem;
     //Private
     private Sequence _seqShop,_seqShopBanner,_seqForge;
     private float bottomBanner1, bottomBanner2, bottomBanner3;
     private static string _strFadeAmount = "_FadeAmount", _strShadowAlpha = "_ShadowAlpha";
     private bool _checkShop = false;
     private int _selection = 0;
+    private Vector2 _anchoredPosMoneyNorm, _anchoredPosMoneyForge;
 
     
     private void Setting_Shop()
@@ -33,6 +36,12 @@ public partial class SideUI : MonoBehaviour
         banner1.Setting();
         banner2.Setting();
         banner3.Setting();
+        banner1.SetItem();
+        banner2.SetItem();
+        banner3.SetItem();
+        _anchoredPosMoneyNorm = new Vector2(0, -70);
+        _anchoredPosMoneyForge = new Vector2(0, 20);
+        UpdateMoney();
     }
     public void Shop_Activate()
     {
@@ -64,7 +73,7 @@ public partial class SideUI : MonoBehaviour
     public void Shop_JustActivate(bool controlDeco ,float delay)
     {
         if (_seqShop.isAlive || _checkShop) return;
-        forgeSaved.FitUI();
+        forgeSaved.Setting();
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_page_open,0.75f);
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_shop,0.975f);
         _checkShop = true;
@@ -130,7 +139,11 @@ public partial class SideUI : MonoBehaviour
         Forage_Hide();
     }
 
-    
+    public void UpdateMoney()
+    {
+        tmpCoin.text = SaveManager.instance.coin.ToString();
+        tmpGem.text = SaveManager.instance.gem.ToString();
+    }
     public void Change()
     {
         banner1.Change(0.0f);
@@ -154,6 +167,9 @@ public partial class SideUI : MonoBehaviour
     {
         _selection = 0;
         rtHero.color = Color.white;
+        banner1.SetItem();
+        banner2.SetItem();
+        banner3.SetItem();
         ShowBanner();
         Change();
         if(twTitle.isHidingText) twTitle.StopDisappearingText();
@@ -163,11 +179,13 @@ public partial class SideUI : MonoBehaviour
         
         Forage_Hide();
     }
-
     public void Button_Always()
     {
         _selection = 1;
         rtHero.color = Color.white;
+        banner1.SetPackage();
+        banner2.SetPackage();
+        banner3.SetPackage();
         ShowBanner();
         Change();
         if(twTitle.isHidingText) twTitle.StopDisappearingText();
@@ -177,7 +195,6 @@ public partial class SideUI : MonoBehaviour
 
         Forage_Hide();
     }
-
     public void Button_Forge()
     {
         _selection = 2;
@@ -188,7 +205,7 @@ public partial class SideUI : MonoBehaviour
         tmpShopTitle.text = String.Empty;
         twTitle.ShowText("대장간");
         
-        Forage_Show(0);
+        Forage_Show(0.125f);
     }
 
     private void Forage_Show(float delay)
@@ -203,8 +220,9 @@ public partial class SideUI : MonoBehaviour
         {
             matHero.SetFloat(_strFadeAmount, curveHeroFade.Evaluate(ratio));
             matHero.SetFloat(_strShadowAlpha, curveHeroShadow.Evaluate(ratio));
-        },startDelay:delay));
-        _seqForge.Group(Tween.Color(rtHero, Color.clear, 0.25f,startDelay:delay));
+        }));
+        _seqForge.Group(Tween.Color(rtHero, Color.clear, 0.25f));
+        _seqForge.Group(Tween.UIAnchoredPosition(rtMoney, _anchoredPosMoneyForge, 0.5f, Ease.InOutCubic));
     }
 
     private void Forage_Hide()
@@ -220,5 +238,6 @@ public partial class SideUI : MonoBehaviour
             matHero.SetFloat(_strFadeAmount, curveHeroFade.Evaluate(ratio));
             matHero.SetFloat(_strShadowAlpha, curveHeroShadow.Evaluate(ratio));
         }));
+        _seqForge.Group(Tween.UIAnchoredPosition(rtMoney, _anchoredPosMoneyNorm, 0.75f, Ease.InOutCubic));
     }
 }

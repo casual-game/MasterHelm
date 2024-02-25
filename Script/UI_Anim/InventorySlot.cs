@@ -66,24 +66,24 @@ public class InventorySlot : MonoBehaviour
     public void UpdateData(WeaponSaveData data)
     {
         _itemResource = null;
-        _itemWeapon = data.weapon;
+        _itemWeapon = SaveManager.instance.GetWeapon(data.weaponIndex);
         icon.enabled = true;
-        icon.sprite = data.weapon.icon;
-        icon.rectTransform.offsetMin = new Vector2(data.weapon.left, data.weapon.bottom);
-        icon.rectTransform.offsetMax = new Vector2(-data.weapon.right, -data.weapon.top);
-        icon.rectTransform.localScale = data.weapon.scale;
+        icon.sprite = _itemWeapon.icon;
+        icon.rectTransform.offsetMin = new Vector2(_itemWeapon.left, _itemWeapon.bottom);
+        icon.rectTransform.offsetMax = new Vector2(-_itemWeapon.right, -_itemWeapon.top);
+        icon.rectTransform.localScale = _itemWeapon.scale;
         
         SetSlotState(data.slotState,data.count);
     }
     public void UpdateData(ResourceSaveData data)
     {
         _itemWeapon = null;
-        _itemResource = data.resource;
+        _itemResource = SaveManager.instance.GetResource(data.resourceIndex);
         icon.enabled = true;
-        icon.sprite = data.resource.icon;
-        icon.rectTransform.offsetMin = new Vector2(data.resource.left, data.resource.bottom);
-        icon.rectTransform.offsetMax = new Vector2(-data.resource.right, -data.resource.top);
-        icon.rectTransform.localScale = data.resource.scale;
+        icon.sprite = _itemResource.icon;
+        icon.rectTransform.offsetMin = new Vector2(_itemResource.left, _itemResource.bottom);
+        icon.rectTransform.offsetMax = new Vector2(-_itemResource.right, -_itemResource.top);
+        icon.rectTransform.localScale = _itemResource.scale;
         
         SetSlotState(data.slotState,data.count);
     }
