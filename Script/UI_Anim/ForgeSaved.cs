@@ -56,8 +56,14 @@ public class ForgeSaved : MonoBehaviour
     {
         for (int i = 0; i < SaveManager.instance.forgeWeaponDatas.Count; i++)
         {
-            slots[i].SetItem(SaveManager.instance.GetWeapon(SaveManager.instance.forgeWeaponDatas[i]));
+            Item_Weapon weapon = SaveManager.instance.GetWeapon(SaveManager.instance.forgeWeaponDatas[i]);
+            slots[i].SetItem(weapon);
         }
+    }
+
+    public void Deselect()
+    {
+        foreach (var slot in slots) slot.Deselected();
     }
     public void Show(float delay)
     {

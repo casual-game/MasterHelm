@@ -21,6 +21,7 @@ public class PopupManager : MonoBehaviour
     [FoldoutGroup("Positive")] public Image imgPositive;
     [FoldoutGroup("Positive")] public CanvasGroup cgPositive;
     [FoldoutGroup("Positive")] public TMP_Text tPositiveText;
+    [FoldoutGroup("Positive")] public CanvasGroup cgPositiveBg;
 
     [FoldoutGroup("Negative")] public Image imgNegative;
     [FoldoutGroup("Negative")] public CanvasGroup cgNegative;
@@ -102,25 +103,30 @@ public class PopupManager : MonoBehaviour
         tPositiveText.text = str;
         _seqPositive.Stop();
         cgPositive.gameObject.SetActive(true);
+        cgPositiveBg.gameObject.SetActive(true);
         block.SetActive(true);
         Vector2 sizeDelta = v2Positive;
         sizeDelta.y *= 0.5f;
         imgPositive.rectTransform.sizeDelta = sizeDelta;
-        tPositiveText.transform.localScale = Vector3.one*1.5f;
+        tPositiveText.transform.localScale = Vector3.one*3.5f;
         cgPositive.alpha = 0;
+        cgPositiveBg.alpha = 0;
         
         _seqPositive = Sequence.Create();
         _seqPositive.timeScale = 1.5f;
         _seqPositive.Chain(Tween.Alpha(cgPositive, 1, 0.25f));
         _seqPositive.Group(Tween.UISizeDelta(imgPositive.rectTransform, v2Positive, 0.5f,Ease.OutCirc));
         _seqPositive.Group(Tween.Scale(tPositiveText.transform, 1.0f, 0.5f, Ease.OutCirc));
-        _seqPositive.ChainDelay(1.5f);
-        _seqPositive.Chain(Tween.Alpha(cgPositive, 0, 0.2f,startDelay:0.2f));
-        _seqPositive.Group(Tween.UISizeDelta(imgPositive.rectTransform, sizeDelta, 0.4f,Ease.InCirc));
+        _seqPositive.Group(Tween.Alpha(cgPositiveBg, 1, 0.25f));
+        _seqPositive.ChainDelay(2.0f);
+        _seqPositive.Chain(Tween.Alpha(cgPositive, 0, 0.25f,startDelay:0.25f));
+        _seqPositive.Group(Tween.Alpha(cgPositiveBg, 0, 0.25f,startDelay:0.25f));
+        _seqPositive.Group(Tween.UISizeDelta(imgPositive.rectTransform, sizeDelta, 0.5f,Ease.InOutCirc));
         _seqPositive.OnComplete(() =>
         {
             block.SetActive(false);
             cgPositive.gameObject.SetActive(false);
+            cgPositiveBg.gameObject.SetActive(false);
         });
     }
     [Button]

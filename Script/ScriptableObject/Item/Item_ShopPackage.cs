@@ -9,4 +9,7 @@ public class Item_ShopPackage : ScriptableObject
     public string title;
     public Sprite sprite;
     public int price = 1500;
+
+    public float left, right, top, bottom;
+    public Vector3 scale;
 }

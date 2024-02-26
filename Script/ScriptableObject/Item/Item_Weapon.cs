@@ -56,6 +56,7 @@ public class Item_Weapon : ScriptableObject
             else if (bpResource2 != null) saveManager.Resource_Remove(bpResource2, bpCount2);
             if (bpWeapon3 != null) saveManager.Weapon_Remove(bpWeapon3, bpCount3);
             else if (bpResource3 != null) saveManager.Resource_Remove(bpResource3, bpCount3);
+            saveManager.Weapon_Add(this,1);
             return true;
         }
         else return false;

@@ -30,6 +30,7 @@ public class UI_Inventory : MonoBehaviour
     private Sequence _seqInventory,_seqInfo;
     private InventoryState _state;
     private (InventoryState state, int index) _selectedItem;
+    private bool isFirst;
     public void Setting()
     {
         gameObject.SetActive(false);
@@ -44,6 +45,7 @@ public class UI_Inventory : MonoBehaviour
         slotWeaponMain.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponMain));
         slotWeaponSkillL.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponSkillL));
         slotWeaponSkillR.ChangeData(saveManager.GetWeapon(saveManager.equipWeaponSkillR));
+        isFirst = true;
     }
     //인벤토리 부분 제어
     public void FitUI()
@@ -67,10 +69,15 @@ public class UI_Inventory : MonoBehaviour
     public void Open(float duration = 0.15f,float delay = 0.05f)
     {
         UpdateItemIndex(0);
-        UpdateState(InventoryState.Weapon);
-        _selectedItem.index = -1;
-        SetSelectedItem(InventoryState.Weapon,0);
-        slots[0].Selected();
+        
+        if (isFirst)
+        {
+            isFirst = false;
+            UpdateState(InventoryState.Weapon);
+            _selectedItem.index = -1;
+            SetSelectedItem(InventoryState.Weapon,0);
+            slots[0].Selected();
+        }
         _seqInventory.Stop();
         foreach (var slot in _slotImages) slot.transform.localScale = Vector3.one*0.75f;
         foreach (var slot in _slotCanvasGroups) slot.alpha = 0;

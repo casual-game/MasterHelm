@@ -32,7 +32,6 @@ public class ForgeBlueprint : MonoBehaviour
     public void Start()
     {
         SetItem(null);
-        gameObject.SetActive(false);
     }
     //세팅,애니메이션
     public void SetItem(Item_Weapon weapon)
@@ -131,7 +130,6 @@ public class ForgeBlueprint : MonoBehaviour
     {
         if (forgeOpened) return;
         forgeOpened = true;
-        
         gameObject.SetActive(true);
         _seqForgeBP.Stop();
         cgTitle.alpha = 0;
@@ -202,11 +200,12 @@ public class ForgeBlueprint : MonoBehaviour
         bool created = _currentWeapon.Create(saveManager);
         if (created)
         {
-            forgeSaved.UpdateData();
             SetItem(null);
             saveManager.Coin_Remove(_createCoin);
             saveManager.Forge_Remove(_currentWeapon);
-            sideUI.UpdateMoney();
+            forgeSaved.UpdateData();
+            forgeSaved.Deselect();
+            sideUI.UpdateMoney_Anim(1.75f);
         }
         
         _tButtonPunch.Stop();

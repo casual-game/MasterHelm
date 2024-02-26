@@ -22,8 +22,9 @@ public partial class SideUI : MonoBehaviour
     [FoldoutGroup("Shop")] public RawImage rtHero;
     [FoldoutGroup("Shop")] public RectTransform rtMoney;
     [FoldoutGroup("Shop")] public TMP_Text tmpCoin, tmpGem;
+    [FoldoutGroup("Shop")] public Image imgCoin, imgGem;
     //Private
-    private Sequence _seqShop,_seqShopBanner,_seqForge;
+    private Sequence _seqShop,_seqShopBanner,_seqForge,_seqMoney;
     private float bottomBanner1, bottomBanner2, bottomBanner3;
     private static string _strFadeAmount = "_FadeAmount", _strShadowAlpha = "_ShadowAlpha";
     private bool _checkShop = false;
@@ -139,8 +140,34 @@ public partial class SideUI : MonoBehaviour
         Forage_Hide();
     }
 
+    public void UpdateMoney_Anim(float delay)
+    {
+        float speed = 750f;
+        int beforeCoin = int.Parse(tmpCoin.text);
+        int afterCoin = SaveManager.instance.coin;
+        int beforeGem = int.Parse(tmpGem.text);
+        int afterGem = SaveManager.instance.gem;
+
+        _seqMoney.Stop();
+        _seqMoney = Sequence.Create();
+        if (beforeCoin != afterCoin)
+        {
+            _seqMoney.Group(Tween.Custom(beforeCoin, afterCoin,
+                Mathf.Abs(beforeCoin - afterCoin) / speed, onValueChange:
+                val => tmpCoin.text = Mathf.RoundToInt(val).ToString(),startDelay:delay));
+        }
+
+        if (beforeGem != afterGem)
+        {
+            _seqMoney.Group(Tween.Custom(beforeGem, afterGem,
+                Mathf.Abs(beforeGem - afterGem) / speed, onValueChange:
+                val => tmpGem.text = Mathf.RoundToInt(val).ToString(),startDelay:delay));
+        }
+    }
+
     public void UpdateMoney()
     {
+        _seqMoney.Stop();
         tmpCoin.text = SaveManager.instance.coin.ToString();
         tmpGem.text = SaveManager.instance.gem.ToString();
     }

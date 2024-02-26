@@ -42,6 +42,7 @@ public class ShopBanner : MonoBehaviour
     
     public void Setting()
     {
+        
         tmpTitle.text = string.Empty;
         tmpPrice.text = string.Empty;
         _bottom = rt.rect.size.y*0.375f;
@@ -197,6 +198,9 @@ public class ShopBanner : MonoBehaviour
         foreach (var banner in banners) banner.main.SetActive(false);
         bannerPackage.main.SetActive(true);
         bannerPackage.icon.sprite = package.sprite;
+        bannerPackage.icon.rectTransform.offsetMin = new Vector2(package.left, package.bottom);
+        bannerPackage.icon.rectTransform.offsetMax = new Vector2(-package.right, -package.top);
+        bannerPackage.icon.rectTransform.localScale = package.scale;
     }
     [Button]
     public void SetItem()
@@ -256,6 +260,7 @@ public class ShopBanner : MonoBehaviour
             _seq = Sequence.Create();
             _seq.Group(Tween.PunchScale(transform, Vector3.one * -0.1f, 0.25f, 2));   
         }
+        PopupManager.instance.Negative("아이템 구매는 아직 개발중입니다.");
     }
 }
 [System.Serializable]
