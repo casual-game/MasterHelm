@@ -119,7 +119,7 @@ public partial class Monster_Boss : Monster
             _hitStrongTime = Time.time;
             
             Vector3 pos = transform.position;
-            CamArm.instance.Tween_Impact(transform,particleScale,damage);
+            //CamArm.instance.Tween_Impact(transform,particleScale,damage);
             //GameManager.Instance.Shockwave(pos);
             Effect_Hit_Counter();
             Hero.Blink(0.5f);

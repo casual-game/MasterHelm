@@ -49,6 +49,7 @@ public class ForgeBlueprint : MonoBehaviour
         }
         else
         {
+            SoundManager.Play(SoundContainer_StageSelect.instance.sound_forge,0.125f);
             if(weapon.bpWeapon1 != null) SetBPWeapon(weapon.bpWeapon1,slots[0],weapon.bpCount1
             ,saveManager.weaponDataLinker[weapon.bpWeapon1].count);
             else if(weapon.bpResource1 != null) SetBPResource(weapon.bpResource1,slots[0],weapon.bpCount1
@@ -146,6 +147,7 @@ public class ForgeBlueprint : MonoBehaviour
         _seqForgeBP.Group(Tween.Scale(tMain, 1, 0.5f, Ease.OutCubic,startDelay: delay));
         _seqForgeBP.Group(Tween.Alpha(cgTitle, 1, 0.2f,startDelay:0.125f + delay));
         _seqForgeBP.Group(Tween.Scale(tTitle, 1, 0.375f, Ease.OutCubic,startDelay:0.125f + delay));
+        SetItem(null);
     }
     public void Hide()
     {
@@ -171,11 +173,10 @@ public class ForgeBlueprint : MonoBehaviour
     //제작
     public void CreateBtn_Coin()
     {
-        print("1");
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         if (_currentWeapon == null)
         {
             PopupManager.instance.Negative("먼저 제작 대상을 선택하세요!");
-            print("2");
             return;
         }
         bool canCreate = _currentWeapon.CanCreate(saveManager) && saveManager.coin >= _createCoin;
@@ -190,7 +191,21 @@ public class ForgeBlueprint : MonoBehaviour
     }
     public void CreateBtn_Gem()
     {
-        
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+        if (_currentWeapon == null)
+        {
+            PopupManager.instance.Negative("먼저 제작 대상을 선택하세요!");
+            return;
+        }
+        bool canCreate = _currentWeapon.CanCreate(saveManager) && saveManager.gem >= _createGem;
+        if (canCreate)
+        {
+            PopupManager.instance.Create_Begin(true,_currentWeapon);
+        }
+        else
+        {
+            PopupManager.instance.Negative("재료 혹은 재화가 부족합니다!");
+        }
     }
     public void Create_WithCoin()
     {
@@ -200,6 +215,14 @@ public class ForgeBlueprint : MonoBehaviour
         bool created = _currentWeapon.Create(saveManager);
         if (created)
         {
+            foreach (var slot in forgeSaved.slots)
+            {
+                if (slot.CheckWeapon(_currentWeapon))
+                {
+                    slot.SetItem(null);
+                    break;
+                }
+            }
             SetItem(null);
             saveManager.Coin_Remove(_createCoin);
             saveManager.Forge_Remove(_currentWeapon);
@@ -230,7 +253,11 @@ public class ForgeBlueprint : MonoBehaviour
                 }
             }
             SetItem(null);
-            saveManager.Coin_Remove(_createCoin);
+            saveManager.Gem_Remove(_createGem);
+            saveManager.Forge_Remove(_currentWeapon);
+            forgeSaved.UpdateData();
+            forgeSaved.Deselect();
+            sideUI.UpdateMoney_Anim(1.75f);
         }
         
         _tButtonPunch.Stop();

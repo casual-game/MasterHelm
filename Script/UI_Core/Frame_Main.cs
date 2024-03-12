@@ -22,8 +22,11 @@ public class Frame_Main : MonoBehaviour
     private float i_hp_height = 41.2131f, i_hplerp_height=39.186f;
     
     [TitleGroup("MP 데이터")] public Image[] i_mp_slots = new Image[3];
-    [TitleGroup("MP 데이터")] public Sprite sprite_mp_charged, sprite_mp_charging;
     [TitleGroup("MP 데이터")] public ParticleImage[] p_usemp = new ParticleImage[3];
+    [TitleGroup("MP 데이터")] public Sprite sprite_mp_charged, sprite_mp_charging;
+
+    [TitleGroup("메뉴")] public TMP_Text tmpCoin, tmpGem;
+    
 
     private int mp_Slot_Capacity,mp_Slot_CurrentCapacity;
     private float i_mp_width = 83.1372f;
@@ -50,6 +53,8 @@ public class Frame_Main : MonoBehaviour
         i_hp_main.rectTransform.sizeDelta = new Vector2(width_main, i_hp_height);
         tmp_hp.text = currenthp + "/" + maxhp + " (" + 100 + "%)";
         Charge_MP(100);
+        tmpCoin.text = SaveManager.instance.coin.ToString();
+        tmpGem.text = SaveManager.instance.gem.ToString();
     }
     public bool HP_Damage(int damage=10)
     {

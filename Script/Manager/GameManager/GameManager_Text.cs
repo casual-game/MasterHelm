@@ -71,5 +71,7 @@ public partial class GameManager: MonoBehaviour
         s_turn_l = "Turn_L",
         s_turn_r = "Turn_R",
         s_greyscaleblend = "_GreyscaleBlend",
-        s_alphaoutlinecolor = "_AlphaOutlineColor";
+        s_alphaoutlinecolor = "_AlphaOutlineColor",
+        s_screen_colour = "_Screen_Colour",
+        s_saturation = "_saturation";
 }

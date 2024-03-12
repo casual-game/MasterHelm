@@ -58,6 +58,13 @@ public class ForgeSaved : MonoBehaviour
         {
             Item_Weapon weapon = SaveManager.instance.GetWeapon(SaveManager.instance.forgeWeaponDatas[i]);
             slots[i].SetItem(weapon);
+            slots[i].Deselected();
+        }
+
+        for (int i = SaveManager.instance.forgeWeaponDatas.Count; i < 6; i++)
+        {
+            slots[i].SetItem(null);
+            slots[i].Deselected();
         }
     }
 

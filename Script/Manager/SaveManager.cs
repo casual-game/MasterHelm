@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;using Sirenix.OdinInspector.Editor;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.Serialization;
 
@@ -33,7 +32,7 @@ public class SaveManager : MonoBehaviour
         new Dictionary<Item_Weapon, WeaponSaveData>();
 
     public int maxForgeCount = 6;
-    private AsyncOperationHandle handle;
+    
 
     public void Awake()
     {
@@ -75,11 +74,6 @@ public class SaveManager : MonoBehaviour
         else
         {
             forgeWeaponDatas = new List<int>();
-            for (int i = 0; i < 3; i++)
-            {
-                print("newnew");
-                forgeWeaponDatas.Add(i);
-            }
         }
         //착용장비
         if (ES3.KeyExists(strEquipWeaponMainData)) equipWeaponMain = ES3.Load<int>(strEquipWeaponMainData);
@@ -193,6 +187,11 @@ public class SaveManager : MonoBehaviour
         }
         else return false;
     }
+    public bool Forge_Contain(Item_Weapon weapon)
+    {
+        int index = itemDatabase.weapons.IndexOf(weapon);
+        return forgeWeaponDatas.Contains(index);
+    }
     //착용
     public void EquipUpdate(Item_Weapon main,Item_Weapon skillL,Item_Weapon skillR)
     {
@@ -244,18 +243,6 @@ public class SaveManager : MonoBehaviour
         Resource_Add(itemDatabase.resources[5],25);
         Resource_Add(itemDatabase.resources[7],0);
         Save();
-    }
-    public void LoadAdressables(string tag)
-    {
-        Addressables.LoadAssetAsync<Item_Resource>(tag).Completed +=
-            (AsyncOperationHandle<Item_Resource> resource) =>
-            {
-                handle = resource;
-            };
-    }
-    public void UnloadAdressables()
-    {
-        Addressables.Release(handle);
     }
 }
 

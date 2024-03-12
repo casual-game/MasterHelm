@@ -28,11 +28,12 @@ public class ForgeSavedSlot : MonoBehaviour
         transform.localScale = Vector3.one*0.8f;
         _seqSlot = Sequence.Create();
         _seqSlot.Chain(Tween.PunchScale(transform, Vector3.one * -0.25f, 0.2f, 2));
-        //if (_itemWeapon == null) return;
         imgSelected.gameObject.SetActive(true);
         imgMakeRatio.color = cImgMakeSelected;
         foreach (var slot in slots) if(slot!=this) slot.Deselected();
         forgeBlueprint.SetItem(_itemWeapon);
+        
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
     }
     public void Deselected()
     {

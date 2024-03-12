@@ -156,7 +156,7 @@ public partial class SelectUI : MonoBehaviour
       }
 
       float speed = Mathf.Clamp(finalMoveVec.magnitude / Time.deltaTime,0,10);
-      windSource.volume = Mathf.Lerp(windSource.volume, speed*0.0625f, Time.deltaTime * 6.5f);
+      windSource.volume = Mathf.Lerp(windSource.volume, speed*0.075f, Time.deltaTime * 8.5f);
    }
 
    public void MoveMap(Vector3 pos)

@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public class ShopButton : MonoBehaviour
 {
-    public SoundData sound_selected;
-    public float soundDelay;
     public List<ShopButton> anotherButtons = new List<ShopButton>();
     public Image img;
     public Color cSelected, cDeselected;
@@ -21,7 +19,6 @@ public class ShopButton : MonoBehaviour
     {
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         if (_selected) return;
-        SoundManager.Play(sound_selected,soundDelay);
         _selected = true;
         onSelected.Invoke();
         foreach (var btn in anotherButtons) btn.Deselected();

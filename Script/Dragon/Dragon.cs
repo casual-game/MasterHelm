@@ -150,7 +150,7 @@ public class Dragon : MonoBehaviour
         _seq.ChainCallback(() => CamArm.instance.Set_FollowTarget(false));
         _seq.ChainCallback(() =>
             {
-                CamArm.instance.Tween_Zoom(duration*0.15f,duration*0.3f,duration*0.4f,0,3.5f);
+                CamArm.instance.Tween_Zoom(duration*0.15f,duration*0.3f,duration*0.4f,0,3.5f,false);
                 CamArm.instance.Tween_Angle(duration*0.15f,duration*0.3f,duration*0.4f,-12.5f);
             })
             .Chain(Tween.Custom(0, 1, duration, onValueChange: ratio =>

@@ -20,5 +20,10 @@ public class SoundContainer_StageSelect : SoundContainer
         sound_page_close,
         sound_shop,
         sound_book,
-        sound_stage_selected;
+        sound_forge,
+        sound_stage_selected,
+        sound_popup_success,
+        sound_popup_positive,
+        sound_popup_negative,
+        sound_popup_create;
 }

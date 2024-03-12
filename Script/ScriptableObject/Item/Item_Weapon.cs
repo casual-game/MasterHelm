@@ -2,10 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.Serialization;
+
 [CreateAssetMenu(fileName = "Weapon", menuName = "Item/Weapon", order = 1)]
 public class Item_Weapon : ScriptableObject
 {
-    [TitleGroup("세팅")]
+    [TitleGroup("세팅")] 
+    [FoldoutGroup("세팅/Setting")] public AssetReference refHighPolyWeaponL;
+    [FoldoutGroup("세팅/Setting")] public AssetReference refHighPolyWeaponR;
+    [FoldoutGroup("세팅/Setting")] public float camDeg;
+    [FoldoutGroup("세팅/Setting")] public Vector3 camLocalPos;
+    [FoldoutGroup("세팅/Setting")] public WeaponHighpolyType highpolyType;
     [FoldoutGroup("세팅/Setting")] public Data_WeaponPack weaponPack;
     [FoldoutGroup("세팅/Setting")] public Sprite icon;
     [FoldoutGroup("세팅/Setting")] public string title; 
@@ -38,11 +46,11 @@ public class Item_Weapon : ScriptableObject
         if (bpWeapon1 != null && saveManager.weaponDataLinker[bpWeapon1].count >= bpCount1) check1 = true;
         else if (bpResource1 != null && saveManager.resourceDataLinker[bpResource1].count >= bpCount1) check1 = true;
         
-        if (bpWeapon2 != null && saveManager.weaponDataLinker[bpWeapon2].count >= bpCount1) check2 = true;
-        else if (bpResource2 != null && saveManager.resourceDataLinker[bpResource2].count >= bpCount1) check2 = true;
+        if (bpWeapon2 != null && saveManager.weaponDataLinker[bpWeapon2].count >= bpCount2) check2 = true;
+        else if (bpResource2 != null && saveManager.resourceDataLinker[bpResource2].count >= bpCount2) check2 = true;
         
-        if (bpWeapon3 != null && saveManager.weaponDataLinker[bpWeapon3].count >= bpCount1) check3 = true;
-        else if (bpResource3 != null && saveManager.resourceDataLinker[bpResource3].count >= bpCount1) check3 = true;
+        if (bpWeapon3 != null && saveManager.weaponDataLinker[bpWeapon3].count >= bpCount3) check3 = true;
+        else if (bpResource3 != null && saveManager.resourceDataLinker[bpResource3].count >= bpCount3) check3 = true;
         
         return check1 && check2 && check3;
     }
@@ -62,3 +70,4 @@ public class Item_Weapon : ScriptableObject
         else return false;
     }
 }
+public enum WeaponHighpolyType {Greatsword=0,DoubleAxe=1,Hammer=2}

@@ -110,6 +110,7 @@ public partial class SideUI : MonoBehaviour
             matHero.SetFloat(_strFadeAmount, curveHeroFade.Evaluate(ratio));
             matHero.SetFloat(_strShadowAlpha, curveHeroShadow.Evaluate(ratio));
         }, startDelay: 0.125f));
+        EquipWeapon(SaveManager.instance.GetWeapon(SaveManager.instance.equipWeaponMain),true);
     }
     public void Shop_JustDeactivate(bool controlDeco)
     {
@@ -192,6 +193,7 @@ public partial class SideUI : MonoBehaviour
 
     public void Button_Limited()
     {
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_shop,0.125f);
         _selection = 0;
         rtHero.color = Color.white;
         banner1.SetItem();
@@ -208,6 +210,7 @@ public partial class SideUI : MonoBehaviour
     }
     public void Button_Always()
     {
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_shop,0.125f);
         _selection = 1;
         rtHero.color = Color.white;
         banner1.SetPackage();
@@ -224,6 +227,7 @@ public partial class SideUI : MonoBehaviour
     }
     public void Button_Forge()
     {
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_forge,0.125f);
         _selection = 2;
         HideBanner();
         Change();
@@ -231,7 +235,6 @@ public partial class SideUI : MonoBehaviour
         if(twTitle.isShowingText) twTitle.StopShowingText();
         tmpShopTitle.text = String.Empty;
         twTitle.ShowText("대장간");
-        
         Forage_Show(0.125f);
     }
 
@@ -250,6 +253,7 @@ public partial class SideUI : MonoBehaviour
         }));
         _seqForge.Group(Tween.Color(rtHero, Color.clear, 0.25f));
         _seqForge.Group(Tween.UIAnchoredPosition(rtMoney, _anchoredPosMoneyForge, 0.5f, Ease.InOutCubic));
+        forgeSaved.UpdateData();
     }
 
     private void Forage_Hide()

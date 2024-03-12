@@ -218,7 +218,22 @@ public partial class Hero : MonoBehaviour
         Effect_Hit_Strong(isBloodBottom);
         return true;
     }
-    
+
+    private void Core_Cancel()
+    {
+        Deactivate_CustomMaterial();
+        CamArm.instance.Tween_ResetTimescale();
+        _animator.SetBool(GameManager.s_leftstate,false);
+        _animator.SetBool(GameManager.s_hit,false);
+        _animator.ResetTrigger(GameManager.s_state_change);
+        Set_AttackIndex(-1);
+        Equipment_UpdateTrail(weaponPack_Normal,false,false,false);
+        Equipment_UpdateTrail(weaponPack_StrongL,false,false,false);
+        Equipment_UpdateTrail(weaponPack_StrongR,false,false,false);
+        Equipment_Equip(null);
+        Equipment_CancelEffect();
+        _animBase.isFinished = true;
+    }
     //이벤트 시스템
     private void E_BTN_Action_Begin()
     {

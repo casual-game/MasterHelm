@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GPUInstancer;
 using LeTai.TrueShadow;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -63,7 +64,12 @@ public class MasterHelm_DevTool : MonoBehaviour
             count++;
             image.raycastTarget = false;
         }
-        print(count+"개의 이미지의 RaycastTarget 비활성화!");
+        foreach (var text in GetComponentsInChildren<TMP_Text>(true))
+        {
+            count++;
+            text.raycastTarget = false;
+        }
+        print(count+"개의 RaycastTarget 비활성화!");
     }
     #endif
 }

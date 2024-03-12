@@ -260,7 +260,8 @@ public class ShopBanner : MonoBehaviour
             _seq = Sequence.Create();
             _seq.Group(Tween.PunchScale(transform, Vector3.one * -0.1f, 0.25f, 2));   
         }
-        PopupManager.instance.Negative("아이템 구매는 아직 개발중입니다.");
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+        PopupManager.instance.Negative("아이템 구매는 아직 개발중입니다.",1.5f);
     }
 }
 [System.Serializable]

@@ -27,6 +27,9 @@ public class UI_Inventory : MonoBehaviour
     public List<InventorySlot> slots = new List<InventorySlot>();
     public List<Image> _slotImages = new List<Image>();
     public List<CanvasGroup> _slotCanvasGroups = new List<CanvasGroup>();
+    public ForgeSaved forgeSaved;
+    public ForgeBlueprint forgeBlueprint;
+    public SideUI sideUI;
     private Sequence _seqInventory,_seqInfo;
     private InventoryState _state;
     private (InventoryState state, int index) _selectedItem;
@@ -75,9 +78,10 @@ public class UI_Inventory : MonoBehaviour
             isFirst = false;
             UpdateState(InventoryState.Weapon);
             _selectedItem.index = -1;
-            SetSelectedItem(InventoryState.Weapon,0);
+            SetSelectedItem(InventoryState.Weapon,0,false);
             slots[0].Selected();
         }
+        else UpdateState(_state);
         _seqInventory.Stop();
         foreach (var slot in _slotImages) slot.transform.localScale = Vector3.one*0.75f;
         foreach (var slot in _slotCanvasGroups) slot.alpha = 0;
@@ -91,8 +95,6 @@ public class UI_Inventory : MonoBehaviour
             {
                 _seqInventory.Group(Tween.Scale(_slotImages[h * 3 + w].transform, 1, 
                     duration, Ease.OutCubic,startDelay: startDelay));
-                //_seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
-                    //duration, Ease.OutSine,startDelay: startDelay));
                 _seqInventory.Group(Tween.Alpha(_slotCanvasGroups[h * 3 + w],1,
                     duration, Ease.OutCubic,startDelay: startDelay));
             }
@@ -107,7 +109,7 @@ public class UI_Inventory : MonoBehaviour
         _seqInfo = Sequence.Create();
         _seqInfo.Chain(Tween.Alpha(cgInfo, 1, 0.375f));
         _seqInfo.Group(Tween.Scale(tInfo, 0.95f, 0.375f, Ease.OutCubic));
-
+        sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
     }
     public void Reroll_Weapon()
     {
@@ -123,6 +125,7 @@ public class UI_Inventory : MonoBehaviour
     }
     private void Reroll(InventoryState inventoryState)
     {
+        _state = inventoryState;
         Close(0.15f,0.05f,true);
         float startDelay = 0.3f;
         for (int h = 3; h >= 0; h--)
@@ -132,13 +135,13 @@ public class UI_Inventory : MonoBehaviour
                 _seqInventory.Group(Tween.Delay(startDelay, () => UpdateState(inventoryState)));
                 _seqInventory.Group(Tween.Scale(_slotImages[h * 3 + w].transform, 1, 
                     0.15f, Ease.OutCubic,startDelay: startDelay));
-                //_seqInventory.Group(Tween.Color(_slotImages[h * 3 + w],Color.white,
-                  //  0.15f, Ease.OutSine,startDelay: startDelay));
                 _seqInventory.Group(Tween.Alpha(_slotCanvasGroups[h * 3 + w],1,
                     0.15f, Ease.OutCubic,startDelay: startDelay));
             }
             startDelay += 0.05f;
         }
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_book,0.15f);
+        sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
     }
     private void Page()
     {
@@ -192,7 +195,7 @@ public class UI_Inventory : MonoBehaviour
             slots[i].tmpIndex.text = ((page + 1) * (i + 1)).ToString();
         }
     }
-    public void UpdateState(InventoryState inventoryState)
+    private void UpdateState(InventoryState inventoryState)
     {
         foreach (var slot in slots) slot.Deselected();
         
@@ -225,7 +228,7 @@ public class UI_Inventory : MonoBehaviour
         }
         if(_selectedItem.state == inventoryState)  slots[_selectedItem.index].SelectedWithoutAnim();
     }
-    public void SetSelectedItem(InventoryState state, int index)
+    public void SetSelectedItem(InventoryState state, int index,bool anim)
     {
         if (_selectedItem.state == state && _selectedItem.index == index) return;
         _selectedItem = (state, index);
@@ -236,6 +239,7 @@ public class UI_Inventory : MonoBehaviour
             tmpItemTitle.text = weapon.title;
             tmpItemInfo.text = String.Empty;
             twItemInfo.ShowText(weapon.info);
+            if(anim) sideUI.EquipWeapon(weapon,false);
         }
         else if (state == InventoryState.Resource)
         {
@@ -243,6 +247,7 @@ public class UI_Inventory : MonoBehaviour
             tmpItemTitle.text = resource.title;
             tmpItemInfo.text = String.Empty;
             twItemInfo.ShowText(resource.info);
+            if(anim) sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
         }
         fitterItemTitle.SetLayoutHorizontal();
         //Info 시퀸스
@@ -256,21 +261,10 @@ public class UI_Inventory : MonoBehaviour
         if (state == InventoryState.Weapon)
         {
             var data = saveManager.weaponSaveDatas[index];
-            if (data.count > 0)
-            {
-                ShowBtnGroup_Origin();
-                RemoveBtnGroup_ForgeForge();
-            }
-            else
-            {
-                if(!saveManager.forgeWeaponDatas.Contains(data.weaponIndex)) ShowBtnGroup_AddForge();
-                else ShowBtnGroup_GoForge();
-                RemoveBtnGroup_OriginSelect();
-            }
+            ShowBtnGroup_Origin();
         }
         else
         {
-            RemoveBtnGroup_ForgeForge();
             RemoveBtnGroup_OriginSelect();
         }
     }
@@ -278,20 +272,21 @@ public class UI_Inventory : MonoBehaviour
     public EauipmentSlot_Weapon slotWeaponMain, slotWeaponSkillL, slotWeaponSkillR;
     public List<CanvasGroup> cgBtnGroupsOrigin = new List<CanvasGroup>();
     public List<CanvasGroup> cgBtnGroupSelectSlot = new List<CanvasGroup>();
-    public CanvasGroup cgBtnAddForge,cgBtnGoForge;
+    public TMP_Text tmpBtnForge;
     public Transform equipFlagT;
     private bool isBtnGroupOrigin,isBtnForgeOrigin;
     private bool isBGOriginSelectActivated, isBGForgeForgeActivated;
     private Sequence seqBtnGroups_OriginSelect,seqBtnGroups_ForgeForge,seqEquip;
     //착용 부분 제어
-    [Button]
     public void ShowBtnGroup_Origin()
     {
+        UpdateForgeButton();
         if (isBtnGroupOrigin && isBGOriginSelectActivated) return;
         isBtnGroupOrigin = true;
         isBGOriginSelectActivated = true;
         seqBtnGroups_OriginSelect.Stop();
         seqBtnGroups_OriginSelect = Sequence.Create();
+        
         //생성
         foreach (var cgBtn in cgBtnGroupsOrigin)
         {
@@ -312,10 +307,10 @@ public class UI_Inventory : MonoBehaviour
             foreach (var cgBtn in cgBtnGroupSelectSlot) cgBtn.gameObject.SetActive(false);
         });
     }
-    [Button]
     public void ShowBtnGroup_SelectSlot()
     {
         if (!isBtnGroupOrigin && isBGOriginSelectActivated) return;
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         isBGOriginSelectActivated = true;
         isBtnGroupOrigin = false;
         seqBtnGroups_OriginSelect.Stop();
@@ -349,7 +344,6 @@ public class UI_Inventory : MonoBehaviour
         _seqInfo = Sequence.Create();
         _seqInfo.Group(Tween.PunchScale(tInfo, Vector3.one*-0.1f, 0.2f, 2));
     }
-    [Button]
     public void RemoveBtnGroup_OriginSelect()
     {
         if (!isBGOriginSelectActivated) return;
@@ -376,73 +370,6 @@ public class UI_Inventory : MonoBehaviour
             foreach (var cgBtn in cgBtnGroupsOrigin) cgBtn.gameObject.SetActive(false);
         });
     }
-    [Button]
-    public void ShowBtnGroup_AddForge()
-    {
-        if (isBtnForgeOrigin && isBGForgeForgeActivated) return;
-        isBGForgeForgeActivated = true;
-        isBtnForgeOrigin = true;
-        seqBtnGroups_ForgeForge.Stop();
-        seqBtnGroups_ForgeForge = Sequence.Create();
-        //생성
-        cgBtnAddForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnAddForge, 1,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnAddForge.transform, 1.0f, 0.2f, Ease.OutCubic));
-        //제거1
-        cgBtnGoForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnGoForge, 0,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnGoForge.transform, 0.8f, 0.2f, Ease.OutCubic));
-        //콜백
-        seqBtnGroups_ForgeForge.OnComplete(() =>
-        {
-            cgBtnAddForge.gameObject.SetActive(true);
-            cgBtnGoForge.gameObject.SetActive(false);
-        });
-    }
-    [Button]
-    public void ShowBtnGroup_GoForge()
-    {
-        if (!isBtnForgeOrigin&& isBGForgeForgeActivated) return;
-        isBGForgeForgeActivated = true;
-        isBtnForgeOrigin = false;
-        seqBtnGroups_ForgeForge.Stop();
-        seqBtnGroups_ForgeForge = Sequence.Create();
-        //생성
-        cgBtnGoForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnGoForge, 1,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnGoForge.transform, 1.0f, 0.2f, Ease.OutCubic));
-        //제거1
-        cgBtnAddForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnAddForge, 0,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnAddForge.transform, 0.8f, 0.2f, Ease.OutCubic));
-        //콜백
-        seqBtnGroups_ForgeForge.OnComplete(() =>
-        {
-            cgBtnAddForge.gameObject.SetActive(false);
-            cgBtnGoForge.gameObject.SetActive(true);
-        });
-    }
-    [Button]
-    public void RemoveBtnGroup_ForgeForge()
-    {
-        if (!isBGForgeForgeActivated) return;
-        isBGForgeForgeActivated = false;
-        seqBtnGroups_ForgeForge = Sequence.Create();
-        //제거1
-        cgBtnAddForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnAddForge, 0,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnAddForge.transform, 0.8f, 0.2f, Ease.OutCubic)); 
-        //제거2
-        cgBtnGoForge.gameObject.SetActive(true);
-        seqBtnGroups_ForgeForge.Group(Tween.Alpha(cgBtnGoForge, 0,0.2f));
-        seqBtnGroups_ForgeForge.Group(Tween.Scale(cgBtnGoForge.transform, 0.8f, 0.2f, Ease.OutCubic)); 
-        //끝나고
-        seqBtnGroups_ForgeForge.OnComplete(() =>
-        {
-            cgBtnAddForge.gameObject.SetActive(false);
-            cgBtnGoForge.gameObject.SetActive(false);
-        });
-    }
 
     public void Equip_WeaponMain()
     {
@@ -454,6 +381,7 @@ public class UI_Inventory : MonoBehaviour
         if (slotWeaponSkillR.weapon == currentWeapon) slotWeaponSkillR.ChangeData(currentSlotWeapon);
         slotWeaponMain.ChangeData(currentWeapon);
         saveManager.EquipUpdate(slotWeaponMain.weapon,slotWeaponSkillL.weapon,slotWeaponSkillR.weapon);
+        PopupManager.instance.Positive("무기를 메인 슬롯에 장착했습니다.",1.5f);
         //시퀸스
         seqEquip.Stop();
         seqEquip = Sequence.Create();
@@ -469,6 +397,8 @@ public class UI_Inventory : MonoBehaviour
         if (slotWeaponSkillR.weapon == currentWeapon) slotWeaponSkillR.ChangeData(currentSlotWeapon);
         slotWeaponSkillL.ChangeData(currentWeapon);
         saveManager.EquipUpdate(slotWeaponMain.weapon,slotWeaponSkillL.weapon,slotWeaponSkillR.weapon);
+        PopupManager.instance.Positive("무기를 스킬L 슬롯에 장착했습니다.",1.5f);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         //시퀸스
         seqEquip.Stop();
         seqEquip = Sequence.Create();
@@ -484,10 +414,50 @@ public class UI_Inventory : MonoBehaviour
         if (slotWeaponSkillL.weapon == currentWeapon) slotWeaponSkillL.ChangeData(currentSlotWeapon);
         slotWeaponSkillR.ChangeData(currentWeapon);
         saveManager.EquipUpdate(slotWeaponMain.weapon,slotWeaponSkillL.weapon,slotWeaponSkillR.weapon);
+        PopupManager.instance.Positive("무기를 스킬R 슬롯에 장착했습니다.",1.5f);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
         //시퀸스
         seqEquip.Stop();
         seqEquip = Sequence.Create();
         seqEquip.Chain(Tween.PunchScale(equipFlagT, Vector3.one * -0.1f,0.25f,2));
+    }
+    public void Btn_Forge()
+    {
+        Item_Weapon weapon = saveManager.GetWeapon(_selectedItem.index);
+        //도면 삭제
+        if (saveManager.Forge_Contain(weapon))
+        {
+            saveManager.Forge_Remove(weapon);
+            PopupManager.instance.Negative("대장간에서 도면이 삭제되었습니다.",1.5f);
+        }
+        //도면 저장
+        else
+        {
+            if (saveManager.forgeWeaponDatas.Count >= 6)
+            {
+                PopupManager.instance.Negative("저장된 도면이 너무 많습니다!",1.5f);
+                return;
+            }
+            saveManager.Forge_Add(weapon);
+            PopupManager.instance.Positive("대장간에 도면이 저장되었습니다!",1.5f);
+        }
+        if(_state == InventoryState.Weapon) slots[_selectedItem.index].UpdateData(saveManager.weaponDataLinker[weapon]);
+        UpdateForgeButton();
+        forgeSaved.UpdateData();
+        forgeBlueprint.SetItem(null);
+        SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+        //Info 시퀸스
+        _seqInfo.Stop();
+        Transform tInfo = cgInfo.transform;
+        tInfo.localScale = Vector3.one*0.95f;
+        cgInfo.alpha = 1;
+        _seqInfo = Sequence.Create();
+        _seqInfo.Group(Tween.PunchScale(tInfo, Vector3.one*-0.1f, 0.2f, 2));
+    }
+    private void UpdateForgeButton()
+    {
+        if (!saveManager.forgeWeaponDatas.Contains(_selectedItem.index)) tmpBtnForge.text = "도면 저장";
+        else tmpBtnForge.text = "도면 삭제";
     }
     //기타
     public void Popup_Dev()

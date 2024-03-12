@@ -19,6 +19,7 @@ public partial class GameManager : MonoBehaviour
         _dragon.gameObject.SetActive(false);
         roomIndex = 0;
         heightFog.fogHeightEnd = Get_Room().startPoint.position.y - 3.75f;
+        Directing_Ready();
     }
     
     [TitleGroup("인게임 구역 인스펙터")]
@@ -34,21 +35,24 @@ public partial class GameManager : MonoBehaviour
     private Tween _tFog;
 
     [Button]
-    public void Enter_Title()
+    public void Directing_Ready()
     {
-        CamArm.instance.Tween_FadeOut();
-    }
-    [Button]
-    public void Title_Ingame()
-    {
-        roomIndex = 0;
+        CamArm.instance.Tween_GameReady();
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
-        CamArm.instance.Tween_FadeIn();
+        roomIndex = 0;
+    }
+    [Button]
+    public void Directing_Start()
+    {
         
+        CamArm.instance.Set_FollowTarget(false);
+        CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
+        CamArm.instance.Tween_GameStart();
         _seqIngame.Stop();
         _seqIngame = Sequence.Create(useUnscaledTime: true);
-        _seqIngame.ChainDelay(0.5f)
+        _seqIngame
+            .ChainDelay(0.5f)
             .ChainCallback(() =>
             {
                 _dragon.Call();
@@ -58,14 +62,8 @@ public partial class GameManager : MonoBehaviour
         
         
     }
-    public Room_Area Get_Room()
-    {
-        if (roomIndex == 0) return Room1;
-        else if (roomIndex == 1) return Room2;
-        else return Room3;
-    }
     [Button]
-    public void MoveRoom()
+    public void Directing_MoveRoom()
     {
         CamArm.instance.UI_Clear();
         CamArm.instance.Set_FollowTarget(false);
@@ -77,6 +75,12 @@ public partial class GameManager : MonoBehaviour
         _tFog = Tween.Custom(heightFog.fogHeightEnd, endRoom.startPoint.position.y - 3.75f,
             2.0f, onValueChange: heightEnd => heightFog.fogHeightEnd = heightEnd);
 
+    }
+    public Room_Area Get_Room()
+    {
+        if (roomIndex == 0) return Room1;
+        else if (roomIndex == 1) return Room2;
+        else return Room3;
     }
     #if UNITY_EDITOR
     void OnDrawGizmos()
