@@ -108,6 +108,10 @@ public partial class Hero : MonoBehaviour
     {
         return _speedRatio;
     }
+    public Animator Get_Animator()
+    {
+        return _animator;
+    }
 
     public MoveState Get_HeroMoveState()
     {

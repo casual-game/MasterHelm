@@ -14,7 +14,7 @@ public class Dragon : MonoBehaviour
     public SkinnedMeshRenderer body;
     public Transform sitPoint;
     public AnimationCurve flightCurve,flightRotCurve,flightAddvecCurve;
-
+    public UI_IngameResult uiIngameResult;
     [HideInInspector] public float degDiff;
     [HideInInspector] public Transform destination = null;
     
@@ -203,6 +203,80 @@ public class Dragon : MonoBehaviour
             FlyAway(2.0f);
         }
     }
+    public void FinalFlight(Room_Area currentRoom,CamArm targetCam)
+    {
+        bool moved = false;
+        destination = targetCam.transform;
+        _seq.Complete();
+        Transform t = transform;
+        //마운트 위치로 이동
+        var mountData = Get_MountData(1.5f, currentRoom, Hero.instance.transform);
+        Vector3 mountPos = mountData.pos;
+        Vector3 beginPos = mountPos + mountData.rot*new Vector3(0, 5, -7.5f);
+        t.SetPositionAndRotation(beginPos,mountData.rot);
+        Activate();
+        anim.SetTrigger(GameManager.s_call);
+        _seq = Sequence.Create();
+        _seq.Chain(Tween.Position(t, beginPos, mountPos, 1.0f, Ease.InOutSine))
+            .Group(Tween.Delay(0.65f, () => anim.SetTrigger(GameManager.s_transition)))
+            .ChainDelay(1.0f);
+        //회전(마운트는 애니매이션 이벤트로 실행.)
+        var dismountData = Get_DismountData(1.5f, targetCam);
+        Vector3 distvec = dismountData.pos - mountPos;
+        distvec.y = 0;
+        degDiff = Mathf.Atan2(distvec.x, distvec.z) * Mathf.Rad2Deg - t.rotation.eulerAngles.y;
+        while (degDiff < -180) degDiff += 360;
+        while (degDiff > 180) degDiff -= 360;
+        if (Mathf.Abs(degDiff)>90)
+        {
+            if(degDiff < -90) _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_turn_l));
+            else if(degDiff > 90) _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_turn_r));
+            anim.SetBool(GameManager.s_turn, false);
+            _seq.ChainDelay(0.5f);
+        }
+        else if (Mathf.Abs(degDiff)>20f)
+        {
+            if(degDiff<-20) _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_turn_l));
+            if(degDiff>20) _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_turn_r));
+            anim.SetBool(GameManager.s_turn, true);
+            _seq.Chain(Tween.Rotation(t, t.rotation * Quaternion.Euler(0, degDiff, 0), 
+                Mathf.Abs(degDiff)*0.0125f, Ease.InOutSine));
+            _seq.ChainDelay(0.5f);
+        }
+        else
+        {
+            _seq.Chain(Tween.Rotation(t, t.rotation * Quaternion.Euler(0, degDiff, 0), 
+                Mathf.Abs(degDiff)*0.01f, Ease.OutSine));
+        }
+        //목적지까지 비행 (Flight)
+        Vector3 flightBegin = mountPos;
+        Vector3 flightFin = mountPos;
+        _seq.ChainCallback(() =>
+        {
+            anim.SetFloat(GameManager.s_flight_x, -1.0f);
+            anim.SetFloat(GameManager.s_flight_y, 0.5f);
+            anim.SetTrigger(GameManager.s_flight);
+            flightBegin = transform.position;
+            flightFin = flightBegin + Vector3.up * 3;
+            Hero.instance.Get_Animator().SetBool(GameManager.s_finish,true);
+            foreach (var p in Hero.instance.finishBeginParticles) p.Play();
+        });
+        _seq.Group(Tween.Delay(0.1f, ()=>
+        {
+            Hero.instance.Effect_Smoke();
+            foreach (var p in Hero.instance.finishFinParticles) p.Play();
+        }));
+        _seq.ChainDelay(0.375f);
+        _seq.Chain(Tween.Custom(0, 1, 0.25f, onValueChange: ratio =>
+        {
+            transform.position = Vector3.Lerp(flightBegin, flightFin, ratio);
+        }));
+        
+        _seq.Group(Tween.Delay(0.5f, ()=>
+        {
+            uiIngameResult.Success_Begin();
+        }));
+    }
     public void FlyAway(float delay)
     {
         _seq.Stop();
@@ -256,6 +330,14 @@ public class Dragon : MonoBehaviour
         Transform point = area.startPoint;
         Quaternion _r = point.rotation * Quaternion.Euler(0,135,0);
         Vector3 _p = point.position + point.rotation * Quaternion.Euler(0, 0, 0)*Vector3.back*dist;
+
+        return (_p, _r);
+    }
+    public (Vector3 pos, Quaternion rot) Get_DismountData(float dist,CamArm cam)
+    {
+        Transform point = cam.mainCam.transform;
+        Quaternion _r = Quaternion.Inverse(Quaternion.LookRotation(point.forward));
+        Vector3 _p = point.position;
 
         return (_p, _r);
     }

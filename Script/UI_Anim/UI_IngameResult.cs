@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AssetKits.ParticleImage;
 using Beautify.Universal;
 using LeTai.Asset.TranslucentImage;
 using PrimeTween;
@@ -24,10 +25,12 @@ public class UI_IngameResult : MonoBehaviour
     [FoldoutGroup("Main/button")] public CanvasGroup cgBtnParent; 
     [FoldoutGroup("Main/deco")] public CanvasGroup cgDeco;
     [FoldoutGroup("Main/deco")] public Transform decoShadow, decoRoot;
-    [FoldoutGroup("Main/score")] public Color cNorm, cSuccess, cFailed;
+    [FoldoutGroup("Main/score")] public Color cNorm, cSuccess, cFailed,cScoreSuccess;
     [FoldoutGroup("Main/score")] public List<ContentSizeFitter> fittersScore = new List<ContentSizeFitter>();
     [FoldoutGroup("Main/score")] public Image imgStar1, imgStar2, imgStar3;
+    [FoldoutGroup("Main/score")] public Image imgScoreBg1, imgScoreBg2, imgScoreBg3;
     [FoldoutGroup("Main/score")] public Color cStarActivated,cStarDeactivated;
+    [FoldoutGroup("Main/score")] public ParticleImage piStarGlow1, piStarGlow2, piStarGlow3,piStarImpact1,piStarImpact2,piStarImpact3;
     [FoldoutGroup("Main/score")] public TMP_Text 
         tmpTimeCurrent,
         tmpTimeTarget,
@@ -44,7 +47,6 @@ public class UI_IngameResult : MonoBehaviour
     private Sequence _seqFrame,_seqButton,_seqEarnable,_seqDeco,_seqFailed,_seqFailedCount;
     private RectTransform _rtFrameL, _rtFrameR,_rtEarnableItem,_rtBtnParent;
     private Vector2 _anchoredPosFrameL, _anchoredPosFrameR,_anchoredPosBtnParent,_anchoredPosEarnableItem;
-
     private void Awake()
     {
         _rtFrameL = cgL.GetComponent<RectTransform>();
@@ -94,7 +96,7 @@ public class UI_IngameResult : MonoBehaviour
     public void Pause_Begin()
     {
         _resultState = ResultState.Pause;
-        Pause_Score();
+        Score_Instantly();
         imgBGL.spriteBlending = 0.1f;
         imgBGR.spriteBlending = 0.1f;
         imgBGL.sprite = spritePause;
@@ -110,7 +112,7 @@ public class UI_IngameResult : MonoBehaviour
         cgSuccessTitle.gameObject.SetActive(false);
         cgFailedTitle.gameObject.SetActive(false);
         //기타 효과들
-        Frame_Activate(Ease.InOutCubic,1,2);
+        Frame_Activate(new Color(1,1,1,0.2f),Ease.InOutCubic,1,2);
         Button_Activate(true,true,false);
         Earnable_Activate();
         Deco_Activate();
@@ -129,57 +131,6 @@ public class UI_IngameResult : MonoBehaviour
         Earnable_Deactivate();
         Deco_Deactivate();
         CamArm.instance.Tween_UIPurkinje(0.0f,0.25f,0.25f);
-    }
-    public void Pause_Score()
-    {
-        int currentTime = 133;
-        int currentScore = 450;
-        int currentCombo = 25;
-
-        if (currentTime <= stageData.targetTime)
-        {
-            imgStar1.color = cStarActivated;
-            tmpTimeCurrent.color = cSuccess;
-        }
-        else
-        {
-            imgStar1.color = cStarDeactivated;
-            tmpTimeCurrent.color = cFailed;
-        }
-        tmpTimeCurrent.text = (currentTime/60)+":"+((currentTime%60) < 10? "0": String.Empty)+(currentTime%60);
-        tmpTimeTarget.text = (stageData.targetTime/60)+":"+(stageData.targetTime%60);
-
-        if (currentScore >= stageData.targetScore)
-        {
-            imgStar2.color = cStarActivated;
-            tmpScoreCurrent.color = cSuccess;
-        }
-        else
-        {
-            imgStar2.color = cStarDeactivated;
-            tmpScoreCurrent.color = cFailed;
-        }
-        tmpScoreCurrent.text = currentScore.ToString();
-        tmpScoreTarget.text = stageData.targetScore.ToString();
-
-        if (currentCombo >= stageData.targetCombo)
-        {
-            imgStar3.color = cStarActivated;
-            tmpComboCurrent.color = cSuccess;
-        }
-        else
-        {
-            imgStar3.color = cStarDeactivated;
-            tmpComboCurrent.color = cFailed;
-        }
-        tmpComboCurrent.text = currentCombo.ToString();
-        tmpComboTarget.text = stageData.targetCombo.ToString();
-
-        foreach (var fitter in fittersScore)
-        {
-            fitter.enabled = false;
-            fitter.enabled = true;
-        }
     }
     #endregion
     #region Success
@@ -207,10 +158,17 @@ public class UI_IngameResult : MonoBehaviour
         cgFailedTitle.gameObject.SetActive(false);
         //기타 효과들
         float playSpeed = 0.75f;
-        Frame_Activate(Ease.InOutBack,playSpeed,5);
+        Frame_Activate(new Color(1,1,1,60.0f/255.0f)
+            ,Ease.InOutBack,playSpeed,-10,true,0.0f);
         Button_Activate(true,false,false,playSpeed);
         Deco_Activate(playSpeed);
-        CamArm.instance.Tween_UIPurkinje(0.0f,0.5f/playSpeed);
+        float duration = 0.375f;
+        CamArm.instance.Tween_UIPurkinje(0.0f,duration/playSpeed);
+        CamArm.instance.Tween_UICompositionDirecting(true,duration/playSpeed,Ease.InOutCirc);
+        //CamArm.instance.Tween_UIChromatic(true,0.01f,duration);
+        CamArm.instance.Tween_UILensDirt(3.0f,duration);
+        CamArm.instance.Tween_UISpeedline(true, duration,0.3f);
+        Score_Sequence();
     }
     [FoldoutGroup("Success/data")][Button]
     public void Success_Fin()
@@ -224,15 +182,11 @@ public class UI_IngameResult : MonoBehaviour
         Button_Deactivate(true,false);
         Deco_Deactivate();
         CamArm.instance.Tween_UIPurkinje(0.0f,0.25f);
+        CamArm.instance.Tween_UICompositionDirecting(false,0.25f,Ease.InOutCirc);
+        //CamArm.instance.Tween_UIChromatic(false,0.00f,0.5f);
+        CamArm.instance.Tween_UILensDirt(0.0f,0.5f);
+        CamArm.instance.Tween_UISpeedline(false, 0.5f);
     }
-    public void Success_Score()
-    {
-        int currentTime = 123;
-        int currentScore = 450;
-        int currentCombo = 25;
-    }
-
-    
     #endregion
     #region Failed
     [TitleGroup("Failed")]
@@ -262,7 +216,7 @@ public class UI_IngameResult : MonoBehaviour
         float playSpeed = 0.75f;
         //Revive_Activate();
         CamArm.instance.Tween_ResetTimescale();
-        Frame_Activate(Ease.InOutCubic,playSpeed,2,false);
+        Frame_Activate(new Color(1,1,1,0.2f),Ease.InOutCubic,playSpeed,5,false);
         Button_Activate(true,false,true,playSpeed);
         Deco_Activate(playSpeed);
         Failed_Activate(playSpeed);
@@ -277,16 +231,15 @@ public class UI_IngameResult : MonoBehaviour
         cgSuccessTitle.gameObject.SetActive(false);
         cgFailedTitle.gameObject.SetActive(true);
         //기타 효과들
-        Frame_Deactivate(Ease.InOutCubic,1,false);
-        Button_Deactivate(true,false);
-        Deco_Deactivate();
-        Failed_Deactivate();
-        Earnable_Deactivate();
-        CamArm.instance.Tween_UIPurkinje(0.0f,0.5f);
-        print("failed fin");
+        float playSpeed = 1.5f;
+        Frame_Deactivate(Ease.InOutCubic,playSpeed,true);
+        Button_Deactivate(true,false,0.2f,playSpeed);
+        Deco_Deactivate(playSpeed);
+        Failed_Deactivate(playSpeed);
+        Earnable_Deactivate(playSpeed);
+        CamArm.instance.Tween_UIPurkinje(0.0f,0.5f/playSpeed);
     }
     #endregion
-
     #region Popup
     [TitleGroup("Popup")]
     [FoldoutGroup("Popup/Revive")] public Image imgCreate,createBG;
@@ -354,7 +307,6 @@ public class UI_IngameResult : MonoBehaviour
     {
         if(popupCreate) Revive_Fin();
     }
-
     public void Revive()
     {
         Hero.instance.Spawn();
@@ -363,16 +315,232 @@ public class UI_IngameResult : MonoBehaviour
         print("revive");
     }
     #endregion
-    
+
+    #region Score
+
+    private Sequence _seqScore;
+    public void Score_Instantly()
+    {
+        int currentTime = GetTime();
+        int currentScore = GetScore();
+        int currentCombo = GetCombo();
+        //목표에 따라 색상 변경
+        Score_UpdateTimeColor(currentTime);
+        Score_UpdateScoreColor(currentScore);
+        Score_UpdateComboColor(currentCombo);
+        //텍스트 업데이트
+        Score_UpdateTime(currentTime);
+        Score_UpdateScore(currentScore);
+        Score_UpdateCombo(currentCombo);
+        //ContentSizeFitter
+        Score_Fit();
+    }
+    public void Score_Sequence()
+    {
+        
+        _seqScore.Stop();
+        _seqScore = Sequence.Create(useUnscaledTime:true);
+        int currentTime = GetTime();
+        int currentScore = GetScore();
+        int currentCombo = GetCombo();
+
+        int midTime = 0;
+        int midScore = 0;
+        int midCombo = 0;
+
+        tmpTimeCurrent.color = cFailed;
+        tmpScoreCurrent.color = cFailed;
+        tmpComboCurrent.color = cFailed;
+        imgStar1.color = Color.clear;
+        imgStar2.color = Color.clear;
+        imgStar3.color = Color.clear;
+        Color normColor = new Color(0, 0, 0, 0.8313726f);
+        imgScoreBg1.color = normColor;
+        imgScoreBg2.color = normColor;
+        imgScoreBg3.color = normColor;
+        tmpTimeCurrent.color = cNorm;
+        tmpScoreCurrent.color = cNorm;
+        tmpComboCurrent.color = cNorm;
+        tmpTimeCurrent.text = String.Empty;
+        tmpScoreCurrent.text = String.Empty;
+        tmpComboCurrent.text = String.Empty;
+        Score_Fit();
+        //Slot1
+        float duration = 0.85f;
+        float delay = 0;
+        bool success = Score_TimeSuccess(currentTime);
+        _seqScore.Group(Tween.Custom(0, currentTime,duration, onValueChange: val =>
+            {
+                midTime = Mathf.FloorToInt(val);
+                tmpTimeCurrent.color = Score_TimeSuccess(midTime) ? cSuccess : cFailed;
+                Score_UpdateTime(midTime);
+                Score_Fit();
+            },startDelay:delay));
+        _seqScore.Group(Tween.Scale(imgStar1.transform, Vector3.one * 8.0f, 
+            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
+            () =>
+            {
+                if (success) piStarImpact1.Play();
+                CamArm.instance.Tween_Shake(0.35f, 30, Vector3.one * 0.125f, Ease.OutSine);
+                CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
+            }));
+        itemGroup.Item1(duration + delay,success);
+        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow1.Play()));
+        _seqScore.Group(Tween.Color(imgStar1,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        _seqScore.Group(Tween.Color(imgScoreBg1, success? cScoreSuccess: Color.red, 
+            normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
+        //Slot2
+        duration = 0.85f;
+        delay = 1;
+        success = Score_ScoreSuccess(currentScore);
+        _seqScore.Group(Tween.Custom(0, currentScore,duration, onValueChange: val =>
+        {
+            midScore = Mathf.FloorToInt(val);
+            tmpScoreCurrent.color = Score_ScoreSuccess(midScore) ? cSuccess : cFailed;
+            Score_UpdateScore(midScore);
+            Score_Fit();
+        },startDelay:delay));
+        _seqScore.Group(Tween.Scale(imgStar2.transform, Vector3.one * 8.0f, 
+            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
+            () =>
+            {
+                if (success) piStarImpact2.Play();
+                CamArm.instance.Tween_Shake(0.35f, 30, Vector3.one * 0.125f, Ease.OutSine);
+                CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
+            }));
+        itemGroup.Item2(duration + delay,success);
+        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow2.Play()));
+        _seqScore.Group(Tween.Color(imgStar2,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        _seqScore.Group(Tween.Color(imgScoreBg2, success? cScoreSuccess: Color.red, 
+            normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
+        //Slot3
+        duration = 0.85f;
+        delay = 2;
+        success = Score_ComboSuccess(currentCombo);
+        _seqScore.Group(Tween.Custom(0, currentCombo,duration, onValueChange: val =>
+        {
+            midCombo = Mathf.FloorToInt(val);
+            tmpComboCurrent.color = Score_ComboSuccess(midCombo) ? cSuccess : cFailed;
+            Score_UpdateCombo(midCombo);
+            Score_Fit();
+        },startDelay:delay));
+        _seqScore.Group(Tween.Scale(imgStar3.transform, Vector3.one * 8.0f, 
+            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
+            () =>
+            {
+                if (success) piStarImpact3.Play();
+                CamArm.instance.Tween_Shake(0.35f, 30, Vector3.one * 0.125f, Ease.OutSine);
+                CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
+                CamArm.instance.Tween_Bloom(0.1f,0.1f,0.75f,15);
+                CamArm.instance.Tween_Radial(0.1f,0.1f,0.75f,0.15f);
+            }));
+        itemGroup.Item3(duration + delay,success);
+        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow3.Play()));
+        _seqScore.Group(Tween.Color(imgStar3,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        _seqScore.Group(Tween.Color(imgScoreBg3, success? cScoreSuccess: Color.red, 
+            normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
+    }
+    private int GetTime()
+    {
+        return Mathf.FloorToInt(Time.time);
+    }
+    private int GetScore()
+    {
+        return 450;
+    }
+    private int GetCombo()
+    {
+        return 20;
+    }
+
+    private bool Score_TimeSuccess(int currentTime)
+    {
+        return currentTime <= stageData.targetTime;
+    }
+    private bool Score_ScoreSuccess(int currentScore)
+    {
+        return currentScore >= stageData.targetScore;
+    }
+    private bool Score_ComboSuccess(int currentCombo)
+    {
+        return currentCombo >= stageData.targetCombo;
+    }
+    private void Score_UpdateTimeColor(int currentTime)
+    {
+        if (Score_TimeSuccess(currentTime))
+        {
+            //imgStar1.color = cStarActivated;
+            tmpTimeCurrent.color = cSuccess;
+        }
+        else
+        {
+            //imgStar1.color = cStarDeactivated;
+            tmpTimeCurrent.color = cFailed;
+        }
+    }
+    private void Score_UpdateScoreColor(int currentScore)
+    {
+        if (Score_ScoreSuccess(currentScore))
+        {
+            //imgStar2.color = cStarActivated;
+            tmpScoreCurrent.color = cSuccess;
+        }
+        else
+        {
+            //imgStar2.color = cStarDeactivated;
+            tmpScoreCurrent.color = cFailed;
+        }
+    }
+    private void Score_UpdateComboColor(int currentCombo)
+    {
+        if (Score_ComboSuccess(currentCombo))
+        {
+            //imgStar3.color = cStarActivated;
+            tmpComboCurrent.color = cSuccess;
+        }
+        else
+        {
+            //imgStar3.color = cStarDeactivated;
+            tmpComboCurrent.color = cFailed;
+        }
+    }
+    private void Score_UpdateTime(int currentTime)
+    {
+        tmpTimeCurrent.text = (currentTime/60)+":"+((currentTime%60) < 10? "0": String.Empty)+(currentTime%60);
+        tmpTimeTarget.text = (stageData.targetTime/60)+":"+(stageData.targetTime%60);
+    }
+    private void Score_UpdateScore(int currentScore)
+    {
+        tmpScoreCurrent.text = currentScore.ToString();
+        tmpScoreTarget.text = stageData.targetScore.ToString();
+    }
+    private void Score_UpdateCombo(int currentCombo)
+    {
+        tmpComboCurrent.text = currentCombo.ToString();
+        tmpComboTarget.text = stageData.targetCombo.ToString();
+    }
+    private void Score_Fit()
+    {
+        foreach (var fitter in fittersScore)
+        {
+            fitter.enabled = false;
+            fitter.enabled = true;
+        }
+    }
+    #endregion
     
     #region 서브 엘리먼트
-    private void Frame_Activate(Ease ease = Ease.InOutCubic,float playSpeed=1.0f,int zoomStrength=1,bool useStop = true)
+    private void Frame_Activate(Color imgBGColor,Ease ease = Ease.InOutCubic,
+        float playSpeed=1.0f,int zoomStrength=1,bool useStop = true,float stopScale = 0.0f)
     {
         _rtFrameL.gameObject.SetActive(false);
         _rtFrameL.gameObject.SetActive(true);
         _rtFrameR.gameObject.SetActive(true);
         imgBG.gameObject.SetActive(true);
-        if(useStop) CamArm.instance.Tween_UIStopped(true,0.5f,0);
+        if(useStop) CamArm.instance.Tween_UIStopped(true,0.5f,0,stopScale);
         CamArm.instance.Tween_UIZoom(true,0.5f/playSpeed,0,ease,zoomStrength);
         cgL.alpha = 0;
         cgR.alpha = 0;
@@ -387,7 +555,7 @@ public class UI_IngameResult : MonoBehaviour
         _seqFrame.Group(Tween.UIAnchoredPosition(_rtFrameR, _anchoredPosFrameR, 0.375f, Ease.OutBack));
         _seqFrame.Group(Tween.Alpha(cgL, 1, 0.2f));
         _seqFrame.Group(Tween.Alpha(cgR, 1, 0.2f));
-        _seqFrame.Group(Tween.Color(imgBG, Color.black, 0.5f,startDelay:0.0f,ease:Ease.OutCubic));
+        _seqFrame.Group(Tween.Color(imgBG, imgBGColor, 0.5f,startDelay:0.0f,ease:Ease.OutCubic));
     }
     private void Frame_Deactivate(Ease ease = Ease.InOutCubic,float playSpeed=1.0f,bool useStop = true)
     {
@@ -395,7 +563,6 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UIZoom(false,0.5f,0.25f,ease);
         cgL.alpha = 1;
         cgR.alpha = 1;
-        imgBG.color = Color.black;
         float amount = Screen.width * 0.04625f;
         _seqFrame.Stop();
         _rtFrameL.anchoredPosition = _anchoredPosFrameL;

@@ -9,6 +9,8 @@ using Sirenix.OdinInspector;
 using SSCS;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -38,21 +40,22 @@ public partial class CamArm : MonoBehaviour
     //Private
     private Vector3 _camBossVec,_camAttackVec;
     private float _camAttackVecDist,_zoomAttackVecFinalRatio = 1;
-    private Transform _camT;
+    private Transform _camT,_addT;
     private Camera[] _cams;
     private Tween t_cambossvec,t_camattackvec,t_time,t_shake,t_chromatic,t_purkinjeLuminanceThreshold,
-        tUIStopped,tInvert,tShakeDeathHero;
+        tUIStopped,tInvert,tShakeDeathHero,tUIRadial,tUIChromatic,tUILensDirt,tUISpeedline;
     private Sequence s_speedline, s_fade, s_cloud, s_angle, seqUIZoom, seqBloom,seqRadial;
-    private Sequence s_frame,s_vignette,s_zoom;
+    private Sequence s_frame,s_vignette,s_zoom,seqUICompositionDirecting;
     private int id_radial;
     private Hero _hero;
     private bool attackVecActivating = false;
     private bool followTarget = false;
-    private bool _uiStopped = false, _uiZoom = false;
+    private bool _uiStopped, _uiZoom,_uiChromatic,_uiRadial,_uiSpeedline;
     public void Setting()
     {
         instance = this;
         _camT = transform.GetChild(0);
+        _addT = _camT.GetChild(0);
         mainCam = GetComponentInChildren<Camera>();
         _cams = GetComponentsInChildren<Camera>();
         transform.position = target.position + addVec;
@@ -60,6 +63,11 @@ public partial class CamArm : MonoBehaviour
         _hero = target.GetComponentInParent<Hero>();
         Setting_UI();
         uiElementFrame.Setting(false);
+
+        _uiStopped = false;
+        _uiZoom = false;
+        _uiChromatic = false;
+        _uiRadial = false;
     }
 
     void LateUpdate()
@@ -137,6 +145,13 @@ public partial class CamArm : MonoBehaviour
         iTitleBG.raycastTarget = true;
         Time.timeScale = 1.0f;
         uiElementFrame.RevealInstantly();
+        BeautifySettings.settings.chromaticAberrationIntensity.value = 0.001f;
+        BeautifySettings.settings.lensDirtIntensity.value = 0;
+        mSpeedline.SetColor(GameManager.s_colour,Color.clear);
+        mRadialblur.SetFloat(GameManager.s_bluramount,0);
+        BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0;
+        BeautifySettings.settings.lutIntensity.value = 0.6f;
+        BeautifySettings.settings.contrast.value = 1.05f;
     }
     public void Tween_GameStart()
     {
@@ -327,6 +342,7 @@ public partial class CamArm : MonoBehaviour
     //싱글 이펙트. 복합에서 호출한다.
     public void Tween_Radial(float begin,float delay,float fin,float intensity)
     {
+        if (_uiRadial) return;
         seqRadial.Stop();
         seqRadial = Sequence.Create(useUnscaledTime:true);
         seqRadial.Chain(Tween.MaterialProperty(mRadialblur, id_radial, intensity, begin));
@@ -394,6 +410,7 @@ public partial class CamArm : MonoBehaviour
     }
     public void Tween_Speedline(float begin, float delay, float fin,Color color,float speed = 0.675f)
     {
+        if (_uiSpeedline) return;
         Color clearColor = color;
         clearColor.a = 0;
         float duration = begin + delay + fin;
@@ -433,12 +450,14 @@ public partial class CamArm : MonoBehaviour
     }
     public void Tween_Chromatic(float strength,float duration,Ease ease,float startDelay)
     {
+        if (_uiChromatic) return;
         t_chromatic.Stop();
         t_chromatic = Tween.Custom(strength, 0.001f, duration, ease: ease, useUnscaledTime: true,startDelay: startDelay,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
     }
     public void Tween_Chromatic(float strength,float duration,Ease ease)
     {
+        if (_uiChromatic) return;
         t_chromatic.Stop();
         t_chromatic = Tween.Custom(strength, 0.001f, duration, ease: ease, useUnscaledTime: true,
             onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
@@ -491,12 +510,12 @@ public partial class CamArm : MonoBehaviour
         },startDelay:delay,useUnscaledTime:true);
 
     }
-    public void Tween_UIStopped(bool stop,float duration, float delay)
+    public void Tween_UIStopped(bool stop,float duration, float delay,float stopScale = 0.0f)
     {
         float startTimeScale = Time.timeScale;
         _uiStopped = stop;
         tUIStopped.Stop();
-        tUIStopped = Tween.Custom(startTimeScale, stop ? 0.0f : 1.0f, duration, onValueChange: val =>
+        tUIStopped = Tween.Custom(startTimeScale, stop ? stopScale : 1.0f, duration, onValueChange: val =>
         {
             Time.timeScale = val;
         }, useUnscaledTime: true);
@@ -510,6 +529,111 @@ public partial class CamArm : MonoBehaviour
         seqUIZoom = Sequence.Create(useUnscaledTime:true);
         foreach (var cam in _cams)seqUIZoom.Group(Tween.CameraOrthographicSize(cam,
             zoom ? orthographicSize + 0.125f*zoomStrength : orthographicSize, duration, ease,startDelay:delay));
+    }
+
+    public void Tween_UIRadial(bool radial,float intensity,float duration)
+    {
+        seqRadial.Stop();
+        tUIRadial.Stop();
+        _uiRadial = radial;
+        if (radial)
+        {
+            tUIRadial = Tween.MaterialProperty(mRadialblur, id_radial, intensity, duration,useUnscaledTime:true);
+        }
+        else
+        {
+            tUIRadial = Tween.MaterialProperty(mRadialblur, id_radial, 0, duration,useUnscaledTime:true);
+        }
+    }
+    public void Tween_UIChromatic(bool chromatic, float intensity, float duration)
+    {
+        t_chromatic.Stop();
+        tUIChromatic.Stop();
+        _uiChromatic = chromatic;
+
+        if (_uiChromatic)
+        {
+            Tween.Custom(0.001f, intensity, duration, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        }
+        else
+        {
+            Tween.Custom(BeautifySettings.settings.chromaticAberrationIntensity.value, 0.001f, 
+                duration, useUnscaledTime: true,
+                onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
+        }
+    }
+    public void Tween_UICompositionDirecting(bool rotate,float duration,Ease ease)
+    {
+        seqUICompositionDirecting.Stop();
+        seqUICompositionDirecting = Sequence.Create(useUnscaledTime:true);
+        if (rotate)
+        {
+            Quaternion rot = Quaternion.Euler(-5,transform.rotation.eulerAngles.y,20);
+            seqUICompositionDirecting.Group(Tween.Rotation(transform, rot, duration, ease));
+            seqUICompositionDirecting.Group(Tween.LocalPosition(_addT,
+                new Vector3(-0.25f, 0.0f, 0), duration, ease));
+            seqUICompositionDirecting.Group(Tween.LocalRotation(_addT,
+                new Vector3(1.65f, -2.5f, -12.38f), duration, ease));
+            seqUICompositionDirecting.Group(Tween.Custom(0, 1.0f, duration
+                , onValueChange: ratio =>
+                {
+                    BeautifySettings.settings.lutIntensity.value = Mathf.Lerp(0.6f, 0.8f, ratio);
+                    BeautifySettings.settings.contrast.value = Mathf.Lerp(1.05f, 1.1f, ratio);
+                }));
+            seqUICompositionDirecting.ChainDelay(0.45f);
+            seqUICompositionDirecting.OnComplete(() =>
+            {
+                float begin = 0.25f, delay = 0.25f, fin = 1.0f;
+                Tween_Radial(begin, delay, fin, 0.15f);
+                Tween_Bloom(begin, delay, fin, 10.0f);
+            });
+        }
+        else
+        {
+            Quaternion rot = Quaternion.Euler(0,transform.rotation.eulerAngles.y,0);
+            seqUICompositionDirecting.Group(Tween.Rotation(transform, rot, duration, ease));
+            seqUICompositionDirecting.Group(Tween.LocalPosition(_addT,
+                new Vector3(0, 0.0f, 0), duration, ease));
+            seqUICompositionDirecting.Group(Tween.LocalRotation(_addT,
+                new Vector3(0, 0, 0), duration, ease));
+            seqUICompositionDirecting.Group(Tween.Custom(0, 1.0f, duration
+                , onValueChange: ratio =>
+                {
+                    BeautifySettings.settings.lutIntensity.value = Mathf.Lerp(0.8f, 0.6f, ratio);
+                    BeautifySettings.settings.contrast.value = Mathf.Lerp(1.1f, 1.05f, ratio);
+                }));
+        }
+    }
+    public void Tween_UILensDirt(float intensity,float duration)
+    {
+        tUILensDirt.Stop();
+        float startVal = BeautifySettings.settings.lensDirtIntensity.value;
+        tUILensDirt = Tween.Custom(startVal, intensity, duration,useUnscaledTime:true,
+            onValueChange: val =>BeautifySettings.settings.lensDirtIntensity.value = val);
+    }
+
+    public void Tween_UISpeedline(bool speedline, float duration, float speed = 0.675f)
+    {
+        s_speedline.Stop();
+        tUISpeedline.Stop();
+        _uiSpeedline = speedline;
+        Color beginColor = mSpeedline.GetColor(GameManager.s_colour);
+        Color targetColor;
+
+        if (_uiSpeedline) targetColor = new Color(1, 1, 1, 35.0f / 255.0f);
+        else targetColor = Color.clear;
+        
+
+        s_speedline = Sequence.Create(useUnscaledTime: true);
+        s_speedline.Group(Tween.Custom(0, 1, Mathf.Min(1.0f,duration*0.1f), onValueChange: val =>
+            {
+                mSpeedline.SetColor(GameManager.s_colour, Color.Lerp(beginColor, targetColor, val));
+            }));
+        s_speedline.Group(Tween.Custom(0, 1, duration, onValueChange: val =>
+        {
+            mSpeedline.SetFloat(GameManager.s_unscaledtime, Time.unscaledTime * speed);
+        }));
     }
     //---
     public bool Get_FollowTarget()

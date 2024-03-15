@@ -26,7 +26,7 @@ public class Frame_Main : MonoBehaviour
     [TitleGroup("MP 데이터")] public Sprite sprite_mp_charged, sprite_mp_charging;
 
     [TitleGroup("메뉴")] public TMP_Text tmpCoin, tmpGem;
-    
+    [TitleGroup("메뉴")] public UI_PunchButton btnHome;
 
     private int mp_Slot_Capacity,mp_Slot_CurrentCapacity;
     private float i_mp_width = 83.1372f;
@@ -55,6 +55,7 @@ public class Frame_Main : MonoBehaviour
         Charge_MP(100);
         tmpCoin.text = SaveManager.instance.coin.ToString();
         tmpGem.text = SaveManager.instance.gem.ToString();
+        btnHome.Setting();
     }
     public bool HP_Damage(int damage=10)
     {

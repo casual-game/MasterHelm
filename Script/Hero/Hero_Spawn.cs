@@ -23,6 +23,9 @@ public partial class Hero : MonoBehaviour
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1.0f);
         _outlineTarget.CutoutThreshold = 1;
     }
+    //Public
+    [FoldoutGroup("Particle")] public List<ParticleSystem> finishBeginParticles = new List<ParticleSystem>();
+    [FoldoutGroup("Particle")] public List<ParticleSystem> finishFinParticles = new List<ParticleSystem>();
     //Private
     [HideInInspector] public bool _spawned = false;
     private float _dissolveRatio;
@@ -37,6 +40,7 @@ public partial class Hero : MonoBehaviour
     {
         frameMain.Setting(heroData.HP, heroData.MP_Slot_Capacity);
         Spawn(transform.position, transform.rotation).Forget();
+        Core_Cancel();
     }
     [Button]
     public void Death()
@@ -132,6 +136,7 @@ public partial class Hero : MonoBehaviour
     public async UniTaskVoid Spawn(Vector3 nextPos,Quaternion nextRot)
     {
         _animator.updateMode = AnimatorUpdateMode.Normal;
+        _animator.SetBool(GameManager.s_finish,false);
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _outlineTarget.CutoutThreshold = 1;

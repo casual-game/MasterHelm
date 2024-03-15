@@ -71,10 +71,18 @@ public partial class GameManager : MonoBehaviour
         roomIndex++;
         Room_Area endRoom = Get_Room();
         _dragon.MoveDestination(startRoom,endRoom);
+        //HeightFog 높이 조절
         _tFog.Stop();
         _tFog = Tween.Custom(heightFog.fogHeightEnd, endRoom.startPoint.position.y - 3.75f,
             2.0f, onValueChange: heightEnd => heightFog.fogHeightEnd = heightEnd);
 
+    }
+
+    [Button]
+    public void Directing_Finish()
+    {
+        CamArm.instance.Set_FollowTarget(true);
+        _dragon.FinalFlight(Get_Room(),CamArm.instance);
     }
     public Room_Area Get_Room()
     {
