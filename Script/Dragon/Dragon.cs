@@ -6,6 +6,7 @@ using EPOOutline;
 using PrimeTween;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Dragon : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class Dragon : MonoBehaviour
     public Transform sitPoint;
     public AnimationCurve flightCurve,flightRotCurve,flightAddvecCurve;
     public UI_IngameResult uiIngameResult;
+    public SoundData soundDragonCall,soundDragonFlyAway,soundDragonRoar,soundDragonFlap;
     [HideInInspector] public float degDiff;
     [HideInInspector] public Transform destination = null;
     
@@ -64,6 +66,7 @@ public class Dragon : MonoBehaviour
     //핵심 함수
     public void Call()
     {
+        SoundManager.Play(soundDragonCall);
         //초기화
         _seq.Complete();
         destination = null;
@@ -82,9 +85,11 @@ public class Dragon : MonoBehaviour
             .ChainCallback(() =>
             {
                 anim.SetTrigger(GameManager.s_flight);
-                Deactivate(4.0f);
+                Deactivate(2.0f);
                 anim.SetFloat(GameManager.s_flight_y, 1);
                 anim.SetFloat(GameManager.s_flight_x, 0);
+                SoundManager.Play(soundDragonRoar);
+                SoundManager.Play(soundDragonFlyAway);
             })
             .Chain(Tween.Custom(0.85f, 0.5f, 1.5f, onValueChange: 
                 val => anim.SetFloat(GameManager.s_flight_y, val),ease:Ease.Linear))
@@ -93,6 +98,8 @@ public class Dragon : MonoBehaviour
     }
     public void MoveDestination(Room_Area currentRoom,Room_Area targetRoom)
     {
+        SoundManager.Play(soundDragonCall);
+        SoundManager.Play(soundDragonRoar,0.0f);
         bool moved = false;
         destination = targetRoom.startPoint;
         _seq.Complete();
@@ -137,6 +144,9 @@ public class Dragon : MonoBehaviour
         //목적지까지 비행 (Flight)
         _seq.ChainCallback(() =>
         {
+            SoundManager.Play(soundDragonFlyAway);
+            SoundManager.Play(soundDragonRoar);
+            
             anim.SetFloat(GameManager.s_flight_x, 0);
             anim.SetFloat(GameManager.s_flight_y, 0);
             _seq.ChainCallback(() => anim.SetTrigger(GameManager.s_flight));
@@ -205,6 +215,8 @@ public class Dragon : MonoBehaviour
     }
     public void FinalFlight(Room_Area currentRoom,CamArm targetCam)
     {
+        SoundManager.Play(soundDragonCall);
+        SoundManager.Play(soundDragonRoar,0.0f);
         bool moved = false;
         destination = targetCam.transform;
         _seq.Complete();
@@ -285,9 +297,11 @@ public class Dragon : MonoBehaviour
             .ChainCallback(() =>
             {
                 anim.SetTrigger(GameManager.s_flight);
-                Deactivate(4.0f);
+                Deactivate(2.0f);
                 anim.SetFloat(GameManager.s_flight_y, 1);
                 anim.SetFloat(GameManager.s_flight_x, 0);
+                SoundManager.Play(soundDragonCall,0.25f);
+                SoundManager.Play(soundDragonRoar,0.0f);
             })
             .Chain(Tween.Custom(0.85f, 0.25f, 1.5f, onValueChange:
                 val => anim.SetFloat(GameManager.s_flight_y, val), ease: Ease.Linear))
@@ -299,6 +313,10 @@ public class Dragon : MonoBehaviour
         anim.SetTrigger(GameManager.s_transition);
     }
     //애니메이션 이벤트
+    public void Flap()
+    {
+        SoundManager.Play(soundDragonFlap);
+    }
     public void Desmount()
     {
         if (destination == null)
@@ -315,6 +333,7 @@ public class Dragon : MonoBehaviour
     {
         Transform t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,1.0f);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_falldown);
     }
 
     public (Vector3 pos, Quaternion rot) Get_MountData(float dist,Room_Area area)

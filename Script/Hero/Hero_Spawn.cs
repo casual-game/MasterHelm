@@ -84,6 +84,9 @@ public partial class Hero : MonoBehaviour
             _animator.SetBool(GameManager.s_force, true);
             _animator.SetTrigger(GameManager.s_forcetransition);
             transform.SetParent(Dragon.instance.sitPoint);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
+            SoundManager.Play(sound_chain,0.1f);
+            SoundManager.Play(sound_voice_short,0.25f);
         });
     }
     public void MountInstantly()

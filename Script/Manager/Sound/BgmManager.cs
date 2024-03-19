@@ -46,11 +46,10 @@ public class BgmManager : MonoBehaviour
             source.outputAudioMixerGroup = bgmMixer;
         }
     }
-    public Dictionary<BgmLayer, AudioSource> layerSources = new Dictionary<BgmLayer, AudioSource>();
-    
+    public Dictionary<BgmLayer, AudioSource> layerSources;
     public void Setting()
     {
-        layerSources.Clear();
+        layerSources = new Dictionary<BgmLayer, AudioSource>();
         instance = this;
         foreach (var bgm in BGMs)
         {
@@ -89,9 +88,11 @@ public class BgmManager : MonoBehaviour
         }
         else
         {
-            GetSource(BGMs[metronomeTarget.x].intro).Stop();
+            if(GetSource(BGMs[metronomeTarget.x].intro)!=null) GetSource(BGMs[metronomeTarget.x].intro).Stop();
             if (BGMs[metronomeTarget.x].bgmLayer.Count > metronomeTarget.y)
             {
+                
+                print(GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).clip.name);
                 GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).volume = 1;
                 GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).Play();
             }
@@ -196,7 +197,8 @@ public class BgmManager : MonoBehaviour
         
         //기존 사운드 설정
         BgmLayer lastLayer;
-        if(GetSource(BGMs[currentData.x].intro).isPlaying) lastLayer = BGMs[currentData.x].intro;
+        var intro = GetSource(BGMs[currentData.x].intro);
+        if(intro!=null && intro.isPlaying) lastLayer = BGMs[currentData.x].intro;
         else lastLayer = BGMs[currentData.x].bgmLayer[currentData.y];
         float section = (60.0f/BGMs[currentData.x].bpm) * lastLayer.beatSectionCount;
         float lastBGMTime = (GetSource(lastLayer).time % lastLayer.clip.length);
@@ -210,23 +212,17 @@ public class BgmManager : MonoBehaviour
         source.volume = 1;
         source.PlayDelayed(delay);
     }
-    [TitleGroup("Control")]
-    [Button]
-    public void FinishBGM()
-    {
-        
-    }
-    public void BgmLowpass(bool activate)
+    public void BgmLowpass(bool activate,float speed = 1.0f)
     {
         _tweenLowpass.Stop();
         if (activate)
         {
-            _tweenLowpass = Tween.Custom(6000, 700, 1.0f, 
+            _tweenLowpass = Tween.Custom(6000, 1000, 1.0f/speed,useUnscaledTime:true, 
                 onValueChange: lowpass =>bgmMixer.audioMixer.SetFloat(_strBgmLowpassCutoff, lowpass));
         }
         else
         {
-            _tweenLowpass = Tween.Custom(700, 6000, 1.0f, 
+            _tweenLowpass = Tween.Custom(700, 6000, 1.0f/speed,useUnscaledTime: true, 
                 onValueChange: lowpass =>bgmMixer.audioMixer.SetFloat(_strBgmLowpassCutoff, lowpass));
         }
 

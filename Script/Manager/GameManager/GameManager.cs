@@ -13,13 +13,13 @@ public partial class GameManager : MonoBehaviour
     public static GameManager Instance;
     public static readonly Vector3 V3_Zero = new Vector3(0, 0, 0), V3_One = new Vector3(1, 1, 1);
     public static readonly Quaternion Q_Identity = Quaternion.identity;
-    
     //기본 함수
     public void Awake()
     {
         Application.targetFrameRate = 60;
         Instance = this;
         FindObjectOfType<SoundManager>().Setting();
+        FindObjectOfType<BgmManager>().Setting();
         FindObjectOfType<ParticleManager>().Setting();
         FindObjectOfType<CamArm>().Setting();
         FindObjectOfType<Hero>().Setting();

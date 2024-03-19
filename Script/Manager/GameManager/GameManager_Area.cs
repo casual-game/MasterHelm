@@ -21,7 +21,8 @@ public partial class GameManager : MonoBehaviour
         heightFog.fogHeightEnd = Get_Room().startPoint.position.y - 3.75f;
         Directing_Ready();
     }
-    
+
+    [TitleGroup("인게임 구역 인스펙터")] public BgmData bgmMain, bgmSuccess, bgmFailed;
     [TitleGroup("인게임 구역 인스펙터")]
     [TabGroup("인게임 구역 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
     public HeightFogGlobal heightFog;
@@ -37,6 +38,7 @@ public partial class GameManager : MonoBehaviour
     [Button]
     public void Directing_Ready()
     {
+        CamArm.instance.SetFinished(false);
         CamArm.instance.Tween_GameReady();
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
@@ -45,7 +47,12 @@ public partial class GameManager : MonoBehaviour
     [Button]
     public void Directing_Start()
     {
+        BgmManager.instance.fadeDuration = 0.0f;
         
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_clear);
+        
+        
+        CamArm.instance.SetFinished(false);
         CamArm.instance.Set_FollowTarget(false);
         CamArm.instance.transform.SetPositionAndRotation(Room1.startPoint.position,Room1.startPoint.rotation);
         CamArm.instance.Tween_GameStart();
@@ -58,9 +65,13 @@ public partial class GameManager : MonoBehaviour
                 _dragon.Call();
                 Hero.instance.SpawnInstantly();
                 Hero.instance.MountInstantly();
-            });
-        
-        
+            })
+            .ChainDelay(0.375f)
+            .ChainCallback(() => BgmManager.instance.PlayBGM(bgmMain, false))
+            .ChainDelay(0.5f)
+            .ChainCallback(() => BgmManager.instance.ChangeLayer(1));
+
+
     }
     [Button]
     public void Directing_MoveRoom()
@@ -77,12 +88,20 @@ public partial class GameManager : MonoBehaviour
             2.0f, onValueChange: heightEnd => heightFog.fogHeightEnd = heightEnd);
 
     }
-
     [Button]
-    public void Directing_Finish()
+    public void Directing_Success()
     {
+        BgmManager.instance.PlayBGM(bgmSuccess,false);
+        CamArm.instance.SetFinished(true);
         CamArm.instance.Set_FollowTarget(true);
         _dragon.FinalFlight(Get_Room(),CamArm.instance);
+    }
+
+    [Button]
+    public void Directing_Failed()
+    {
+        BgmManager.instance.PlayBGM(bgmFailed,false);
+        Hero.instance.Death();
     }
     public Room_Area Get_Room()
     {

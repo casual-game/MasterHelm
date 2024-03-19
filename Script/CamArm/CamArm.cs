@@ -38,6 +38,7 @@ public partial class CamArm : MonoBehaviour
     [TitleGroup("Sequence")] [FoldoutGroup("Sequence/data")] public UIElement_Frame uiElementFrame;
     [TitleGroup("Sequence")] [FoldoutGroup("Sequence/data")] public UI_IngameResult uiIngameResult;
     //Private
+    private bool finished = false;
     private Vector3 _camBossVec,_camAttackVec;
     private float _camAttackVecDist,_zoomAttackVecFinalRatio = 1;
     private Transform _camT,_addT;
@@ -69,13 +70,20 @@ public partial class CamArm : MonoBehaviour
         _uiChromatic = false;
         _uiRadial = false;
     }
-
+    public void SetFinished(bool fin)
+    {
+        finished = fin;
+    }
     void LateUpdate()
     {
         if (!followTarget) return;
         _camAttackVec = Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward;
+
+        float deltaTime;
+        if (!finished) deltaTime = Time.deltaTime;
+        else deltaTime = Time.unscaledDeltaTime;
         transform.position = Vector3.Lerp(transform.position,
-            target.position + addVec + _camBossVec + (_camAttackVec*_camAttackVecDist*_zoomAttackVecFinalRatio),moveSpeed*Time.unscaledDeltaTime);
+            target.position + addVec + _camBossVec + (_camAttackVec*_camAttackVecDist*_zoomAttackVecFinalRatio),moveSpeed*deltaTime);
     }
     public void Tween_CamBossVec(bool activateBossVec)
     {

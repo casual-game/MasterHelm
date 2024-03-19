@@ -27,11 +27,15 @@ public partial class CamArm : MonoBehaviour
     public CanvasGroup cg_Round,cg_Clear;
     [TitleGroup("UI")] [FoldoutGroup("UI/round")]
     public ParticleImage pi_Round,pi_Clear;
+
+    [TitleGroup("UI")] [FoldoutGroup("UI/round")]
+    public SoundData soundRound, soundClear;
     private Sequence seqRound;
     public TMP_Text tmp_round;
     [Button]
     public void UI_Round(bool isFinal, int round=0)
     {
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_begin,0.0f);
         seqRound.Stop();
         //글자
         float textRatio = 1.25f;
@@ -102,10 +106,10 @@ public partial class CamArm : MonoBehaviour
         }
         seqRound.OnComplete(() => cg_Round.gameObject.SetActive(false));
     }
-
     [Button]
     public void UI_Clear()
     {
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_clear,0.375f);
         seqRound.Stop();
         cg_Clear.gameObject.SetActive(true);
         g_Clear_bg.rectTransform.sizeDelta = new Vector2(g_Clear_bg.rectTransform.sizeDelta.x, 600);

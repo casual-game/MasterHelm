@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class Metronome : MonoBehaviour
 {
     [ReadOnly]public List<AudioSource> sources = new List<AudioSource>();
     [ReadOnly]public int index;
     public AudioClip beatClip;
+    public AudioMixerGroup mixerGroup;
     [Button]
     public void Setting()
     {
@@ -19,6 +21,7 @@ public class Metronome : MonoBehaviour
             source.loop = false;
             source.playOnAwake = false;
             source.clip = beatClip;
+            source.outputAudioMixerGroup = mixerGroup;
             sources.Add(source);
         }
     }

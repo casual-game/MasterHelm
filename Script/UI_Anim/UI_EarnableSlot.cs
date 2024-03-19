@@ -74,7 +74,7 @@ public class UI_EarnableSlot : MonoBehaviour,IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        //SoundManager.Play(SoundContainer_StageSelect.instance.sound_click);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_click);
         tPunch.Stop();
         transform.localScale = Vector3.one * 0.75f;
         tPunch = Tween.PunchScale(transform, Vector3.one *-0.25f, 0.15f, 2,useUnscaledTime:true);

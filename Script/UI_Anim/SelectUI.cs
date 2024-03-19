@@ -50,6 +50,7 @@ public partial class SelectUI : MonoBehaviour
     }
     public void Select_Start()
     {
+        Tween_Blur(0.25f, 0.0f, 0.25f);
         _seqStageStart.Stop();
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_page_close,0.5f);
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_sideui_close);

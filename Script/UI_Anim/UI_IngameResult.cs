@@ -8,26 +8,26 @@ using PrimeTween;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UI_IngameResult : MonoBehaviour
 {
     [TitleGroup("Main")] 
     public StageData stageData;
-    [FoldoutGroup("Main/data")] public TranslucentImage imgBGL, imgBGR;
-    [FoldoutGroup("Main/data")] public Image imgGradientL,imgGradientR;
     [FoldoutGroup("Main/data")] public CanvasGroup cgL, cgR;
     [FoldoutGroup("Main/data")] public UI_IngameItemGroup itemGroup;
     [FoldoutGroup("Main/data")] public UI_IngameEarnableItem earnableItem;
     [FoldoutGroup("Main/data")] public GameObject gFenceL, gFenceR;
-    [FoldoutGroup("Main/data")] public Image imgBG;
+    [FoldoutGroup("Main/data")] public Image imgBG,gradientL,patternL,gradientR,patternR;
+    [FoldoutGroup("Main/sound")] public SoundData soundFrameEnter, soundFrameExit; 
     [FoldoutGroup("Main/button")] public UI_PunchButton gBtnBack, gBtnContinue,gBtnRevive;
     [FoldoutGroup("Main/button")] public CanvasGroup cgBtnParent; 
     [FoldoutGroup("Main/deco")] public CanvasGroup cgDeco;
     [FoldoutGroup("Main/deco")] public Transform decoShadow, decoRoot;
     [FoldoutGroup("Main/score")] public Color cNorm, cSuccess, cFailed,cScoreSuccess;
-    [FoldoutGroup("Main/score")] public List<ContentSizeFitter> fittersScore = new List<ContentSizeFitter>();
-    [FoldoutGroup("Main/score")] public Image imgStar1, imgStar2, imgStar3;
+    [FoldoutGroup("Main/score")] public List<RectTransform> rtFitters = new List<RectTransform>();
+    [FoldoutGroup("Main/score")] public CanvasGroup cgStar1, cgFailed1, cgStar2, cgFailed2, cgStar3, cgFailed3;
     [FoldoutGroup("Main/score")] public Image imgScoreBg1, imgScoreBg2, imgScoreBg3;
     [FoldoutGroup("Main/score")] public Color cStarActivated,cStarDeactivated;
     [FoldoutGroup("Main/score")] public ParticleImage piStarGlow1, piStarGlow2, piStarGlow3,piStarImpact1,piStarImpact2,piStarImpact3;
@@ -71,9 +71,13 @@ public class UI_IngameResult : MonoBehaviour
     }
 
     //개별 상태
-    
-    public void Back()
+    public void Button_Back()
     {
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_click);
+    }
+    public void Button_Continue()
+    {
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_click);
         switch (_resultState)
         {
             case ResultState.Pause:
@@ -90,19 +94,17 @@ public class UI_IngameResult : MonoBehaviour
     #region Pause
     [TitleGroup("Pause")]
     [FoldoutGroup("Pause/data")] public Sprite spritePause;
-    [FoldoutGroup("Pause/data")] public Color colorPause;
     [FoldoutGroup("Pause/data")] public CanvasGroup cgPauseTitle,cgEarnableItem;
+    [FoldoutGroup("Pause/data")] public Color cPauseGradient, cPausePattern;
     [FoldoutGroup("Pause/data")][Button]
     public void Pause_Begin()
     {
         _resultState = ResultState.Pause;
-        Score_Instantly();
-        imgBGL.spriteBlending = 0.1f;
-        imgBGR.spriteBlending = 0.1f;
-        imgBGL.sprite = spritePause;
-        imgBGR.sprite = spritePause;
-        imgGradientL.color = colorPause;
-        imgGradientR.color = colorPause;
+        gradientL.color = cPauseGradient;
+        gradientR.color = cPauseGradient;
+        patternL.color = cPausePattern;
+        patternR.color = cPausePattern;
+        
         itemGroup.Deactivate();
         earnableItem.Activate();
         gFenceL.SetActive(false);
@@ -112,11 +114,16 @@ public class UI_IngameResult : MonoBehaviour
         cgSuccessTitle.gameObject.SetActive(false);
         cgFailedTitle.gameObject.SetActive(false);
         //기타 효과들
-        Frame_Activate(new Color(1,1,1,0.2f),Ease.InOutCubic,1,2);
+        Frame_Activate(Color.black,Ease.InOutCubic,1,2);
         Button_Activate(true,true,false);
         Earnable_Activate();
         Deco_Activate();
-        CamArm.instance.Tween_UIPurkinje(1.0f,0.25f);
+        CamArm.instance.Tween_UIChromatic(true,0.01f,0.75f);
+        CamArm.instance.Tween_UIPurkinje(1.0f,0.75f);
+        Score_Instantly();
+        
+        SoundManager.Play(soundFrameEnter);
+        BgmManager.instance.BgmLowpass(true,1.5f);
     }
     [FoldoutGroup("Pause/data")][Button]
     public void Pause_Fin()
@@ -130,24 +137,26 @@ public class UI_IngameResult : MonoBehaviour
         Button_Deactivate(true,true);
         Earnable_Deactivate();
         Deco_Deactivate();
+        CamArm.instance.Tween_UIChromatic(false,0.0f,0.25f);
         CamArm.instance.Tween_UIPurkinje(0.0f,0.25f,0.25f);
+        
+        SoundManager.Play(soundFrameExit);
+        BgmManager.instance.BgmLowpass(false,1.5f);
     }
     #endregion
     #region Success
     [TitleGroup("Success")]
     [FoldoutGroup("Success/data")] public Sprite spriteSuccess;
-    [FoldoutGroup("Success/data")] public Color colorSuccess;
     [FoldoutGroup("Success/data")] public CanvasGroup cgSuccessTitle;
+    [FoldoutGroup("Success/data")] public Color cSuccessGradient, cSuccessPattern;
     [FoldoutGroup("Success/data")][Button]
     public void Success_Begin()
     {
         _resultState = ResultState.Success;
-        imgBGL.spriteBlending = 0.1f;
-        imgBGR.spriteBlending = 0.1f;
-        imgBGL.sprite = spriteSuccess;
-        imgBGR.sprite = spriteSuccess;
-        imgGradientL.color = colorSuccess;
-        imgGradientR.color = colorSuccess;
+        gradientL.color = cSuccessGradient;
+        gradientR.color = cSuccessGradient;
+        patternL.color = cSuccessPattern;
+        patternR.color = cSuccessPattern;
         itemGroup.Activate();
         earnableItem.Deactivate();
         gFenceL.SetActive(false);
@@ -191,19 +200,17 @@ public class UI_IngameResult : MonoBehaviour
     #region Failed
     [TitleGroup("Failed")]
     [FoldoutGroup("Failed/data")] public Sprite spriteFailed;
-    [FoldoutGroup("Failed/data")] public Color colorFailed;
     [FoldoutGroup("Failed/data")] public CanvasGroup cgFailedTitle,cgFailedBG;
     [FoldoutGroup("Failed/data")] public TMP_Text tmpFailedCount;
+    [FoldoutGroup("Failed/data")] public Color cFailedGradient, cFailedPattern;
     [FoldoutGroup("Failed/data")][Button] 
     public void Failed_Begin()
     {
         _resultState = ResultState.Failed;
-        imgBGL.spriteBlending = 0.75f;
-        imgBGR.spriteBlending = 0.75f;
-        imgBGL.sprite = spriteFailed;
-        imgBGR.sprite = spriteFailed;
-        imgGradientL.color = colorFailed;
-        imgGradientR.color = colorFailed;
+        gradientL.color = cFailedGradient;
+        gradientR.color = cFailedGradient;
+        patternL.color = cFailedPattern;
+        patternR.color = cFailedPattern;
         itemGroup.Deactivate();
         earnableItem.Deactivate();
         gFenceL.SetActive(true);
@@ -216,7 +223,7 @@ public class UI_IngameResult : MonoBehaviour
         float playSpeed = 0.75f;
         //Revive_Activate();
         CamArm.instance.Tween_ResetTimescale();
-        Frame_Activate(new Color(1,1,1,0.2f),Ease.InOutCubic,playSpeed,5,false);
+        Frame_Activate(Color.black,Ease.InOutCubic,playSpeed,5,false);
         Button_Activate(true,false,true,playSpeed);
         Deco_Activate(playSpeed);
         Failed_Activate(playSpeed);
@@ -315,7 +322,6 @@ public class UI_IngameResult : MonoBehaviour
         print("revive");
     }
     #endregion
-
     #region Score
 
     private Sequence _seqScore;
@@ -351,9 +357,16 @@ public class UI_IngameResult : MonoBehaviour
         tmpTimeCurrent.color = cFailed;
         tmpScoreCurrent.color = cFailed;
         tmpComboCurrent.color = cFailed;
-        imgStar1.color = Color.clear;
-        imgStar2.color = Color.clear;
-        imgStar3.color = Color.clear;
+        
+        
+        
+        cgStar1.alpha = 0;
+        cgFailed1.alpha = 0;
+        cgStar2.alpha = 0;
+        cgFailed2.alpha = 0;
+        cgStar3.alpha = 0;
+        cgFailed3.alpha = 0;
+        
         Color normColor = new Color(0, 0, 0, 0.8313726f);
         imgScoreBg1.color = normColor;
         imgScoreBg2.color = normColor;
@@ -376,8 +389,7 @@ public class UI_IngameResult : MonoBehaviour
                 Score_UpdateTime(midTime);
                 Score_Fit();
             },startDelay:delay));
-        _seqScore.Group(Tween.Scale(imgStar1.transform, Vector3.one * 8.0f, 
-            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        
         _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
             () =>
             {
@@ -386,8 +398,23 @@ public class UI_IngameResult : MonoBehaviour
                 CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
             }));
         itemGroup.Item1(duration + delay,success);
-        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow1.Play()));
-        _seqScore.Group(Tween.Color(imgStar1,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        if (success)
+        {
+            cgStar1.gameObject.SetActive(true);
+            cgFailed1.gameObject.SetActive(false);
+            _seqScore.Group(Tween.Scale(cgStar1.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow1.Play()));
+            _seqScore.Group(Tween.Alpha(cgStar1,1,0.2f,startDelay:duration + delay));
+        }
+        else
+        {
+            cgStar1.gameObject.SetActive(false);
+            cgFailed1.gameObject.SetActive(true);
+            _seqScore.Group(Tween.Scale(cgFailed1.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Alpha(cgFailed1,1,0.2f,startDelay:duration + delay));
+        }
         _seqScore.Group(Tween.Color(imgScoreBg1, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
         //Slot2
@@ -401,8 +428,7 @@ public class UI_IngameResult : MonoBehaviour
             Score_UpdateScore(midScore);
             Score_Fit();
         },startDelay:delay));
-        _seqScore.Group(Tween.Scale(imgStar2.transform, Vector3.one * 8.0f, 
-            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        
         _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
             () =>
             {
@@ -411,8 +437,23 @@ public class UI_IngameResult : MonoBehaviour
                 CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
             }));
         itemGroup.Item2(duration + delay,success);
-        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow2.Play()));
-        _seqScore.Group(Tween.Color(imgStar2,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        if (success)
+        {
+            cgStar2.gameObject.SetActive(true);
+            cgFailed2.gameObject.SetActive(false);
+            _seqScore.Group(Tween.Scale(cgStar2.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow2.Play()));
+            _seqScore.Group(Tween.Alpha(cgStar2,1,0.2f,startDelay:duration + delay));
+        }
+        else
+        {
+            cgStar2.gameObject.SetActive(false);
+            cgFailed2.gameObject.SetActive(true);
+            _seqScore.Group(Tween.Scale(cgFailed2.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Alpha(cgFailed2,1,0.2f,startDelay:duration + delay));
+        }
         _seqScore.Group(Tween.Color(imgScoreBg2, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
         //Slot3
@@ -426,8 +467,7 @@ public class UI_IngameResult : MonoBehaviour
             Score_UpdateCombo(midCombo);
             Score_Fit();
         },startDelay:delay));
-        _seqScore.Group(Tween.Scale(imgStar3.transform, Vector3.one * 8.0f, 
-            Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+        
         _seqScore.Group(Tween.Delay(duration + 0.5f + delay,
             () =>
             {
@@ -438,8 +478,24 @@ public class UI_IngameResult : MonoBehaviour
                 CamArm.instance.Tween_Radial(0.1f,0.1f,0.75f,0.15f);
             }));
         itemGroup.Item3(duration + delay,success);
-        if(success) _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow3.Play()));
-        _seqScore.Group(Tween.Color(imgStar3,success? cStarActivated: cStarDeactivated,0.2f,startDelay:duration + delay));
+        if (success)
+        {
+            cgStar3.gameObject.SetActive(true);
+            cgFailed3.gameObject.SetActive(false);
+            _seqScore.Group(Tween.Scale(cgStar3.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow3.Play()));
+            _seqScore.Group(Tween.Alpha(cgStar3,1,0.2f,startDelay:duration + delay));
+        }
+        else
+        {
+            cgStar3.gameObject.SetActive(false);
+            cgFailed3.gameObject.SetActive(true);
+            _seqScore.Group(Tween.Scale(cgFailed3.transform, Vector3.one * 8.0f, 
+                Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
+            _seqScore.Group(Tween.Alpha(cgFailed3,1,0.2f,startDelay:duration + delay));
+        }
+        
         _seqScore.Group(Tween.Color(imgScoreBg3, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
     }
@@ -524,11 +580,11 @@ public class UI_IngameResult : MonoBehaviour
     }
     private void Score_Fit()
     {
-        foreach (var fitter in fittersScore)
+        foreach (var rtFitter in rtFitters)
         {
-            fitter.enabled = false;
-            fitter.enabled = true;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rtFitter);
         }
+        
     }
     #endregion
     
