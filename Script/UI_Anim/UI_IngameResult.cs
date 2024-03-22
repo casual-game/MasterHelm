@@ -20,7 +20,7 @@ public class UI_IngameResult : MonoBehaviour
     [FoldoutGroup("Main/data")] public UI_IngameEarnableItem earnableItem;
     [FoldoutGroup("Main/data")] public GameObject gFenceL, gFenceR;
     [FoldoutGroup("Main/data")] public Image imgBG,gradientL,patternL,gradientR,patternR;
-    [FoldoutGroup("Main/sound")] public SoundData soundFrameEnter, soundFrameExit; 
+    [FoldoutGroup("Main/data")] public Material matDynamic;
     [FoldoutGroup("Main/button")] public UI_PunchButton gBtnBack, gBtnContinue,gBtnRevive;
     [FoldoutGroup("Main/button")] public CanvasGroup cgBtnParent; 
     [FoldoutGroup("Main/deco")] public CanvasGroup cgDeco;
@@ -122,7 +122,7 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UIPurkinje(1.0f,0.75f);
         Score_Instantly();
         
-        SoundManager.Play(soundFrameEnter);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_open);
         BgmManager.instance.BgmLowpass(true,1.5f);
     }
     [FoldoutGroup("Pause/data")][Button]
@@ -140,7 +140,7 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UIChromatic(false,0.0f,0.25f);
         CamArm.instance.Tween_UIPurkinje(0.0f,0.25f,0.25f);
         
-        SoundManager.Play(soundFrameExit);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_close);
         BgmManager.instance.BgmLowpass(false,1.5f);
     }
     #endregion
@@ -167,8 +167,7 @@ public class UI_IngameResult : MonoBehaviour
         cgFailedTitle.gameObject.SetActive(false);
         //기타 효과들
         float playSpeed = 0.75f;
-        Frame_Activate(new Color(1,1,1,60.0f/255.0f)
-            ,Ease.InOutBack,playSpeed,-10,true,0.0f);
+        Frame_Activate(Color.black,Ease.InOutBack,playSpeed,-10,true,0.0f);
         Button_Activate(true,false,false,playSpeed);
         Deco_Activate(playSpeed);
         float duration = 0.375f;
@@ -178,6 +177,8 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UILensDirt(3.0f,duration);
         CamArm.instance.Tween_UISpeedline(true, duration,0.3f);
         Score_Sequence();
+        
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_open,0.375f);
     }
     [FoldoutGroup("Success/data")][Button]
     public void Success_Fin()
@@ -195,6 +196,9 @@ public class UI_IngameResult : MonoBehaviour
         //CamArm.instance.Tween_UIChromatic(false,0.00f,0.5f);
         CamArm.instance.Tween_UILensDirt(0.0f,0.5f);
         CamArm.instance.Tween_UISpeedline(false, 0.5f);
+        
+        BgmManager.instance.BgmLowpass(false);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_close);
     }
     #endregion
     #region Failed
@@ -203,6 +207,7 @@ public class UI_IngameResult : MonoBehaviour
     [FoldoutGroup("Failed/data")] public CanvasGroup cgFailedTitle,cgFailedBG;
     [FoldoutGroup("Failed/data")] public TMP_Text tmpFailedCount;
     [FoldoutGroup("Failed/data")] public Color cFailedGradient, cFailedPattern;
+    [FoldoutGroup("Failed/data")] public SoundData soundHeartbeat,soundGameOver;
     [FoldoutGroup("Failed/data")][Button] 
     public void Failed_Begin()
     {
@@ -215,6 +220,7 @@ public class UI_IngameResult : MonoBehaviour
         earnableItem.Deactivate();
         gFenceL.SetActive(true);
         gFenceR.SetActive(true);
+        
         //타이틀
         cgPauseTitle.gameObject.SetActive(false);
         cgSuccessTitle.gameObject.SetActive(false);
@@ -229,6 +235,8 @@ public class UI_IngameResult : MonoBehaviour
         Failed_Activate(playSpeed);
         Earnable_Activate(playSpeed);
         CamArm.instance.Tween_UIPurkinje(0.75f,0.5f/playSpeed);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_open,0.5f);
+        Score_Instantly();
     }
     [FoldoutGroup("Failed/data")][Button] 
     public void Failed_Fin()
@@ -245,6 +253,7 @@ public class UI_IngameResult : MonoBehaviour
         Failed_Deactivate(playSpeed);
         Earnable_Deactivate(playSpeed);
         CamArm.instance.Tween_UIPurkinje(0.0f,0.5f/playSpeed);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_close,0.25f);
     }
     #endregion
     #region Popup
@@ -280,6 +289,8 @@ public class UI_IngameResult : MonoBehaviour
         _seqCreate.Group(Tween.UIAnchoredPosition(rtCurrentMoney, v2MoneyReveal, 1.0f, Ease.InOutCirc));
         popupCreate = true;
         _seqFailedCount.timeScale = 0;
+        BgmManager.instance.BgmLowpass(true);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_popup_create);
     }
     public void Revive_Fin()
     {
@@ -309,6 +320,8 @@ public class UI_IngameResult : MonoBehaviour
         
         popupCreate = false;
         _seqFailedCount.timeScale = 1;
+        BgmManager.instance.BgmLowpass(false);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_page_close);
     }
     public void Popup_Fin()
     {
@@ -316,10 +329,13 @@ public class UI_IngameResult : MonoBehaviour
     }
     public void Revive()
     {
+        if (_seqCreate.isAlive) return;
         Hero.instance.Spawn();
         Failed_Fin();
         Revive_Fin();
-        print("revive");
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_click);
+        BgmManager.instance.fadeDuration = 0.5f;
+        BgmManager.instance.PlayBGM(GameManager.Instance.bgmMain,false,1);
     }
     #endregion
     #region Score
@@ -381,6 +397,7 @@ public class UI_IngameResult : MonoBehaviour
         //Slot1
         float duration = 0.85f;
         float delay = 0;
+        float resultSoundDelay = 0.5f;
         bool success = Score_TimeSuccess(currentTime);
         _seqScore.Group(Tween.Custom(0, currentTime,duration, onValueChange: val =>
             {
@@ -406,6 +423,12 @@ public class UI_IngameResult : MonoBehaviour
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow1.Play()));
             _seqScore.Group(Tween.Alpha(cgStar1,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_begin,resultSoundDelay);
+                }));
         }
         else
         {
@@ -414,6 +437,12 @@ public class UI_IngameResult : MonoBehaviour
             _seqScore.Group(Tween.Scale(cgFailed1.transform, Vector3.one * 8.0f, 
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Alpha(cgFailed1,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash,resultSoundDelay);
+                }));
         }
         _seqScore.Group(Tween.Color(imgScoreBg1, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
@@ -445,6 +474,12 @@ public class UI_IngameResult : MonoBehaviour
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow2.Play()));
             _seqScore.Group(Tween.Alpha(cgStar2,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_clear,resultSoundDelay);
+                }));
         }
         else
         {
@@ -453,6 +488,12 @@ public class UI_IngameResult : MonoBehaviour
             _seqScore.Group(Tween.Scale(cgFailed2.transform, Vector3.one * 8.0f, 
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Alpha(cgFailed2,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash,resultSoundDelay);
+                }));
         }
         _seqScore.Group(Tween.Color(imgScoreBg2, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
@@ -474,8 +515,10 @@ public class UI_IngameResult : MonoBehaviour
                 if (success) piStarImpact3.Play();
                 CamArm.instance.Tween_Shake(0.35f, 30, Vector3.one * 0.125f, Ease.OutSine);
                 CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
-                CamArm.instance.Tween_Bloom(0.1f,0.1f,0.75f,15);
-                CamArm.instance.Tween_Radial(0.1f,0.1f,0.75f,0.15f);
+                CamArm.instance.Tween_Bloom(0.10f,0.0f,0.5f,5.0f,0.75f);
+                CamArm.instance.Tween_Radial(0.25f,0.25f,1.25f,0.15f);
+                Dragon.instance.pFinish_Fin.Play();
+                
             }));
         itemGroup.Item3(duration + delay,success);
         if (success)
@@ -486,6 +529,12 @@ public class UI_IngameResult : MonoBehaviour
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Delay(duration + 0.1f + delay, () => piStarGlow3.Play()));
             _seqScore.Group(Tween.Alpha(cgStar3,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_stage_clear,resultSoundDelay);
+                }));
         }
         else
         {
@@ -494,10 +543,17 @@ public class UI_IngameResult : MonoBehaviour
             _seqScore.Group(Tween.Scale(cgFailed3.transform, Vector3.one * 8.0f, 
                 Vector3.one, 0.5f, Ease.InBack,startDelay:duration + delay));
             _seqScore.Group(Tween.Alpha(cgFailed3,1,0.2f,startDelay:duration + delay));
+            _seqScore.Group(Tween.Delay(duration + delay,
+                () =>
+                {
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_result_create);
+                    SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash,resultSoundDelay);
+                }));
         }
         
         _seqScore.Group(Tween.Color(imgScoreBg3, success? cScoreSuccess: Color.red, 
             normColor, 0.75f,startDelay:duration + 0.5f + delay,ease: Ease.InCubic));
+        _seqScore.OnComplete(() => BgmManager.instance.PlayBGM(GameManager.Instance.bgmSuccess, false));
     }
     private int GetTime()
     {
@@ -592,6 +648,7 @@ public class UI_IngameResult : MonoBehaviour
     private void Frame_Activate(Color imgBGColor,Ease ease = Ease.InOutCubic,
         float playSpeed=1.0f,int zoomStrength=1,bool useStop = true,float stopScale = 0.0f)
     {
+        matDynamic.SetColor(GameManager.s_alphaoutlinecolor,Color.clear);
         _rtFrameL.gameObject.SetActive(false);
         _rtFrameL.gameObject.SetActive(true);
         _rtFrameR.gameObject.SetActive(true);
@@ -739,6 +796,7 @@ public class UI_IngameResult : MonoBehaviour
         {
             if (num > 0)
             {
+                SoundManager.Play(soundHeartbeat);
                 tmpFailedCount.text = num.ToString();
                 CamArm.instance.Tween_Chromatic(0.05f,1.0f,Ease.OutCirc);
                 CamArm.instance.Tween_Radial(0.1f,0.0f,0.5f,0.05f);
@@ -749,6 +807,9 @@ public class UI_IngameResult : MonoBehaviour
             }
             else
             {
+                SoundManager.Play(soundGameOver);
+                BgmManager.instance.fadeDuration = 2.0f;
+                BgmManager.instance.PlayBGM(GameManager.Instance.bgmGameOver,false);
                 tmpFailedCount.text = String.Empty;
                 CamArm.instance.Tween_Chromatic(0.05f, 2.5f, Ease.OutCirc);
                 CamArm.instance.Tween_Radial(0.25f, 0.25f, 2.0f, 0.2f);

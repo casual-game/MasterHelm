@@ -39,7 +39,7 @@ public partial class CamArm : MonoBehaviour
     [TitleGroup("Sequence")] [FoldoutGroup("Sequence/data")] public UI_IngameResult uiIngameResult;
     //Private
     private bool finished = false;
-    private Vector3 _camBossVec,_camAttackVec;
+    private Vector3 _camBossVec,_camLocoVec;
     private float _camAttackVecDist,_zoomAttackVecFinalRatio = 1;
     private Transform _camT,_addT;
     private Camera[] _cams;
@@ -74,14 +74,60 @@ public partial class CamArm : MonoBehaviour
     {
         finished = fin;
     }
+    private float _jsVecMoveRatio =0;
+    private float _jsVecMoveSpeed = 0;
+    private Vector3 _jsVec,_finalDirectingVec;
     void LateUpdate()
     {
         if (!followTarget) return;
-        _camAttackVec = Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward;
-
         float deltaTime;
         if (!finished) deltaTime = Time.deltaTime;
         else deltaTime = Time.unscaledDeltaTime;
+        //보는 각도로.
+        float jsDeg;
+        float dist;
+        float speed;
+        if (_hero.Get_CurrentWeaponPack() != null)
+        {
+            dist = 1.5f;
+            speed = 3.5f * deltaTime;
+            jsDeg = _hero.transform.rotation.eulerAngles.y;
+        }
+        else if (_hero.Get_HeroMoveState() == Hero.MoveState.Roll)
+        {
+            dist = 1.0f;
+            speed = 5.0f * deltaTime;
+            jsDeg = _hero.transform.rotation.eulerAngles.y;
+        }
+        else if (GameManager.Bool_Move)
+        {
+            dist = 1.75f;
+            speed = 2.0f * deltaTime;
+            jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) 
+                * Mathf.Rad2Deg + transform.rotation.eulerAngles.y+90;
+        }
+        else
+        {
+            dist = 0.75f;
+            speed = 1.5f * deltaTime;
+            jsDeg = _hero.transform.rotation.eulerAngles.y;
+        }
+        //_jsVecMoveSpeed = Mathf.Lerp(_jsVecMoveSpeed,speed)
+        Vector3 jsVec = Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*dist;
+        //_jsVecMoveRatio = Mathf.Clamp01(_jsVecMoveRatio + (moveCam ? camMoveSpeed : -camMoveSpeed));
+        _jsVec = Vector3.MoveTowards(_jsVec, jsVec, speed);
+
+        Vector3 pos = transform.position;
+        Vector3 finalVec = target.position + addVec + _jsVec + _camBossVec;
+        finalVec = Vector3.Lerp(pos,finalVec ,moveSpeed*deltaTime);
+        _finalDirectingVec = Vector3.Lerp(pos, finalVec, _zoomAttackVecFinalRatio);
+        Vector3 centerVec = target.position + addVec + Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*0.75f;
+        transform.position = Vector3.Lerp(centerVec,_finalDirectingVec,_zoomAttackVecFinalRatio);
+
+        return;
+        //공격 각도로.
+        Vector3 _camAttackVec = Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward;
+        
         transform.position = Vector3.Lerp(transform.position,
             target.position + addVec + _camBossVec + (_camAttackVec*_camAttackVecDist*_zoomAttackVecFinalRatio),moveSpeed*deltaTime);
     }
@@ -103,18 +149,19 @@ public partial class CamArm : MonoBehaviour
     {
         if (activateAttackVec == attackVecActivating) return;
         float distance = 1.25f;
-        float distanceRatio = Vector3.Distance(_camAttackVec, transform.position - target.position) / distance;
+        float distanceRatio = Vector3.Distance(Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward, 
+            transform.position - target.position) / distance;
         if (activateAttackVec)
         {
             attackVecActivating = true;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.5f*distanceRatio, onValueChange: value =>
-            { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
+            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.5f*distanceRatio, 
+                onValueChange: value => _camAttackVecDist = value,ease: Ease.InOutSine);
         }
         else
         {
             attackVecActivating = false;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f*distanceRatio, onValueChange: value =>
-                { _camAttackVecDist = value; } ,ease: Ease.InOutSine);
+            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f*distanceRatio, 
+                onValueChange: value => _camAttackVecDist = value,ease: Ease.InOutSine);
         }
     }
     public void Set_FollowTarget(bool follow)
@@ -155,6 +202,7 @@ public partial class CamArm : MonoBehaviour
         uiElementFrame.RevealInstantly();
         BeautifySettings.settings.chromaticAberrationIntensity.value = 0.001f;
         BeautifySettings.settings.lensDirtIntensity.value = 0;
+        BeautifySettings.settings.bloomIntensity.value = 1.0f;
         mSpeedline.SetColor(GameManager.s_colour,Color.clear);
         mRadialblur.SetFloat(GameManager.s_bluramount,0);
         BeautifySettings.settings.purkinjeLuminanceThreshold.value = 0;
@@ -303,9 +351,6 @@ public partial class CamArm : MonoBehaviour
 
 
         uiIngameResult.Failed_Begin();
-        return;
-        tShakeDeathHero.Stop();
-        tShakeDeathHero = Tween.Delay(begin + delay, () => uiIngameResult.Failed_Begin(),useUnscaledTime:true);
     }
     public void Tween_ShakeDown()
     {
@@ -394,26 +439,23 @@ public partial class CamArm : MonoBehaviour
     public void Tween_Zoom(float begin, float delay, float fin, float startDelay,float zoom,bool useUnscaledTime = true)
     {
         if (_uiZoom) return;
+        Ease ease = Ease.OutExpo;
         seqUIZoom.Stop();
         s_zoom.Complete();
         s_zoom = Sequence.Create(useUnscaledTime:useUnscaledTime);
         if (startDelay > 0.01f) s_zoom.ChainDelay(startDelay);
         s_zoom
             .Chain(Tween.CameraOrthographicSize(_cams[0], zoom, begin,
-                ease: Ease.OutCirc))
+                ease: ease))
             .Group(Tween.CameraOrthographicSize(_cams[1], zoom, begin,
-                ease: Ease.OutCirc))
-            .Group(Tween.Custom(1, 0, begin, onValueChange: val =>
-            {
-                _zoomAttackVecFinalRatio = val;
-            }))
+                ease: ease))
+            .Group(Tween.Custom(1, 0, begin,ease:ease, 
+                onValueChange: val => _zoomAttackVecFinalRatio = val))
             .ChainDelay(delay, true)
-            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, fin, Ease.OutCirc))
-            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, fin, Ease.OutCirc))
-            .Group(Tween.Custom(0, 1, fin, onValueChange: val =>
-            {
-                _zoomAttackVecFinalRatio = val;
-            }));
+            .Chain(Tween.CameraOrthographicSize(_cams[0], orthographicSize, fin, ease))
+            .Group(Tween.CameraOrthographicSize(_cams[1], orthographicSize, fin, ease))
+            .Group(Tween.Custom(0, 1, fin,ease: ease, 
+                onValueChange: val => _zoomAttackVecFinalRatio = val));
 
     }
     public void Tween_Speedline(float begin, float delay, float fin,Color color,float speed = 0.675f)
@@ -493,10 +535,8 @@ public partial class CamArm : MonoBehaviour
         Tween_Zoom(0.15f,0.35f,1.0f,0,orthographicSize-0.5f);
         Tween_Chromatic(0.035f,1.5f,Ease.OutCirc,0.1f);
     }
-
-    public void Tween_Bloom(float begin,float delay,float fin,float intensity)
+    public void Tween_Bloom(float begin,float delay,float fin,float intensity,float defaultBloom = 1.0f)
     {
-        float defaultBloom = 1.0f;
         seqBloom.Stop();
         BeautifySettings.settings.bloomIntensity.value = defaultBloom;
         
@@ -561,12 +601,12 @@ public partial class CamArm : MonoBehaviour
 
         if (_uiChromatic)
         {
-            Tween.Custom(0.001f, intensity, duration, useUnscaledTime: true,
+            tUIChromatic = Tween.Custom(0.001f, intensity, duration, useUnscaledTime: true,
                 onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
         }
         else
         {
-            Tween.Custom(BeautifySettings.settings.chromaticAberrationIntensity.value, 0.001f, 
+            tUIChromatic = Tween.Custom(BeautifySettings.settings.chromaticAberrationIntensity.value, 0.001f, 
                 duration, useUnscaledTime: true,
                 onValueChange: newVal => BeautifySettings.settings.chromaticAberrationIntensity.value = newVal);
         }

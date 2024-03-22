@@ -16,7 +16,9 @@ public class Dragon : MonoBehaviour
     public Transform sitPoint;
     public AnimationCurve flightCurve,flightRotCurve,flightAddvecCurve;
     public UI_IngameResult uiIngameResult;
-    public SoundData soundDragonCall,soundDragonFlyAway,soundDragonRoar,soundDragonFlap;
+    public SoundData soundDragonCall,soundDragonFlyAway,soundDragonRoar,soundDragonFinish,soundDragonFlap;
+    public ParticleSystem pFinish_Begin,pFinish_Fin;
+    public Animator eyesAnimator;
     [HideInInspector] public float degDiff;
     [HideInInspector] public Transform destination = null;
     
@@ -37,6 +39,7 @@ public class Dragon : MonoBehaviour
     //반복 함수
     public void Activate()
     {
+        eyesAnimator.enabled = true;
         gameObject.SetActive(true);
         _tDissolve.Stop();
         AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(
@@ -216,7 +219,7 @@ public class Dragon : MonoBehaviour
     public void FinalFlight(Room_Area currentRoom,CamArm targetCam)
     {
         SoundManager.Play(soundDragonCall);
-        SoundManager.Play(soundDragonRoar,0.0f);
+        SoundManager.Play(soundDragonFinish,0.0f);
         bool moved = false;
         destination = targetCam.transform;
         _seq.Complete();
@@ -231,7 +234,15 @@ public class Dragon : MonoBehaviour
         _seq = Sequence.Create();
         _seq.Chain(Tween.Position(t, beginPos, mountPos, 1.0f, Ease.InOutSine))
             .Group(Tween.Delay(0.65f, () => anim.SetTrigger(GameManager.s_transition)))
-            .ChainDelay(1.0f);
+            .ChainDelay(1.0f)
+            .ChainCallback(()=>
+            {
+                pFinish_Begin.Play();
+                SoundManager.Play(Hero.instance.sound_combat_chargebegin);
+                SoundManager.Play(Hero.instance.sound_combat_skill);
+                CamArm.instance.Tween_Shake(10,200,Vector3.one*0.05f,Ease.InSine);
+            });
+        
         //회전(마운트는 애니매이션 이벤트로 실행.)
         var dismountData = Get_DismountData(1.5f, targetCam);
         Vector3 distvec = dismountData.pos - mountPos;
@@ -272,21 +283,40 @@ public class Dragon : MonoBehaviour
             flightFin = flightBegin + Vector3.up * 3;
             Hero.instance.Get_Animator().SetBool(GameManager.s_finish,true);
             foreach (var p in Hero.instance.finishBeginParticles) p.Play();
+            pFinish_Begin.Stop(true);
+            foreach (var p in Hero.instance.finishFinParticles) p.Play();
+            SoundManager.Play(soundDragonFlyAway);
+            SoundManager.Play(soundDragonRoar,0.0f);
+            SoundManager.Play(Hero.instance.sound_voice_attack_strong,0.2f);
         });
         _seq.Group(Tween.Delay(0.1f, ()=>
         {
             Hero.instance.Effect_Smoke();
-            foreach (var p in Hero.instance.finishFinParticles) p.Play();
+            
         }));
-        _seq.ChainDelay(0.375f);
+        float dur = 0.2f;
+        _seq.Group(Tween.Delay(dur, ()=>
+        {
+            GameManager.Instance.Shockwave(transform.position,0.75f);
+            pFinish_Fin.Play();
+            SoundManager.Play(Hero.instance.sound_spawn);
+            SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash);
+            CamArm.instance.Tween_Shake(0.5f,50,Vector3.one*0.25f,Ease.OutSine);
+            CamArm.instance.Tween_Radial(0.035f,0.0f,0.5f,0.1f);
+            CamArm.instance.Tween_Chromatic(0.025f,0.5f,Ease.OutCubic);
+        }));
+        _seq.ChainDelay(0.375f-dur);
         _seq.Chain(Tween.Custom(0, 1, 0.25f, onValueChange: ratio =>
         {
             transform.position = Vector3.Lerp(flightBegin, flightFin, ratio);
         }));
         
-        _seq.Group(Tween.Delay(0.5f, ()=>
+        _seq.Group(Tween.Delay(3.375f, ()=>
         {
             uiIngameResult.Success_Begin();
+            eyesAnimator.enabled = false;
+            eyesAnimator.gameObject.SetActive(false);
+            eyesAnimator.gameObject.SetActive(true);
         }));
     }
     public void FlyAway(float delay)

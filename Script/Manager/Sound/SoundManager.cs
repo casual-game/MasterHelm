@@ -137,6 +137,7 @@ public class SoundManager : MonoBehaviour
                 source.clip = soundData.clip;
                 source.volume = soundData.volume;
                 source.loop = soundData.isLoop;
+                source.outputAudioMixerGroup = soundGroups[i].soundData.mixerGroup;
                 soundGroups[i].audioSources.Add(source);
             }
         }

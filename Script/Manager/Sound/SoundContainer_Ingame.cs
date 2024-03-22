@@ -21,5 +21,10 @@ public class SoundContainer_Ingame : SoundContainer
         sound_friction_cloth,
         sound_stage_clear,
         sound_stage_begin,
-        sound_stage_click;
+        sound_stage_click,
+        sound_page_open,
+        sound_page_close,
+        sound_groundsmash,
+        sound_result_create,
+        sound_popup_create;
 }

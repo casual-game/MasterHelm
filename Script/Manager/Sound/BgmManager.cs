@@ -92,7 +92,7 @@ public class BgmManager : MonoBehaviour
             if (BGMs[metronomeTarget.x].bgmLayer.Count > metronomeTarget.y)
             {
                 
-                print(GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).clip.name);
+                //print(GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).clip.name);
                 GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).volume = 1;
                 GetSource(BGMs[metronomeTarget.x].bgmLayer[metronomeTarget.y]).Play();
             }
@@ -117,22 +117,15 @@ public class BgmManager : MonoBehaviour
     }
     //BGM------------------------------------------------------------------
     [TitleGroup("Control")][Button]
-    public void PlayBGM(BgmData data,bool useIntro)
+    public void PlayBGM(BgmData data,bool useIntro,int layer =0)
     {
         int bgmIndex = BGMs.IndexOf(data);
         if (BGMs.Count <= currentData.x) return;
         if (BGMs.Count <= bgmIndex) return;
         
         //기존 BGM 페이드 아웃
-        double dspTime = AudioSettings.dspTime;
-        AudioSource pastSource = GetSource(BGMs[currentData.x].intro);
-        if(pastSource!=null && pastSource.isPlaying) AddFadeOut(pastSource,0);
-        if (BGMs[currentData.x].bgmLayer.Count > currentData.y)
-        {
-            AudioSource source = GetSource(BGMs[currentData.x].bgmLayer[currentData.y]);
-            if (source.isPlaying) AddFadeOut(source,0);
-        }
-        currentData = new Vector2Int(bgmIndex, 0);
+        FadeOut();
+        currentData = new Vector2Int(bgmIndex, layer);
         //새로 플레이 
         if (useIntro)
         {
@@ -175,8 +168,20 @@ public class BgmManager : MonoBehaviour
             if (BGMs[currentData.x].bgmLayer.Count > 0)
             {
                 AudioSource source = GetSource(BGMs[currentData.x].bgmLayer[currentData.y]);
-                
-                if(source.isPlaying) AddFadeIn(source,startDelay);
+
+                if (source.isPlaying)
+                {
+                    if (source.time < 0.01f)
+                    {
+                        source.Stop();
+                        source.volume = 1;
+                        source.PlayDelayed(startDelay);
+                    }
+                    else
+                    {
+                        AddFadeIn(source,startDelay);
+                    }
+                }
                 else
                 {
                     source.volume = 1;
@@ -185,15 +190,28 @@ public class BgmManager : MonoBehaviour
             }
         }
     }
+    public void FadeOut()
+    {
+        AudioSource pastSource = GetSource(BGMs[currentData.x].intro);
+        if (pastSource != null && pastSource.isPlaying)
+        {
+            AddFadeOut(pastSource,0);
+        }
+        foreach (var layer in BGMs[currentData.x].bgmLayer)
+        {
+            AudioSource source = GetSource(layer);
+            if (source.isPlaying) AddFadeOut(source,0);
+        }
+    }
     [TitleGroup("Control")][Button]
-    public void ChangeLayer(int layerIndex)
+    public float ChangeLayer(int layerIndex)
     {
         //범위 밖,이미 플레이중이면 return
-        if (BGMs.Count <= currentData.x) return;
-        if (BGMs[currentData.x].bgmLayer.Count <= currentData.y) return;
-        if (BGMs[currentData.x].bgmLayer.Count <= layerIndex) return;
+        if (BGMs.Count <= currentData.x) return -1;
+        if (BGMs[currentData.x].bgmLayer.Count <= currentData.y) return -1;
+        if (BGMs[currentData.x].bgmLayer.Count <= layerIndex) return -1;
         if (GetSource(BGMs[currentData.x].bgmLayer[layerIndex]).isPlaying &&
-            GetSource(BGMs[currentData.x].bgmLayer[layerIndex]).volume>0.25f) return;
+            GetSource(BGMs[currentData.x].bgmLayer[layerIndex]).volume>0.25f) return -1;
         
         //기존 사운드 설정
         BgmLayer lastLayer;
@@ -211,6 +229,7 @@ public class BgmManager : MonoBehaviour
         source.time = 0;
         source.volume = 1;
         source.PlayDelayed(delay);
+        return delay;
     }
     public void BgmLowpass(bool activate,float speed = 1.0f)
     {
@@ -230,6 +249,7 @@ public class BgmManager : MonoBehaviour
     //함수------------------------------------------------------------------
     private Dictionary<AudioSource, (double dspDelay, double dspFade)> dspFadeOutCall =
         new Dictionary<AudioSource, (double dspDelay, double dspFade)>();
+    [ShowInInspector]
     private Dictionary<AudioSource, (double dspDelay, double dspFade)> dspFadeInCall =
         new Dictionary<AudioSource, (double dspDelay, double dspFade)>();
     private void FixedUpdate()
@@ -286,11 +306,22 @@ public class BgmManager : MonoBehaviour
     private void AddFadeOut(AudioSource source,float delay)
     {
         double dspTime = AudioSettings.dspTime;
-        dspFadeOutCall.Add(source,(dspTime + delay,fadeDuration + dspTime));
+        bool contains = dspFadeOutCall.ContainsKey(source);
+        if (contains)
+        {
+            //print("Contains, "+source.clip.name + ", delay: "+dspTime + delay+ ", fade: "+fadeDuration + dspTime);
+            dspFadeOutCall[source] = (dspTime + delay, fadeDuration + dspTime);
+        }
+        else
+        {
+            //print("New, "+source.clip.name + ", delay: "+dspTime + delay+ ", fade: "+fadeDuration + dspTime);
+            dspFadeOutCall.Add(source,(dspTime + delay,fadeDuration + dspTime));
+        }
     }
     private void AddFadeIn(AudioSource source,float delay)
     {
         double dspTime = AudioSettings.dspTime;
-        dspFadeInCall.Add(source,(dspTime + delay,fadeDuration + dspTime));
+        bool canAdd = !dspFadeInCall.ContainsKey(source);
+        if(canAdd) dspFadeInCall.Add(source,(dspTime + delay,fadeDuration + dspTime));
     }
 }

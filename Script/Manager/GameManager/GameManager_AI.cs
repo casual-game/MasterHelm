@@ -6,6 +6,8 @@ using UnityEngine;
 
 public partial class GameManager : MonoBehaviour
 {
+    [TitleGroup("메인 설정 인스펙터")]
+    [TabGroup("메인 설정 인스펙터/AreaUI", "기본 설정", SdfIconType.Gear)]
     public AnimatorOverrideController baseOverride_Monster,baseOverride_Boss;
     
     private Dictionary<Data_MonsterInfo, AnimatorOverrideController> _aiAnimators = new Dictionary<Data_MonsterInfo, AnimatorOverrideController>();

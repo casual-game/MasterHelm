@@ -64,9 +64,9 @@ public partial class GameManager : MonoBehaviour
             if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
             ComboText();
 
-            s_combo = Sequence.Create()
+            s_combo = Sequence.Create(useUnscaledTime:true)
                 .Group(Tween.MaterialProperty(image_Combo.material, id_fadeamount, -0.1f, 0.2f))
-                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+                .Group(Tween.Custom(0,1,0.5f,onValueChange: newVal =>
                 {
                     Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;
@@ -97,8 +97,8 @@ public partial class GameManager : MonoBehaviour
             if(dmp_created_sub!=null) dmp_created_sub.FadeOut();
             ComboText();
             
-            s_combo = Sequence.Create()
-                .Group(Tween.Custom(0,1,0.5f,useUnscaledTime:true,onValueChange: newVal =>
+            s_combo = Sequence.Create(useUnscaledTime:true)
+                .Group(Tween.Custom(0,1,0.5f,onValueChange: newVal =>
                 {
                     Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2-2*newVal) * 15;
                     image_Combo.rectTransform.anchoredPosition = comboAnchoredPos + RandomVec;

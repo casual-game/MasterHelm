@@ -197,10 +197,17 @@ public partial class Hero : MonoBehaviour
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {
         if (weaponPack == null) return;
+        if (!_spawned)
+        {
+            weaponL = false;
+            weaponR = false;
+            shield = false;
+        }
         var data = weapondata[weaponPack];
         if (data.weaponL != null) data.weaponL.SetTrail(weaponL);
         if (data.weaponR != null) data.weaponR.SetTrail(weaponR);
         if (this.shield != null) this.shield.SetTrail(shield);
+        
     }
     
     public void Equipment_Collision_Interact(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool useShield)

@@ -22,7 +22,6 @@ public partial class Hero : MonoBehaviour
         sound_combat_chargefin,
         sound_combat_superarmor,
         sound_combat_skill,
-        sound_combat_groundsmash,
         sound_weapon_spawn,
         sound_weapon_despawn,
         sound_voice_attack_normal,
@@ -30,6 +29,7 @@ public partial class Hero : MonoBehaviour
         sound_voice_short,
         sound_voice_hit_normal,
         sound_voice_hit_strong,
+        sound_voice_death,
         sound_spawn,
         sound_slomo;
 
@@ -143,7 +143,7 @@ public partial class Hero : MonoBehaviour
     }
     public void Sound_GroundSmash()
     {
-        SoundManager.Play(sound_combat_groundsmash);
+        SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash);
     }
     //Grass
     private void OnTriggerEnter(Collider other)

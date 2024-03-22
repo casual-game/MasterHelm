@@ -24,10 +24,10 @@ public class UI_Button : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         s_interact.Complete();
-        s_interact = Sequence.Create()
+        s_interact = Sequence.Create(useUnscaledTime: true)
             .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * -3.0f,
-                tween_FadeDuration, 1, useUnscaledTime: true))
-            .Group(Tween.Color(inner, Color.white, tween_FadeDuration, useUnscaledTime: true));
+                tween_FadeDuration, 1))
+            .Group(Tween.Color(inner, Color.white, tween_FadeDuration));
     }
 
 }

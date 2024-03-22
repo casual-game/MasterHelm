@@ -135,7 +135,6 @@ public partial class Hero : MonoBehaviour
         CamArm.instance.Set_FollowTarget(true);
     }
     
-    
     public async UniTaskVoid Spawn(Vector3 nextPos,Quaternion nextRot)
     {
         _animator.updateMode = AnimatorUpdateMode.Normal;
@@ -180,7 +179,6 @@ public partial class Hero : MonoBehaviour
             _shadow.localScale = _shadowScale; 
         }
     }
-
     public void SpawnInstantly()
     {
         gameObject.SetActive(false);
@@ -195,7 +193,6 @@ public partial class Hero : MonoBehaviour
         _outlineTarget.CutoutThreshold = 0;
         _shadow.localScale = _shadowScale; 
     }
-        
     public async UniTaskVoid Despawn()
     {
         _animator.updateMode = AnimatorUpdateMode.UnscaledTime;

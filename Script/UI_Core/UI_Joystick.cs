@@ -36,11 +36,11 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         bg.rectTransform.localScale = GameManager.V3_One * 0.75f;
         bg.rectTransform.anchoredPosition = inner.rectTransform.anchoredPosition;
 
-        s_interact = Sequence.Create()
+        s_interact = Sequence.Create(useUnscaledTime: true)
             .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * 0.1f, 
-                tween_FadeDuration, 1, useUnscaledTime: true))
-            .Group(Tween.Scale(bg.transform,GameManager.V3_One,tween_ScaleDuration,Ease.OutBack, useUnscaledTime: true))
-            .Group(Tween.Color(bg, Color.white, tween_FadeDuration, useUnscaledTime: true));
+                tween_FadeDuration, 1))
+            .Group(Tween.Scale(bg.transform,GameManager.V3_One,tween_ScaleDuration,Ease.OutBack))
+            .Group(Tween.Color(bg, Color.white, tween_FadeDuration));
     }
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -54,10 +54,10 @@ public class UI_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         inner.color = Color.clear;
         bg.rectTransform.anchoredPosition = inner.rectTransform.anchoredPosition;
         
-        s_interact = Sequence.Create()
+        s_interact = Sequence.Create(useUnscaledTime: true)
             .Chain(Tween.PunchScale(inner.transform, GameManager.V3_One * 0.1f, 
-                tween_FadeDuration, 1, useUnscaledTime: true))
-            .Group(Tween.Color(inner, Color.white, tween_FadeDuration, useUnscaledTime: true));
+                tween_FadeDuration, 1))
+            .Group(Tween.Color(inner, Color.white, tween_FadeDuration));
     }
 
 }
