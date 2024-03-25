@@ -35,5 +35,4 @@ public partial class GameManager : MonoBehaviour
     }
 }
 public enum AttackMotionType {Center=0,LeftSlash=60,RightSlash=-60}
-public enum AttackType {Normal = 0,Stun=1,Smash=2,Combo=3}
-public enum HitType {Normal =-1,Bound=2,Screw=3,Flip=4,Smash=5,Stun=6}
+public enum AttackType {Normal = 0,Stun=2,Smash=3}

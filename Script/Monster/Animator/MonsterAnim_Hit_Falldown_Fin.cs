@@ -21,9 +21,8 @@ public class MonsterAnim_Hit_Falldown_Fin : MonsterAnim_Base
         }
         //이동
         Vector3 relativePos = animator.deltaPosition * motionSpeed;
-        Quaternion nextRot = animator.rootRotation;
 
-        _monster.Move_Nav(relativePos, nextRot);
+        _monster.Move_Nav(relativePos);
         
         if (stateInfo.normalizedTime > endRatio)
         {

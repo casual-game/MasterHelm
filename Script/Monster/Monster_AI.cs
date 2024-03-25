@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -34,7 +35,7 @@ public partial class Monster : MonoBehaviour
     private MoveState _monsterMoveState = MoveState.Idle;
     private NavMeshAgent _agent;
     private float _clipLength;
-    protected HitState _hitState
+    [ShowInInspector] protected HitState _hitState
     {
         get;
         private set;
@@ -46,7 +47,7 @@ public partial class Monster : MonoBehaviour
     {
         Idle = 0,Pattern=1,Hit=2
     }
-    public enum HitState {Ground=0,Air=1,Recovery=2}
+    public enum HitState {Ground=0,Stun = 0,Smash=1,Recovery=3}
     [HideInInspector] public float rotateCurrentVelocity;
     
     //Get
@@ -78,6 +79,8 @@ public partial class Monster : MonoBehaviour
     //Set
     public void Set_HitState(HitState hitState)
     {
+        if(hitState == HitState.Recovery) Effect_ChangeColor(monsterInfo.colorGroggy,0.25f);
+        else if(_hitState == HitState.Recovery) Effect_ChangeColor(Color.clear,0.25f);
         _hitState = hitState;
     }
     public void Set_MonsterMoveState(MoveState moveState)
@@ -102,7 +105,7 @@ public partial class Monster : MonoBehaviour
         _animator.SetInteger(GameManager.s_125ms,p.pattern.Pointer_GetData_TransitionDuration());
         _currentMonsterPattern = p.pattern;
     }
-    public virtual bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public virtual bool AI_Hit(Transform prop,TrailData trailData)
     {
         return false;
     }

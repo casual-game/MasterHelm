@@ -152,7 +152,7 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down(1.5f);
             Effect_Hit_SuperArmor();
             CamArm.instance.Tween_ShakeSuperArmor();
-            GameManager.Instance.Combo(GameManager.s_superarmor);
+            //GameManager.Instance.Combo(GameManager.s_superarmor);
             return true;
         }
         //각종 변수,데이터 설정
@@ -181,7 +181,7 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         //히트 처리
-        if (trailData.hitType == HitType.Normal)
+        if (trailData.attackType == AttackType.Normal)
         {
             //상대적 벡터 계산
             Vector3 targetHitVec = hitPoint-transform.position;
@@ -208,14 +208,13 @@ public partial class Hero : MonoBehaviour
             lookVec.y = 0;
             transform.rotation = Quaternion.LookRotation(lookVec);
             //각종 처리
-            _animator.SetInteger(GameManager.s_hit_type,(int)trailData.hitType);
+            _animator.SetInteger(GameManager.s_hit_type,(int)trailData.attackType);
             Tween_Punch_Down(1.1f);
             CamArm.instance.Tween_ShakeStrong_Hero();
             SoundManager.Play(sound_voice_hit_strong);
             SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
         }
-        bool isBloodBottom = trailData.hitType is HitType.Normal or HitType.Bound or HitType.Stun;
-        Effect_Hit_Strong(isBloodBottom);
+        Effect_Hit_Strong();
         return true;
     }
 

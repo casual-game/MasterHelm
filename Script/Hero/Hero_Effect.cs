@@ -180,7 +180,7 @@ public partial class Hero : MonoBehaviour
         var t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
     }
-    public void Effect_Hit_Strong(bool isBloodBottom)
+    public void Effect_Hit_Strong()
     {
         Tween_Blink_Hit(1.0f);
         var t = transform;

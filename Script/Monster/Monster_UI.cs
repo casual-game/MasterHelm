@@ -31,23 +31,7 @@ public partial class Monster : MonoBehaviour
         
     }
 
-    protected void Core_Damage_Normal(int damage)
-    {
-        GameManager.Instance.dmp_normal.Spawn(transform.position + Vector3.up * 1.2f, damage);
-        Core_Damage(damage);
-    }
-    protected void Core_Damage_Weak(int damage)
-    {
-        damage = Mathf.CeilToInt(damage*GameManager.recoveryDamage);
-        GameManager.Instance.dmp_weak.Spawn(transform.position + Vector3.up * 1.2f, damage);
-        Core_Damage(damage);
-    }
-    protected void Core_Damage_Strong(int damage,bool spawn = true)
-    {
-        if(spawn) GameManager.Instance.dmp_strong.Spawn(transform.position + Vector3.up * 1.2f, damage);
-        Core_Damage(damage);
-    }
-    protected virtual void Core_Damage(int damage)
+    protected void Core_Damage(int damage)
     {
         currenthp -= damage;
         if (currenthp > 0)
@@ -67,8 +51,6 @@ public partial class Monster : MonoBehaviour
             t_dmg_main = Tween.UIFillAmount(img_health_main, 0, 0.5f, Ease.OutQuart, useUnscaledTime: true);
             t_dmg_lerp = Tween.UIFillAmount(img_health_lerp, 
                 0, 1.5f, Ease.InOutSine, useUnscaledTime: true,startDelay:2.0f);
-            Despawn().Forget();
         }
-        
     }
 }

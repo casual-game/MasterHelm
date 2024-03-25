@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 [CreateAssetMenu(fileName = "MonsterInfo", menuName = "Data/MonsterInfo", order = 1)]
 public class Data_MonsterInfo : ScriptableObject
 {
     public int hp = 1000;
     
-    [ColorUsage(true,true)] public Color c_hit_begin, c_hit_fin;
+    [ColorUsage(true,true)] public Color colorHit,colorGroggy;
+
     [PropertySpace(16)]
     [Title("몬스터 패턴")]
     [Toggle("usePattern")] public MonsterPattern Pattern_0;

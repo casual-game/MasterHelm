@@ -24,8 +24,7 @@ public class MonsterAnim_Hit_Strong : MonsterAnim_Base
         float moveMagnitude = (moveFlowCurve.Evaluate(ratio) - moveFlowCurve.Evaluate(lastRatio)) 
                               * hit_movedistance;
         Vector3 relativePos = animator.deltaPosition.normalized * moveMagnitude;
-        Quaternion nextRot = animator.rootRotation;
-        _monster.Move_Nav(relativePos, nextRot);
+        _monster.Move_Nav(relativePos);
         lastRatio = ratio;
 
         if (normalizedTime > endRatio)

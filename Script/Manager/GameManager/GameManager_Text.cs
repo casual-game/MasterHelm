@@ -75,5 +75,6 @@ public partial class GameManager: MonoBehaviour
         s_screen_colour = "_Screen_Colour",
         s_saturation = "_saturation",
         s_finish = "Finish",
-        s_alphaoutlineblend = "_AlphaOutlineBlend";
+        s_alphaoutlineblend = "_AlphaOutlineBlend",
+        s_death = "Death";
 }

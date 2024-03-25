@@ -74,40 +74,47 @@ public partial class Monster : MonoBehaviour
     }
     public void Effect_Hit_Normal()
     {
-        t_blink.Complete();
-        t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.2f,
-            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
-            ,ease: Ease.Linear);
+        Effect_Blink(monsterInfo.colorHit, 0.5f);
         
         
         Transform t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_blood_normal,
-            t.position + Vector3.up * 0.75f, t.rotation, particleScale);
+            t.position + Vector3.up * 1.25f, t.rotation, particleScale);
     }
-    public void Effect_Hit_Strong(bool isBloodBottom,bool isCombo,Quaternion rot)
+    public void Effect_Hit_Strong(bool isCombo,Quaternion rot)
     {
-        t_blink.Complete();
-        t_blink = Tween.Custom(monsterInfo.c_hit_begin, monsterInfo.c_hit_fin, duration: 0.3f,
-            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
-            ,ease: Ease.InQuad);
+        Effect_Blink(monsterInfo.colorHit, 0.5f);
 
-        Vector3 pos = transform.position + Vector3.up*0.75f;
+        Vector3 pos = transform.position + Vector3.up*1.25f;
         ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
         if(!isCombo) ParticleManager.Play(ParticleManager.instance.pd_blood_strong,pos,rot, particleScale);
         else ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
     }
     public void Effect_Hit_Counter()
     {
-        t_blink.Complete();
-        t_blink = Tween.Custom(Color.white, Color.clear, duration: 0.5f,
-            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
-            ,ease: Ease.InQuad);
+        Effect_Blink(Color.white, 0.5f);
         
         var t = transform;
         Vector3 pos = t.position + Vector3.up*0.75f;
         Quaternion rot = t.rotation;
         ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
         ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
+    }
+
+    private void Effect_ChangeColor(Color color,float duration)
+    {
+        Color startColor = _outlinable.FrontParameters.FillPass.GetColor(GameManager.s_publiccolor);
+        t_blink.Stop();
+        t_blink = Tween.Custom(startColor,color , duration: duration,
+            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
+            ,ease: Ease.InQuad,useUnscaledTime: true);
+    }
+    private void Effect_Blink(Color color,float duration)
+    {
+        t_blink.Complete();
+        t_blink = Tween.Custom(color, Color.clear, duration: duration,
+            onValueChange: newVal => _outlinable.FrontParameters.FillPass.SetColor(GameManager.s_publiccolor, newVal)
+            ,ease: Ease.InQuad,useUnscaledTime: true);
     }
     //CustomMaterialController
     

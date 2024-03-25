@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using AmazingAssets.AdvancedDissolve;
 using Cysharp.Threading.Tasks;
 using EPOOutline;
+using HighlightPlus;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public partial class Monster : MonoBehaviour
@@ -20,6 +22,7 @@ public partial class Monster : MonoBehaviour
         _material = smr.material;
         _meshRoot = smr.rootBone;
         _outlinable = GetComponent<Outlinable>();
+        _highlightEffect = GetComponent<HighlightEffect>();
         _animator = GetComponent<Animator>();
         _animator.runtimeAnimatorController = animatorOverrideController;
         _outlineTarget = _outlinable.OutlineTargets[0];
@@ -33,9 +36,27 @@ public partial class Monster : MonoBehaviour
         Prefab_Prop l = _weaponL==null?null:Instantiate(_weaponL), 
             r = _weaponR==null?null:Instantiate(_weaponR), 
             s = _shield==null?null:Instantiate(_shield);
-        if(l!=null) l.Setting_Monster(_outlinable,false,t_hand_l,null,this,GameManager.Folder_MonsterProp);
-        if(r!=null) r.Setting_Monster(_outlinable,false,t_hand_r,null,this,GameManager.Folder_MonsterProp);
-        if(s!=null) s.Setting_Monster(_outlinable,false,t_shield,null,this,GameManager.Folder_MonsterProp);
+        List<Renderer> renderers = new List<Renderer>();
+        if (l != null)
+        {
+            l.Setting_Monster(_outlinable,false,t_hand_l,null,this,GameManager.Folder_MonsterProp);
+            renderers.AddRange(l.GetComponentsInChildren<Renderer>());
+        }
+
+        if (r != null)
+        {
+            r.Setting_Monster(_outlinable,false,t_hand_r,null,this,GameManager.Folder_MonsterProp);
+            renderers.AddRange(r.GetComponentsInChildren<Renderer>());
+        }
+
+        if (s != null)
+        {
+            s.Setting_Monster(_outlinable,false,t_shield,null,this,GameManager.Folder_MonsterProp);
+            renderers.AddRange(s.GetComponentsInChildren<Renderer>());
+        }
+        renderers.Add(GetComponentInChildren<SkinnedMeshRenderer>());
+        _highlightEffect.SetTargets(transform,renderers.ToArray());
+        _highlightEffect.highlighted = true;
         //생성
         Transform t = transform;
         _weaponL = l;
@@ -60,6 +81,7 @@ public partial class Monster : MonoBehaviour
     private Transform _shadow;
     private Vector3 _shadowScale;
     protected Outlinable _outlinable;
+    protected HighlightEffect _highlightEffect;
     protected MonsterAnim_Base _animBase;
     protected Animator _animator;
     protected Transform _meshRoot;
@@ -183,6 +205,10 @@ public partial class Monster : MonoBehaviour
     public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
     {
         transform.rotation = nextRot;
+        _agent.Move(relativePos);
+    }
+    public void Move_Nav(Vector3 relativePos)
+    {
         _agent.Move(relativePos);
     }
     public void Move_Normal(Vector3 nextPos,Quaternion nextRot)

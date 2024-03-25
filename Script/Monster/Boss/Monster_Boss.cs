@@ -83,7 +83,7 @@ public partial class Monster_Boss : Monster
             .Group(Tween.Scale(img_nameplate.transform, 0.0f, _uiDuration * 0.75f, Ease.InBack))
             .Chain(Tween.Scale(img_health_root.transform, 0, _uiDuration, Ease.InBack, startDelay: 0.2f));
     }
-    protected override void Core_Damage(int damage)
+    protected void Core_Damage(int damage)
     {
         currenthp -= damage;
         if (currenthp > 0)

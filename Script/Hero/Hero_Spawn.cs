@@ -141,11 +141,12 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_finish,false);
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _dissolveRatio = 1;
+        _spawned = true;
         _outlineTarget.CutoutThreshold = 1;
         gameObject.SetActive(false);
         gameObject.SetActive(true);
         Move_Warp(nextPos,nextRot);
-        _spawned = true;
         _animator.Rebind();
         Tween_Blink_Evade(1.0f);
         Sound_Voice_Short();
@@ -170,7 +171,6 @@ public partial class Hero : MonoBehaviour
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
-
         if (_spawned)
         {
             AdvancedDissolveProperties.Cutout.Standard.

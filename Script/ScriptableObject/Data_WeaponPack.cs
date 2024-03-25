@@ -61,8 +61,7 @@ public class TrailData
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] 
     [ShowIf("useCustomParticle")][Range(0,4)] public int customParticle_ShakeRatio = 0;
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public SoundData soundData;
-    [TitleGroup("TrailData/공격 정보 설정")] public AttackType attackType_ground;
-    [TitleGroup("TrailData/공격 정보 설정")] public bool isAirSmash;
+    [FormerlySerializedAs("attackType_ground")] [TitleGroup("TrailData/공격 정보 설정")] public AttackType attackType;
     [TitleGroup("TrailData/공격 정보 설정")] public Vector2Int damage = new Vector2Int(10,15);
     [TitleGroup("TrailData/공격 정보 설정")] public int regain = 2;
     [TitleGroup("TrailData/공격 정보 설정")] public int charge_mp = 1;
@@ -91,13 +90,17 @@ public class TrailData
     [TitleGroup("TrailData/타이밍 설정")][HideIf("$isHitScan")]
     [MinMaxSlider(0,1,true)]
     public Vector2 collisionRange = new Vector2(0,1);
+    
+    public int GetDamage()
+    {
+        return Random.Range(damage.x, damage.y + 1);
+    }
 }
 [System.Serializable]
 public class TrailData_Monster : TrailData
 {
     [TitleGroup("TrailData/공격 정보 설정")][LabelText("회피 방식")][EnumToggleButtons] public EvadeType evadeType;
     [TitleGroup("TrailData/공격 정보 설정")][LabelText("공격 판정")][EnumToggleButtons]  public AttackMotionType attackMotionType = AttackMotionType.Center;
-    [TitleGroup("TrailData/공격 정보 설정")][EnumToggleButtons,HideLabel] public HitType hitType = HitType.Normal;
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public float playSpeed = 1.0f, moveSpeed = 1.0f;
     [TitleGroup("TrailData/공격 정보 설정")] public bool rotateToHero = true;
     [TitleGroup("TrailData/공격 정보 설정")] [ShowIf("rotateToHero")] public float rotateDuration = 1.0f;

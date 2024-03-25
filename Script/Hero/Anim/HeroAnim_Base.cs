@@ -270,7 +270,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             lookVec.y = 0;
             animator.transform.rotation = Quaternion.LookRotation(lookVec);
             //기본 설정들
-            GameManager.Instance.Combo(GameManager.s_evade);
+            //GameManager.Instance.Combo(GameManager.s_evade);
             _hero.Set_AnimatorUnscaledTime(true);
             CamArm.instance.Tween_JustEvade();
             

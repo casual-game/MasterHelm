@@ -59,9 +59,9 @@ public partial class Monster : MonoBehaviour
     public void Equipment_Collision_Interact(bool weaponL,bool weaponR,bool useShield)
     {
         Transform t = transform;
-        if (weaponL && _weaponL != null) _weaponL.Collision_Interact_Monster(_currentTrailData, t);
-        if (weaponR && _weaponR != null) _weaponR.Collision_Interact_Monster(_currentTrailData, t);
-        if (useShield && _shield != null) _shield.Collision_Interact_Monster(_currentTrailData, t);
+        if (weaponL && _weaponL != null) _weaponL.Collision_Interact_Monster(_currentTrailData);
+        if (weaponR && _weaponR != null) _weaponR.Collision_Interact_Monster(_currentTrailData);
+        if (useShield && _shield != null) _shield.Collision_Interact_Monster(_currentTrailData);
     }
     public void Equipment_Collision_Skip()
     {

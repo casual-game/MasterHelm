@@ -11,150 +11,83 @@ public partial class Monster_Normal : Monster
     
     
     //Private
-    private int _hitStrongType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
+    private int normalHitType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     
     //Setter
-    public override bool AI_Hit(Transform attacker,Transform prop,TrailData trailData)
+    public override bool AI_Hit(Transform prop,TrailData trailData)
     {
-        if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay) return false;
+        if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay 
+            || _hitState == HitState.Recovery || _hitState == HitState.Smash) return false;
+        int damage = trailData.GetDamage();
         Set_MonsterMoveState(MoveState.Hit);
         Equipment_UpdateTrail(false,false,false);
-        //현 상태에 따른 히트 타입 설정
-        AttackType attackType = trailData.attackType_ground;
-        bool isAirSmash = trailData.isAirSmash;
-        string attackString;
-        int damage = Random.Range(trailData.damage.x, trailData.damage.y+1);
-        HitType hitType;
-        if (_hitState == HitState.Ground)
+        bool isBigHit = trailData.attackType != AttackType.Normal && _hitState != HitState.Recovery;
+        
+        _animBase.isFinished = true;
+        _hitStrongTime = Time.time;
+        
+        //노멀 히트
+        switch (trailData.attackType)
         {
-            _animBase.isFinished = true;
-            _animator.SetBool(GameManager.s_isair,false);
-            
-            switch (attackType)
-            {
-                case AttackType.Normal:
-                    Set_HitState(HitState.Ground);
-                    hitType = HitType.Normal;
-                    Core_Damage_Normal(damage);
-                    Effect(false);
-                    attackString =GameManager.s_normalattack;
-                    SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_normal);
-                    Voice_Hit();
-                    break;
-                case AttackType.Stun:
-                    Set_HitState(HitState.Ground);
-                    hitType = HitType.Stun;
-                    Core_Damage_Strong(damage);
-                    Effect(true);
-                    attackString = GameManager.s_combobegin;
-                    SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
-                    Voice_Hit(true);
-                    break;
-                case AttackType.Smash:
-                    Set_HitState(HitState.Ground);
-                    hitType = HitType.Smash;
-                    Core_Damage_Strong(damage);
-                    Effect(true);
-                    attackString = GameManager.s_smash;
-                    SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
-                    Voice_Death();
-                    break;
-                case AttackType.Combo:
-                    Set_HitState(HitState.Air);
-                    hitType = HitType.Bound;
-                    Core_Damage_Strong(damage);
-                    Effect(true);
-                    attackString = GameManager.s_combobegin;
-                    SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
-                    Voice_Hit(true);
-                    break;
-                default:
-                    Set_HitState(HitState.Ground);
-                    hitType = HitType.Normal;
-                    Core_Damage_Normal(damage);
-                    Effect(false);
-                    attackString = GameManager.s_normalattack;
-                    SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_normal);
-                    break;
-            }
-        }
-        else if (_hitState == HitState.Air)
-        {
-            _animBase.isFinished = true;
-            _animator.SetBool(GameManager.s_isair,true);
-            if (isAirSmash)
-            {
-                Set_HitState(HitState.Recovery);
-                hitType = HitType.Flip;
-                Core_Damage_Strong(damage);
-                Effect(true);
-                attackString = GameManager.s_combofinish;
-                SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
-                Voice_Death();
-            }
-            else
-            {
-                Set_HitState(HitState.Air);
-                hitType = HitType.Screw;
-                Core_Damage_Normal(damage);
-                Effect(false);
-                attackString = GameManager.s_truecombo;
+            case AttackType.Normal:
+            default:
+                Set_HitState(HitState.Ground);
                 SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_normal);
-                Voice_Hit();
-            }
+                break;
+            case AttackType.Stun:
+                Set_HitState(HitState.Stun);
+                SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
+                break;
+            case AttackType.Smash:
+                Set_HitState(HitState.Smash);
+                SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
+                break;
         }
-        else
-        {
-            _hitStrongTime = Time.time;
-            Core_Damage_Weak(damage);
-            Punch_Down(1.5f);
-            Effect_Hit_Normal();
-            CamArm.instance.Tween_ShakeWeak();
-            return true;
-        }
-
-        if (!Get_IsAlive()) attackString = GameManager.s_kill;
-        GameManager.Instance.Combo(attackString);
         //회전
-        Vector3 lookVec = attacker.position-transform.position;
+        Vector3 currentPos = transform.position;
+        Vector3 lookVec = Hero.instance.transform.position-currentPos;
         lookVec.y = 0;
         transform.rotation = Quaternion.LookRotation(lookVec);
-        
-        //애니메이터 설정
-        _hitStrongTime = Time.time;
-        _hitStrongType = (_hitStrongType + 1) % 2;
-        _animator.SetBool(GameManager.s_hit,true);
-        _animator.SetTrigger(GameManager.s_state_change);
-        if (hitType == HitType.Normal)
+        //데미지,애니메이터,파티클,연출
+        Core_Damage(damage);
+        Quaternion effectRot = prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0);
+        Effect_Hit_Strong(isBigHit,effectRot);
+        if (!Get_IsAlive())
         {
-            Punch_Down(1.0f);
-            _animator.SetInteger(GameManager.s_hit_type,_hitStrongType);
+            GameManager.Instance.ComboText_Kill(currentPos);
+            Punch_Down(1.1f);
+            _animator.SetBool(GameManager.s_death,true);
+            _animator.SetInteger(GameManager.s_hit_type,trailData.attackType == AttackType.Smash?0:1);
+            CamArm.instance.Tween_ShakeStrong();
+            GameManager.Instance.Shockwave(transform.position,1.0f);
+            Despawn().Forget();
+            Voice_Death();
+        }
+        else if (isBigHit)
+        {
+            if(trailData.attackType == AttackType.Smash) GameManager.Instance.ComboText_Smash(currentPos);
+            else GameManager.Instance.ComboText_Norm(currentPos);
+            Punch_Down(1.1f);
+            _animator.SetBool(GameManager.s_hit,true);
+            _animator.SetInteger(GameManager.s_hit_type,(int)trailData.attackType);
+            CamArm.instance.Tween_ShakeStrong();
+            GameManager.Instance.Shockwave(transform.position,1.0f);
+            Voice_Hit(true);
         }
         else
         {
-            Punch_Down(1.1f);
-            _animator.SetInteger(GameManager.s_hit_type,(int)hitType);
+            GameManager.Instance.ComboText_Norm(currentPos);
+            Punch_Down(1.0f);
+            _animator.SetBool(GameManager.s_hit,true);
+            normalHitType = (normalHitType + 1) % 2;
+            _animator.SetInteger(GameManager.s_hit_type,normalHitType);
+            CamArm.instance.Tween_ShakeNormal();
+            Voice_Hit();
         }
-        
-        //이펙트 생성
-        bool isBloodBottom = hitType is HitType.Normal or HitType.Bound or HitType.Stun;
-        bool isCombo = (attackType != AttackType.Normal && _hitState == HitState.Ground) 
-                       || _hitState == HitState.Air || isAirSmash;
-        Effect_Hit_Strong(isBloodBottom,isCombo,prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0));
+        _highlightEffect.HitFX();
+        _animator.SetTrigger(GameManager.s_state_change);
         return true;
-        void Effect(bool isStrong)
-        {
-            if (isStrong || !Get_IsAlive())
-            {
-                CamArm.instance.Tween_ShakeStrong();
-                GameManager.Instance.Shockwave(transform.position);
-            }
-            else
-            {
-                CamArm.instance.Tween_ShakeNormal();
-            }
-        }
     }
 
     

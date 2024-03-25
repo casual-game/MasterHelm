@@ -134,7 +134,7 @@ public partial class Hero : MonoBehaviour
         if (traildata != null)
         {
             SoundManager.Play(traildata.soundData);
-            if (traildata.attackType_ground == AttackType.Normal)
+            if (traildata.attackType == AttackType.Normal)
             {
                 Sound_Voice_Attack_Normal();
             }
@@ -218,21 +218,21 @@ public partial class Hero : MonoBehaviour
         int count = 0;
         if (weaponL && data.weaponL != null)
         {
-            var hitData = data.weaponL.Collision_Interact_Hero(_currentTrailData, t);
+            var hitData = data.weaponL.Collision_Interact_Hero(_currentTrailData);
             if (hitData.collided) collided = true;
             count += hitData.count;
         }
 
         if (weaponR && data.weaponR != null)
         {
-            var hitData = data.weaponR.Collision_Interact_Hero(_currentTrailData, t);
+            var hitData = data.weaponR.Collision_Interact_Hero(_currentTrailData);
             if (hitData.collided) collided = true;
             count += hitData.count;
         }
 
         if (useShield && data.useShield)
         {
-            var hitData = shield.Collision_Interact_Hero(_currentTrailData, t);
+            var hitData = shield.Collision_Interact_Hero(_currentTrailData);
             if(hitData.collided) collided = true;
             count += hitData.count;
         }
@@ -265,7 +265,7 @@ public partial class Hero : MonoBehaviour
         foreach (var signal in _sensor.GetSignals())
         {
             signal.Object.TryGetComponent<Monster>(out var monster);
-            if(monster.AI_Hit(t,t,_currentTrailData)) collided = true;
+            if(monster.AI_Hit(t,_currentTrailData)) collided = true;
         }
 
         if (collided)

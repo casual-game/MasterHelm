@@ -12,6 +12,7 @@ using UnityEngine;
 
 public class Prefab_Prop : MonoBehaviour
 {
+    public List<Renderer> renderers = new List<Renderer>();
     private AnimationCurve _curve = AnimationCurve.EaseInOut(0,0,1,1);
     private float _currentActivateRatio, _targetActivateRatio;
     private bool _targetActivation;
@@ -68,7 +69,7 @@ public class Prefab_Prop : MonoBehaviour
     }
     //Collision
     
-    public (bool collided,int count) Collision_Interact_Hero(TrailData trailData,Transform attacker)//공격 판정 계산할때 호출한다.
+    public (bool collided,int count) Collision_Interact_Hero(TrailData trailData)//공격 판정 계산할때 호출한다.
     {
         if (skipCurrentInteraction) return (false,0);
         bool collided = false;
@@ -80,7 +81,7 @@ public class Prefab_Prop : MonoBehaviour
             if (!_interact_interactedTargets.Contains(coll))
             {
                 coll.TryGetComponent<Monster>(out var monster);
-                if (monster.AI_Hit(attacker, transform, trailData))
+                if (monster.AI_Hit(transform, trailData))
                 {
                     collided = true;
                     count++;
@@ -91,7 +92,7 @@ public class Prefab_Prop : MonoBehaviour
         _interact_savedTargets.Clear();
         return (collided,count);
     }
-    public bool Collision_Interact_Monster(TrailData_Monster trailData,Transform attacker)//공격 판정 계산할때 호출한다.
+    public bool Collision_Interact_Monster(TrailData_Monster trailData)//공격 판정 계산할때 호출한다.
     {
         if (skipCurrentInteraction) return false;
         bool collided = false;
