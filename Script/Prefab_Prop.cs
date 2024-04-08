@@ -103,7 +103,9 @@ public class Prefab_Prop : MonoBehaviour
             if (!_interact_interactedTargets.Contains(coll))
             {
                 coll.TryGetComponent<Hero>(out var hero);
-                if (hero.Core_Hit_Strong(trailData,_monster.transform.position)) collided = true;
+                if (trailData.attackType == AttackType.Weak 
+                    && hero.Core_Hit_Normal(_monster.transform.position)) collided = true;
+                else if (hero.Core_Hit_Strong(trailData,_monster.transform.position)) collided = true;
                 _interact_interactedTargets.Add(coll);
             }
         }

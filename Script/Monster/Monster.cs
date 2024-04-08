@@ -24,6 +24,7 @@ public partial class Monster : MonoBehaviour
         _outlinable = GetComponent<Outlinable>();
         _highlightEffect = GetComponent<HighlightEffect>();
         _animator = GetComponent<Animator>();
+        print("ASDASERD");
         _animator.runtimeAnimatorController = animatorOverrideController;
         _outlineTarget = _outlinable.OutlineTargets[0];
         _dissolveRatio = 1.0f;
@@ -74,6 +75,7 @@ public partial class Monster : MonoBehaviour
     public static List<Monster> Monsters = new List<Monster>();
     [FoldoutGroup("MainData")] public Data_MonsterInfo monsterInfo;
     [FoldoutGroup("MainData")] public Prefab_Prop _weaponL, _weaponR, _shield;
+    [FoldoutGroup("Anim")] public AnimationClip animIdle,animStrafeFwd,animStrafeLeft,animStrafeRight,animRun;
     //Private,Protected
     private float _dissolveRatio = 1.0f;
     private Material _material;
@@ -100,12 +102,12 @@ public partial class Monster : MonoBehaviour
         _isReady = false;
         gameObject.SetActive(true);
         _animator.Rebind();
-        _animator.SetBool(GameManager.s_spawn,Random.Range(0,2)==1);
         _isAlive = true;
         p_spawn.Play();
         SoundManager.Play(sd_spawn);
         Voice_Attack();
-        Move_Nav(relativePos,rot);
+        transform.rotation = rot;
+        Move_Nav(relativePos);
         ActivateUI();
         
         Equipment_Equip();
@@ -201,12 +203,6 @@ public partial class Monster : MonoBehaviour
         return _isReady;
     }
 
-    //Move
-    public void Move_Nav(Vector3 relativePos,Quaternion nextRot)
-    {
-        transform.rotation = nextRot;
-        _agent.Move(relativePos);
-    }
     public void Move_Nav(Vector3 relativePos)
     {
         _agent.Move(relativePos);

@@ -110,7 +110,9 @@ public class MonsterAnim_Attack : MonsterAnim_Base
             targetRot = Quaternion.Euler(0, targetDeg, 0);
         }
         else targetRot = animator.rootRotation;
-        _monster.Move_Nav(targetPos,targetRot);
+
+        _monster.transform.rotation = targetRot;
+        _monster.Move_Nav(targetPos);
     }
     void Update_Finish(in bool overRatio,in Animator animator)
     {

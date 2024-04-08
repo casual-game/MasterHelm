@@ -45,7 +45,7 @@ public partial class Hero : MonoBehaviour
     {
         if (!_spawned) return;
         _btnAttack = true;
-        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll;
         if (canChargeMotion)
         {
             SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
@@ -85,7 +85,7 @@ public partial class Hero : MonoBehaviour
     private void E_BTN_Attack_PressedUpdate()
     {
         if (!_spawned || !_btnAttack) return;
-        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll;
         Quaternion myRot = transform.rotation;
         //공격 조이스틱 각도 계산,Display 회전
         float jsDeg;
@@ -155,7 +155,7 @@ public partial class Hero : MonoBehaviour
     private void E_BTN_Attack_ReleasedUpdate()
     {
         if (!_spawned|| _btnAttack) return;
-        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust;
+        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll;
         float eulery = transform.rotation.eulerAngles.y;
         float targetDeg = Mathf.SmoothDampAngle(_lookDisplayT.eulerAngles.y, 
             eulery, ref _lookDisplayRefDeg, heroData.lookDisplayDuration);

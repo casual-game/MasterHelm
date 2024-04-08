@@ -22,7 +22,7 @@ public partial class SideUI : MonoBehaviour
     private OutlineTarget tempOutlineTargetL, tempOutlineTargetR;
     private Item_Weapon _currentWeapon = null;
     private static string strGreatsword = "Greatsword", strDoubleAxe = "DoubleAxe", strHammer = "Hammer",strIdle = "Idle",
-        strShineLocation = "_ShineLocation",strHitEffectBlend = "_HitEffectBlend";
+        strShineLocation = "_ShineLocation",strHitEffectBlend = "_HitEffectBlend",strDissolveAmount = "_DissolveAmount";
     private Tween _tweenDissolveL, _tweenDissolveR;
     private Sequence _seqHero;
     private bool _isBack = true;
@@ -52,7 +52,7 @@ public partial class SideUI : MonoBehaviour
                     if (!heroAnim.GetCurrentAnimatorStateInfo(0).IsName(strHammer)) heroAnim.Play(strHammer);
                     break;
             }   
-            heroCamT.SetLocalPositionAndRotation(weapon.camLocalPos,Quaternion.Euler(0,weapon.camDeg,0));
+            heroCamT.SetLocalPositionAndRotation(weapon.camLocalPos,Quaternion.Euler(weapon.camDeg));
         }
         //로딩
         if(_currentWeapon!=null && _currentWeapon!=weapon) ReleaseWeapon(_currentWeapon);
@@ -65,15 +65,13 @@ public partial class SideUI : MonoBehaviour
         if (tempOutlineTargetL != null && tempWeaponL!=null)
         {
             tempOutlineTargetL.CutoutThreshold = 1;
-            AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetL.
-                renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+            tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,1);
         }
 
         if (tempOutlineTargetR != null && tempWeaponR!=null)
         {
             tempOutlineTargetR.CutoutThreshold = 1;
-            AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetR.
-                renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1); 
+            tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,1);
         }
         
         Transform parent;
@@ -89,8 +87,9 @@ public partial class SideUI : MonoBehaviour
                     {
                         tempWeaponL = obj.Result;
                         Transform weaponT = tempWeaponL.transform;
-                        tempOutlineTargetL = new OutlineTarget(tempWeaponL.GetComponent<Renderer>(),
-                            "_AdvancedDissolveCutoutStandardMap1", 1.0f);
+                        tempOutlineTargetL = new OutlineTarget(tempWeaponL.GetComponentInChildren<Renderer>(),
+                            "_DissolveMap", 0.0f);
+                        tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,0.0f);
                         outlinable.TryAddTarget(tempOutlineTargetL);
                         if (isBack)
                         {
@@ -105,13 +104,14 @@ public partial class SideUI : MonoBehaviour
                             weaponT.localScale = copyT.localScale;
                         }
 
+                        /*
                         _tweenDissolveL = Tween.Custom(1, 0, 0.5f, 
                             onValueChange: val =>
                             {
                                 tempOutlineTargetL.CutoutThreshold = val;
-                                AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetL.
-                                    renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,val);
+                                tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,val);
                             });
+                        */
                     };
             }
             else tempOutlineTargetL = null;
@@ -124,8 +124,9 @@ public partial class SideUI : MonoBehaviour
                     (AsyncOperationHandle<GameObject> obj) =>
                     {
                         tempWeaponR = obj.Result;
-                        tempOutlineTargetR = new OutlineTarget(tempWeaponR.GetComponent<Renderer>(),
-                            "_AdvancedDissolveCutoutStandardMap1", 1.0f);
+                        tempOutlineTargetR = new OutlineTarget(tempWeaponR.GetComponentInChildren<Renderer>(),
+                            "_DissolveMap", 0.0f);
+                        tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,0.0f);
                         outlinable.TryAddTarget(tempOutlineTargetR);
                         Transform weaponT = tempWeaponR.transform;
                         if (isBack)
@@ -140,14 +141,14 @@ public partial class SideUI : MonoBehaviour
                             weaponT.SetLocalPositionAndRotation(copyT.localPosition, copyT.localRotation);
                             weaponT.localScale = copyT.localScale;
                         }
-
+                        /*
                         _tweenDissolveR = Tween.Custom(1, 0, 0.5f, 
                             onValueChange: val =>
                             {
                                 tempOutlineTargetR.CutoutThreshold = val;
-                                AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetR.
-                                    renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,val);
+                                tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,val);
                             });
+                        */
                     };
             }
             else tempOutlineTargetR = null;
@@ -157,6 +158,11 @@ public partial class SideUI : MonoBehaviour
             //왼쪽 무기
             if (tempWeaponL != null)
             {
+                if (tempOutlineTargetL != null)
+                {
+                    tempOutlineTargetL.CutoutThreshold = 0;
+                    tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,0.0f);
+                }
                 if (isBack)
                 {
                     Transform copyT = tempWeaponL.transform.GetChild(1);
@@ -171,18 +177,23 @@ public partial class SideUI : MonoBehaviour
                     tempWeaponL.transform.SetLocalPositionAndRotation(copyT.localPosition,copyT.localRotation);
                     tempWeaponL.transform.localScale = copyT.localScale;
                 }
-                
+                /*
                 _tweenDissolveL = Tween.Custom(1, 0, 0.5f, 
                     onValueChange: val =>
                     {
                         tempOutlineTargetL.CutoutThreshold = val;
-                        AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetL.
-                            renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,val);
+                        tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,val);
                     });
+                */
             }
             //오른쪽 무기
             if (tempWeaponR != null)
             {
+                if (tempOutlineTargetR != null)
+                {
+                    tempOutlineTargetR.CutoutThreshold = 0;
+                    tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,0.0f);
+                }
                 if (isBack)
                 {
                     tempWeaponR.transform.SetParent(tBackR);
@@ -197,14 +208,14 @@ public partial class SideUI : MonoBehaviour
                     tempWeaponR.transform.SetLocalPositionAndRotation(copyT.localPosition,copyT.localRotation);
                     tempWeaponR.transform.localScale = copyT.localScale;
                 }
-                
+                /*
                 _tweenDissolveR = Tween.Custom(1, 0, 0.5f, 
                     onValueChange: val =>
                     {
                         tempOutlineTargetR.CutoutThreshold = val;
-                        AdvancedDissolveProperties.Cutout.Standard.UpdateLocalProperty(tempOutlineTargetR.
-                            renderer.material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,val);
+                        tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,val);
                     });
+                */
             }
         }
     }
@@ -212,6 +223,8 @@ public partial class SideUI : MonoBehaviour
     {
         if (weapon.refHighPolyWeaponL.RuntimeKeyIsValid() && tempWeaponL!=null)
         {
+            tempOutlineTargetL.CutoutThreshold = 0;
+            tempOutlineTargetL.renderer.material.SetFloat(strDissolveAmount,0);
             outlinable.RemoveTarget(tempOutlineTargetL);
             weapon.refHighPolyWeaponL.ReleaseInstance(tempWeaponL);
             tempWeaponL = null;
@@ -219,6 +232,8 @@ public partial class SideUI : MonoBehaviour
 
         if (weapon.refHighPolyWeaponR.RuntimeKeyIsValid()&& tempWeaponR!=null)
         {
+            tempOutlineTargetR.CutoutThreshold = 0;
+            tempOutlineTargetR.renderer.material.SetFloat(strDissolveAmount,0);
             outlinable.TryAddTarget(tempOutlineTargetR);
             weapon.refHighPolyWeaponR.ReleaseInstance(tempWeaponR);
             tempWeaponR = null;

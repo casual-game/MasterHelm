@@ -27,8 +27,32 @@ public partial class GameManager : MonoBehaviour
             if (!_aiAnimators.ContainsKey(monster.monsterInfo))
             {
                 AnimatorOverrideController overrideController;
-                if (monster is Monster_Boss) overrideController = new AnimatorOverrideController(baseOverride_Boss);
-                else overrideController = new AnimatorOverrideController(baseOverride_Monster);
+                if (monster is Monster_Boss)
+                {
+                    overrideController = new AnimatorOverrideController(baseOverride_Boss);
+                }
+                else
+                {
+                    var norm = (Monster_Normal)monster;
+                    overrideController = new AnimatorOverrideController(baseOverride_Monster);
+                    overrideController[s_deathflip] = norm.animDeathFlip;
+                    overrideController[s_deathnorm] = norm.animDeathNorm;
+                    overrideController[s_hitstrong1] = norm.animHitStrong1;
+                    overrideController[s_hitstrong2] = norm.animHitStrong2;
+                    overrideController[s_idle] = norm.animIdle;
+                    overrideController[s_smashbegin] = norm.animSmashBegin;
+                    overrideController[s_smashloop] = norm.animSmashLoop;
+                    overrideController[s_smashfin] = norm.animSmashFin;
+                    if(norm.animSpawnGround == null) overrideController[s_spawn] = norm.animSpawnAir;
+                    else overrideController[s_spawn] = Random.Range(0, 2) == 1 ? norm.animSpawnAir : norm.animSpawnGround;
+                    overrideController[s_stunbegin] = norm.animStunBegin;
+                    overrideController[s_stunloop] = norm.animStunLoop;
+                    overrideController[s_stunfin] = norm.animStunFin;
+                    overrideController[s_run] = norm.animRun;
+                    overrideController[s_strafefwd] = norm.animStrafeFwd;
+                    overrideController[s_strafeleft] = norm.animStrafeLeft;
+                    overrideController[s_straferight] = norm.animStrafeRight;
+                }
                 ApplyPatternAnim(monster.monsterInfo.Pattern_0,0);
                 ApplyPatternAnim(monster.monsterInfo.Pattern_1,1);
                 ApplyPatternAnim(monster.monsterInfo.Pattern_2,2);

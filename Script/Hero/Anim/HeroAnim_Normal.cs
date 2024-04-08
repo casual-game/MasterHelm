@@ -12,7 +12,7 @@ public class HeroAnim_Normal : HeroAnim_Base
         
         Vector3 relativePos = animator.deltaPosition*motionSpeed;
         Quaternion nextRot = animator.rootRotation;
-
+        
         _hero.Move_Nav(relativePos, nextRot);
     }
 }

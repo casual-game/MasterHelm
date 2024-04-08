@@ -11,7 +11,6 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
     private float rotateLimitNormalizedTime = 0.15f;
     //사이드 구르기
     private Monster mtarget;
-    private float sideAddDeg;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
@@ -29,37 +28,6 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
         _hero.Sound_Footstep();
         _hero.Sound_Voice_Short();
         SoundManager.Play(_hero.sound_footstep_roll_begin);
-        CamArm.instance.Tween_CamAttackVec(false);
-        //사이드 구르기 확인, 세팅
-        float minDist = _hero.heroData.justEvadeDistance * _hero.heroData.justEvadeDistance;
-        mtarget = null;
-        foreach (var m in Monster.Monsters)
-        {
-            if (m.Get_CanSideRoll())
-            {
-                Vector3 _lookvec = m.transform.position - animator.transform.position; 
-                float dist = Vector3.SqrMagnitude(_lookvec);
-                if (minDist > dist)
-                {
-                    mtarget = m;
-                    minDist = dist;
-                }
-                break;
-            }
-        }
-
-        if (mtarget != null)
-        {
-            var state = mtarget.Get_CurrentTrail();
-            if (state.evadeType == EvadeType.LeftSide) sideAddDeg = -90;
-            else if (state.evadeType == EvadeType.RightSide) sideAddDeg = 90;
-            else sideAddDeg = 180;
-            Vector3 lookVec = mtarget.transform.position - _hero.transform.position;
-            lookVec.y = 0;
-            float lookDeg = Quaternion.LookRotation(lookVec).eulerAngles.y + sideAddDeg;
-            _hero.transform.rotation = Quaternion.Euler(0,lookDeg,0);
-        }
-        
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -68,51 +36,31 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
         if (IsNotAvailable(animator,stateInfo)) return;
         Transform heroT = _hero.transform;
         float targetDeg;
-        if (mtarget !=null)
+        //조이스틱 각도 계산
+        float jsDeg;
+        if (GameManager.Bool_Move)
         {
-            Vector3 lookVec = mtarget.transform.position - heroT.position;
-            lookVec.y = 0;
-            float lookDeg = Quaternion.LookRotation(lookVec).eulerAngles.y + sideAddDeg;
-            
+            jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
+                    CamArm.instance.transform.rotation.eulerAngles.y+90;
+        }
+        else jsDeg = heroT.rotation.eulerAngles.y;
+        //pattern에 알맞은 동작
+        if (pattern == 0)
+        {
+            float ratio = Mathf.Clamp01(stateInfo.normalizedTime / rotateLimitNormalizedTime);
+            targetDeg = Mathf.LerpAngle(startDeg,endDeg, rotateCurve.Evaluate(ratio));
+            if (stateInfo.normalizedTime > rotateLimitNormalizedTime) pattern++;
+        }
+        else
+        {
             //플레이어 각도와의 차이 계산
-            float degDiff = -heroT.rotation.eulerAngles.y + lookDeg;
+            float degDiff = -heroT.rotation.eulerAngles.y + jsDeg;
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
             //값들을 변환하여 회전 애니메이션에 반영, 실제 회전 각도 계산
             degDiff = Mathf.Clamp(degDiff, -60, 60) / 60.0f;
-            targetDeg = Mathf.SmoothDampAngle(heroT.eulerAngles.y, lookDeg,
+            targetDeg = Mathf.SmoothDampAngle(heroT.eulerAngles.y, jsDeg,
                 ref _hero.rotateCurrentVelocity, _heroData.turnDuration_roll * Mathf.Abs(degDiff));
-        }
-        else
-        {
-            //조이스틱 각도 계산
-            float jsDeg;
-            if (GameManager.Bool_Move)
-            {
-                jsDeg = -Mathf.Atan2(GameManager.JS_Move.y, GameManager.JS_Move.x) * Mathf.Rad2Deg +
-                        CamArm.instance.transform.rotation.eulerAngles.y+90;
-            }
-            else jsDeg = heroT.rotation.eulerAngles.y;
-            //pattern에 알맞은 동작
-        
-            
-            if (pattern == 0)
-            {
-                float ratio = Mathf.Clamp01(stateInfo.normalizedTime / rotateLimitNormalizedTime);
-                targetDeg = Mathf.LerpAngle(startDeg,endDeg, rotateCurve.Evaluate(ratio));
-                if (stateInfo.normalizedTime > rotateLimitNormalizedTime) pattern++;
-            }
-            else
-            {
-                //플레이어 각도와의 차이 계산
-                float degDiff = -heroT.rotation.eulerAngles.y + jsDeg;
-                while (degDiff < -180) degDiff += 360;
-                while (degDiff > 180) degDiff -= 360;
-                //값들을 변환하여 회전 애니메이션에 반영, 실제 회전 각도 계산
-                degDiff = Mathf.Clamp(degDiff, -60, 60) / 60.0f;
-                targetDeg = Mathf.SmoothDampAngle(heroT.eulerAngles.y, jsDeg,
-                    ref _hero.rotateCurrentVelocity, _heroData.turnDuration_roll * Mathf.Abs(degDiff));
-            }
         }
         //최종 이동 설정
         Vector3 targetPos = animator.deltaPosition * moveSpeed;

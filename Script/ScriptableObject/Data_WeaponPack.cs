@@ -20,10 +20,10 @@ public class Data_WeaponPack : ScriptableObject
     [FoldoutGroup("일반 공격으로 사용/Data")][LabelText("일반 공격 정보")]
     public List<PlayerAttackMotionData> PlayerAttackMotionDatas_Normal = new List<PlayerAttackMotionData>();
     //스킬
-    [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")]
-    public bool isLeftIsMirror = false;
+    [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")][LabelText("Left State로 시작")]
+    public bool startLeftState = true;
 
-    [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")]
+    [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")][LabelText("종료 애니메이션 ratio")]
     public float weaponOffRatio = 1.0f;
     [TitleGroup("강 공격으로 사용")] [FoldoutGroup("강 공격으로 사용/Data")] [LabelText("강 공격 정보 (Left 기준)")]
     public PlayerAttackMotionData playerAttackMotionData_Strong;
@@ -61,7 +61,7 @@ public class TrailData
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] 
     [ShowIf("useCustomParticle")][Range(0,4)] public int customParticle_ShakeRatio = 0;
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public SoundData soundData;
-    [FormerlySerializedAs("attackType_ground")] [TitleGroup("TrailData/공격 정보 설정")] public AttackType attackType;
+    [TitleGroup("TrailData/공격 정보 설정")][EnumToggleButtons] public AttackType attackType = AttackType.Normal;
     [TitleGroup("TrailData/공격 정보 설정")] public Vector2Int damage = new Vector2Int(10,15);
     [TitleGroup("TrailData/공격 정보 설정")] public int regain = 2;
     [TitleGroup("TrailData/공격 정보 설정")] public int charge_mp = 1;
@@ -99,8 +99,8 @@ public class TrailData
 [System.Serializable]
 public class TrailData_Monster : TrailData
 {
-    [TitleGroup("TrailData/공격 정보 설정")][LabelText("회피 방식")][EnumToggleButtons] public EvadeType evadeType;
-    [TitleGroup("TrailData/공격 정보 설정")][LabelText("공격 판정")][EnumToggleButtons]  public AttackMotionType attackMotionType = AttackMotionType.Center;
+    //[TitleGroup("TrailData/공격 정보 설정")][LabelText("회피 방식")][EnumToggleButtons] public EvadeType evadeType;
+    //[TitleGroup("TrailData/공격 정보 설정")][LabelText("공격 판정")][EnumToggleButtons]  public AttackMotionType attackMotionType = AttackMotionType.Center;
     [FoldoutGroup("TrailData")] [TitleGroup("TrailData/공격 정보 설정")] public float playSpeed = 1.0f, moveSpeed = 1.0f;
     [TitleGroup("TrailData/공격 정보 설정")] public bool rotateToHero = true;
     [TitleGroup("TrailData/공격 정보 설정")] [ShowIf("rotateToHero")] public float rotateDuration = 1.0f;

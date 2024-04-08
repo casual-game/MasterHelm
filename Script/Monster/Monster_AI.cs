@@ -35,7 +35,7 @@ public partial class Monster : MonoBehaviour
     private MoveState _monsterMoveState = MoveState.Idle;
     private NavMeshAgent _agent;
     private float _clipLength;
-    [ShowInInspector] protected HitState _hitState
+    protected HitState _hitState
     {
         get;
         private set;
@@ -64,10 +64,6 @@ public partial class Monster : MonoBehaviour
 
         return evadeMin <= currentTime && currentTime < evadeMax;
     }
-    public bool Get_CanSideRoll()
-    {
-        return _monsterMoveState == MoveState.Pattern && _currentTrailData != null;
-    }
     public MoveState Get_MonsterMoveState()
     {
         return _monsterMoveState;
@@ -93,6 +89,7 @@ public partial class Monster : MonoBehaviour
     }
     //AI
     public string patternName = "TripleSwing";
+    [Button]
     public void AI_Pattern()
     {
         if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_force)) return;
@@ -105,9 +102,40 @@ public partial class Monster : MonoBehaviour
         _animator.SetInteger(GameManager.s_125ms,p.pattern.Pointer_GetData_TransitionDuration());
         _currentMonsterPattern = p.pattern;
     }
+
+    
+    private Vector3 _movePos;
+    private bool _moveStrafe;
+    [Button]
+    public void AI_Move(bool strafe,Vector3 pos)
+    {
+        if (!AI_CanAction())
+        {
+            #if UNITY_EDITOR
+            print("아직 행동 불가합니다.");
+            #endif
+            return;
+        }
+        
+        _moveStrafe = strafe;
+        _movePos = pos;
+        _animator.SetTrigger(GameManager.s_state_change);
+        _animator.SetInteger(GameManager.s_state_type,2);
+    }
+
+    public (Vector3 movePos,bool moveStrafe) AI_GetMoveData()
+    {
+        return (_movePos,_moveStrafe);
+    }
     public virtual bool AI_Hit(Transform prop,TrailData trailData)
     {
         return false;
     }
-    
+    /// <summary>
+    /// 이동,패턴 등의 새로운 액션을 할 수 있는 상태인지 확인.
+    /// </summary>
+    public virtual bool AI_CanAction()
+    {
+        return Get_MonsterMoveState() == MoveState.Idle;
+    }
 }

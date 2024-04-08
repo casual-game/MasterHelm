@@ -142,7 +142,7 @@ public partial class Hero : MonoBehaviour
         AdvancedDissolveProperties.Cutout.Standard.
             UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
         _dissolveRatio = 1;
-        _spawned = true;
+        _spawned = false;
         _outlineTarget.CutoutThreshold = 1;
         gameObject.SetActive(false);
         gameObject.SetActive(true);
@@ -161,7 +161,7 @@ public partial class Hero : MonoBehaviour
         Tween_Punch_Up_Compact(1.0f);
         //await UniTask.Delay(TimeSpan.FromSeconds(0.2f), DelayType.DeltaTime);
         GameManager.Instance.Shockwave(transform.position + Vector3.up);
-        while (_spawned && _dissolveRatio>0)
+        while (_dissolveRatio>0)
         {
             _dissolveRatio -= Time.deltaTime*_dissolveSpeed_Spawn;
             float ratio = Mathf.Clamp01(_dissolveRatio);
@@ -171,13 +171,10 @@ public partial class Hero : MonoBehaviour
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
-        if (_spawned)
-        {
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
-            _outlineTarget.CutoutThreshold = 0;
-            _shadow.localScale = _shadowScale; 
-        }
+        AdvancedDissolveProperties.Cutout.Standard.
+            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
+        _outlineTarget.CutoutThreshold = 0;
+        _shadow.localScale = _shadowScale; 
     }
     public void SpawnInstantly()
     {

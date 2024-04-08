@@ -11,7 +11,7 @@ public class Item_Weapon : ScriptableObject
     [TitleGroup("세팅")] 
     [FoldoutGroup("세팅/Setting")] public AssetReference refHighPolyWeaponL;
     [FoldoutGroup("세팅/Setting")] public AssetReference refHighPolyWeaponR;
-    [FoldoutGroup("세팅/Setting")] public float camDeg;
+    [FoldoutGroup("세팅/Setting")] public Vector3 camDeg;
     [FoldoutGroup("세팅/Setting")] public Vector3 camLocalPos;
     [FoldoutGroup("세팅/Setting")] public WeaponHighpolyType highpolyType;
     [FoldoutGroup("세팅/Setting")] public Data_WeaponPack weaponPack;

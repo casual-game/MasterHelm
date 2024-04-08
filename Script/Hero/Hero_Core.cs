@@ -93,7 +93,6 @@ public partial class Hero : MonoBehaviour
     {
         if (HeroMoveState == MoveState.Locomotion)
         {
-            CamArm.instance.Tween_CamAttackVec(true);
             GameManager.Reset_AttackRealeasedTime();
             _animator.SetInteger(GameManager.s_chargeenterindex,-1);
             Deactivate_CustomMaterial();
@@ -105,9 +104,8 @@ public partial class Hero : MonoBehaviour
     }
     public void Core_StrongAttack()
     {
-        if (HeroMoveState is MoveState.Locomotion or MoveState.Roll or MoveState.RollJust && Get_Charged())
+        if (HeroMoveState is MoveState.Locomotion or MoveState.Roll && Get_Charged())
         {
-            CamArm.instance.Tween_CamAttackVec(true);
             GameManager.Reset_AttackRealeasedTime();
             Activate_SuperArmor();
             _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Strong);
@@ -117,14 +115,13 @@ public partial class Hero : MonoBehaviour
         }
         else Core_NormalAttack();
     }
-    public bool Core_Hit_Normal()
+    public bool Core_Hit_Normal(Vector3 hitPoint)
     {
-        CamArm.instance.Tween_CamAttackVec(false);
+        if (Time.time < _hitStrongTime + HitStrongDelay|| !_spawned) return false;
         //감속시킨다.
         _speedRatio *=0.35f;
         //타겟 벡터
-        Vector3 hitpoint = GameManager.V3_Zero;
-        Vector3 targetHitVec = hitpoint-transform.position;
+        Vector3 targetHitVec = hitPoint-transform.position;
         targetHitVec.y = 0;
 
         Vector3 myLookVec = transform.forward;
@@ -138,12 +135,12 @@ public partial class Hero : MonoBehaviour
         _animator.SetTrigger(GameManager.s_hit_additive);
         Tween_Punch_Down_Compact(1.5f);
         Effect_Hit_Normal();
+        CamArm.instance.Tween_ShakeNormal_Hero();
         return true;
     }
     public bool Core_Hit_Strong(TrailData_Monster trailData, Vector3 hitPoint)
     {
-        //저스트 회피,중복히트 필터링
-        if (Time.time < _hitStrongTime + HitStrongDelay || HeroMoveState == MoveState.RollJust || !_spawned) return false;
+        if (Time.time < _hitStrongTime + HitStrongDelay || !_spawned) return false;
         //구르기, 슈퍼아머 처리.
         if (_superarmor || HeroMoveState == MoveState.Roll)
         {
@@ -152,7 +149,6 @@ public partial class Hero : MonoBehaviour
             Tween_Punch_Down(1.5f);
             Effect_Hit_SuperArmor();
             CamArm.instance.Tween_ShakeSuperArmor();
-            //GameManager.Instance.Combo(GameManager.s_superarmor);
             return true;
         }
         //각종 변수,데이터 설정
@@ -163,7 +159,6 @@ public partial class Hero : MonoBehaviour
             _spawned = false;
             return true;
         }
-        CamArm.instance.Tween_CamAttackVec(false);
         Set_HeroMoveState(MoveState.Hit);
         _fastRoll = 2;
         _animBase.cleanFinished = true;
@@ -189,7 +184,7 @@ public partial class Hero : MonoBehaviour
             Vector3 myLookVec = transform.forward;
             float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
             float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
-            float degDiff = targetHitDeg - myLookDeg + (int)trailData.attackMotionType;
+            float degDiff = targetHitDeg - myLookDeg;// + (int)trailData.attackMotionType;
             while (degDiff < -180) degDiff += 360;
             while (degDiff > 180) degDiff -= 360;
             degDiff /= 180.0f;
@@ -265,20 +260,6 @@ public partial class Hero : MonoBehaviour
                 return;
             }
         }
-
-        //구르기
-        bool canRoll = HeroMoveState != MoveState.Hit && HeroMoveState != MoveState.Roll
-                                                      && HeroMoveState != MoveState.RollJust
-                                                      && !_animator.GetBool(GameManager.s_hit)
-                                                      && !_animator.GetBool(GameManager.s_force);
-        /*
-        if (isTimting)
-        {
-            if (canRoll) Core_Roll();
-            else _inputTimeAction = Time.time;
-        }
-        */
-
         //Smashed이후 빠른 기상
         bool canSpeedRoll = Time.time < _falledTime + heroData.hit_Smash_RecoveryInputDelay 
                             && HeroMoveState == MoveState.Hit && _fastRoll>0;

@@ -11,6 +11,6 @@ public class UI_Ratio : MonoBehaviour
     {
         var rect = parentRectT.rect;
         float radius = Mathf.Min(rect.width, rect.height);
-        myRectT.sizeDelta = Vector2.one*radius*1.625f;
+        myRectT.sizeDelta = Vector2.one*radius*1.75f;
     }
 }

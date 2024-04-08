@@ -12,13 +12,20 @@ using Random = UnityEngine.Random;
 
 public partial class Monster_Boss : Monster
 {
+    
     //Public
     [FoldoutGroup("UI")] public Image img_health_root,img_nameplate;
     [FoldoutGroup("UI")] public RectTransform rect_shake;
+    public static Monster_Boss instance = null;
     private Vector2 _shakeAnchoredPos;
     private Tween t_shake;
-     
     private readonly float _uiDuration = 0.6f;
+
+    public override void Setting_Monster(AnimatorOverrideController animatorOverrideController)
+    {
+        base.Setting_Monster(animatorOverrideController);
+        instance = this;
+    }
     protected override void Setting_UI()
     {
         base.Setting_UI();
@@ -29,7 +36,6 @@ public partial class Monster_Boss : Monster
     protected override void ActivateUI()
     {
         base.ActivateUI();
-        CamArm.instance.Tween_CamBossVec(true);
         Core_InteractionState(BossInteractionState.Normal);
         seq_ui.Complete();
         img_health_root.rectTransform.localScale = GameManager.V3_Zero;
@@ -71,7 +77,6 @@ public partial class Monster_Boss : Monster
     protected override void DeactivateUI()
     {
         base.DeactivateUI();
-        CamArm.instance.Tween_CamBossVec(false);
         seq_ui.Complete();
         img_health_root.rectTransform.localScale = GameManager.V3_One*0.73f;
         img_nameplate.rectTransform.localScale = GameManager.V3_One;
@@ -117,5 +122,10 @@ public partial class Monster_Boss : Monster
             Vector2 RandomVec = Random.insideUnitCircle.normalized * Mathf.Clamp01(2 - 2 * newVal) * 6;
             rect_shake.anchoredPosition = _shakeAnchoredPos + RandomVec;
         });
+    }
+
+    public static bool IsBossActivated()
+    {
+        return instance != null && instance._isAlive;
     }
 }

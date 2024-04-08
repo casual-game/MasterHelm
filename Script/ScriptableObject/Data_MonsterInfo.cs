@@ -8,7 +8,6 @@ using UnityEngine.Serialization;
 public class Data_MonsterInfo : ScriptableObject
 {
     public int hp = 1000;
-    
     [ColorUsage(true,true)] public Color colorHit,colorGroggy;
 
     [PropertySpace(16)]

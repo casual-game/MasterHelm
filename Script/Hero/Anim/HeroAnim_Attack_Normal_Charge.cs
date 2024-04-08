@@ -14,7 +14,6 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
         animator.speed = 0.75f;
         animator.SetBool(GameManager.s_charge_normal,false);
     }
-
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateMove(animator, stateInfo, layerIndex);

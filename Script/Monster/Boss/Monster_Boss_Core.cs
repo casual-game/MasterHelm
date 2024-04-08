@@ -8,7 +8,6 @@ using Random = UnityEngine.Random;
 
 public partial class Monster_Boss : Monster
 {
-
     //Const, ReadOnly
     private const float HitStrongDelay = 0.3f;
     
@@ -19,6 +18,7 @@ public partial class Monster_Boss : Monster
     }
     [ReadOnly] public BossInteractionState interactionState;
     [FoldoutGroup("Effect")] public ParticleSystem p_groundimpact;
+    [FoldoutGroup("Effect")] public ParticleSystem p_boom;
     //Private
     private int _hitStrongType = 0; //강한 히트 모션은 2가지가 있다. 해당 종류를 설정한다.
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
@@ -106,7 +106,8 @@ public partial class Monster_Boss : Monster
             
             Vector3 pos = transform.position;
             CamArm.instance.Tween_Impact();
-            GameManager.Instance.Shockwave(pos);
+            
+            
             Effect_Hit_Counter();
             Hero.Blink(0.5f);
             Punch_Down(1.0f);
@@ -116,6 +117,7 @@ public partial class Monster_Boss : Monster
             _animator.SetBool(GameManager.s_hit,true);
             _animator.SetTrigger(GameManager.s_state_change);
             _animator.SetInteger(GameManager.s_hit_type,2);
+            p_boom.Play();
             p_spawn.Play();
 
             Vector3 lookVec = Hero.instance.transform.position - pos;

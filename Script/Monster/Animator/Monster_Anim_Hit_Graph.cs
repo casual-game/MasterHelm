@@ -28,7 +28,9 @@ public class Monster_Anim_Hit_Graph : MonsterAnim_Base
         float normalizedTime = Mathf.Clamp01(stateInfo.normalizedTime);
         Vector3 finalPos = _startPos + _moveVec * moveFlowCurve.Evaluate(normalizedTime) * moveDistanceRatio;
 
-        _monster.Move_Nav(finalPos-_monster.transform.position, _startRot);
+        Transform t = _monster.transform;
+        t.rotation = _startRot;
+        _monster.Move_Nav(finalPos-t.position);
 
         if (normalizedTime > endRatio)
         {

@@ -16,7 +16,19 @@ public partial class Monster_Normal : Monster
     [FoldoutGroup("UI")] public Transform t_UI_XZ,t_UI_Y;
     [FoldoutGroup("UI")] public float ui_Height;
     [FoldoutGroup("UI")] public Image img_health_root;
+    [FoldoutGroup("Anim")] public AnimationClip animSpawnGround,animSpawnAir;
 
+    [FoldoutGroup("Anim")] public AnimationClip 
+        animHitStrong1,
+        animHitStrong2,
+        animStunBegin,
+        animStunLoop,
+        animStunFin,
+        animSmashBegin,
+        animSmashLoop,
+        animSmashFin,
+        animDeathFlip,
+        animDeathNorm;
     protected override void ActivateUI()
     {
         base.ActivateUI();

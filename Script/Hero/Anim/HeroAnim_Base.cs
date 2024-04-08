@@ -114,7 +114,6 @@ public class HeroAnim_Base : StateMachineBehaviour
         animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);
         _hero.Set_AttackIndex(-1);
-        CamArm.instance.Tween_CamAttackVec(false);
         isFinished = true;
     }
 
@@ -232,7 +231,7 @@ public class HeroAnim_Base : StateMachineBehaviour
     protected void Set_Roll(Animator animator)
     {
         //기본
-        if (_hero.HeroMoveState == Hero.MoveState.Roll || _hero.HeroMoveState == Hero.MoveState.RollJust) return;
+        if (_hero.HeroMoveState == Hero.MoveState.Roll) return;
         Set_Cancel(animator);
         isFinished = true;
         _hero.Set_HeroMoveState(Hero.MoveState.Roll);
@@ -254,7 +253,7 @@ public class HeroAnim_Base : StateMachineBehaviour
                     mtarget = m;
                     minDist = dist;
                     lookVec = _lookvec;
-                    m.Equipment_Collision_Skip();
+                    //m.Equipment_Collision_Skip();
                 }
                 isJustRoll = true;
                 break;
@@ -262,8 +261,9 @@ public class HeroAnim_Base : StateMachineBehaviour
         }
         if(mtarget!=null) _hero.Set_RoolLookT(mtarget.transform);
         //일반 구르기
-        if(!isJustRoll || mtarget == null) animator.SetInteger(GameManager.s_state_type,0);
+        if(true) animator.SetInteger(GameManager.s_state_type,0);
         //저스트 구르기
+        /*
         else
         {
             //회전
@@ -281,6 +281,7 @@ public class HeroAnim_Base : StateMachineBehaviour
             else rollState = 3;
             animator.SetInteger(GameManager.s_state_type,rollState);
         }
+        */
     }
     
 }

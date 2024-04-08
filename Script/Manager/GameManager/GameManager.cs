@@ -34,5 +34,4 @@ public partial class GameManager : MonoBehaviour
         E_LateUpdate?.Invoke();
     }
 }
-public enum AttackMotionType {Center=0,LeftSlash=60,RightSlash=-60}
-public enum AttackType {Normal = 0,Stun=2,Smash=3}
+public enum AttackType {Normal = 0,Weak = 1,Stun=2,Smash=3}

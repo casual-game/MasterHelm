@@ -109,7 +109,8 @@ public class UI_Inventory : MonoBehaviour
         _seqInfo = Sequence.Create();
         _seqInfo.Chain(Tween.Alpha(cgInfo, 1, 0.375f));
         _seqInfo.Group(Tween.Scale(tInfo, 0.95f, 0.375f, Ease.OutCubic));
-        sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
+        if(_state != InventoryState.Weapon) sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
+        else sideUI.EquipWeapon(slots[_selectedItem.index].GetWeapon(),false);
     }
     public void Reroll_Weapon()
     {
@@ -141,7 +142,8 @@ public class UI_Inventory : MonoBehaviour
             startDelay += 0.05f;
         }
         SoundManager.Play(SoundContainer_StageSelect.instance.sound_book,0.15f);
-        sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
+        if(_state != InventoryState.Weapon) sideUI.EquipWeapon(saveManager.GetWeapon(saveManager.equipWeaponMain),true);
+        else sideUI.EquipWeapon(slots[_selectedItem.index].GetWeapon(),false);
     }
     private void Page()
     {

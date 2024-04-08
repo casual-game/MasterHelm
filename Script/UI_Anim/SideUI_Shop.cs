@@ -110,7 +110,8 @@ public partial class SideUI : MonoBehaviour
             matHero.SetFloat(_strFadeAmount, curveHeroFade.Evaluate(ratio));
             matHero.SetFloat(_strShadowAlpha, curveHeroShadow.Evaluate(ratio));
         }, startDelay: 0.125f));
-        EquipWeapon(SaveManager.instance.GetWeapon(SaveManager.instance.equipWeaponMain),true);
+        _seqShop.Group(Tween.Delay(0.125f, () => EquipWeapon(
+            SaveManager.instance.GetWeapon(SaveManager.instance.equipWeaponMain), true)));
     }
     public void Shop_JustDeactivate(bool controlDeco)
     {

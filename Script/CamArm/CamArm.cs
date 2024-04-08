@@ -39,11 +39,11 @@ public partial class CamArm : MonoBehaviour
     [TitleGroup("Sequence")] [FoldoutGroup("Sequence/data")] public UI_IngameResult uiIngameResult;
     //Private
     private bool finished = false;
-    private Vector3 _camBossVec,_camLocoVec;
-    private float _camAttackVecDist,_zoomAttackVecFinalRatio = 1;
+    private Vector3 _camLocoVec;
+    private float _zoomAttackVecFinalRatio = 1;
     private Transform _camT,_addT;
     private Camera[] _cams;
-    private Tween t_cambossvec,t_camattackvec,t_time,t_shake,t_chromatic,t_purkinjeLuminanceThreshold,
+    private Tween t_time,t_shake,t_chromatic,t_purkinjeLuminanceThreshold,
         tUIStopped,tInvert,tShakeDeathHero,tUIRadial,tUIChromatic,tUILensDirt,tUISpeedline;
     private Sequence s_speedline, s_fade, s_cloud, s_angle, seqUIZoom, seqBloom,seqRadial;
     private Sequence s_frame,s_vignette,s_zoom,seqUICompositionDirecting;
@@ -83,6 +83,13 @@ public partial class CamArm : MonoBehaviour
         float deltaTime;
         if (!finished) deltaTime = Time.deltaTime;
         else deltaTime = Time.unscaledDeltaTime;
+
+        if (Monster_Boss.IsBossActivated()) MoveCam_Boss(deltaTime);
+        else MoveCam_Norm(deltaTime);
+    }
+
+    private void MoveCam_Norm(float deltaTime)
+    {
         //보는 각도로.
         float jsDeg;
         float dist;
@@ -92,6 +99,12 @@ public partial class CamArm : MonoBehaviour
             dist = 0.0f;
             speed = 3.5f * deltaTime;
             jsDeg = _hero.transform.rotation.eulerAngles.y;
+        }
+        else if (_hero.HeroMoveState == Hero.MoveState.Hit)
+        {
+            dist = 0.0f;
+            speed = 5.0f * deltaTime;
+            jsDeg = _hero.transform.rotation.eulerAngles.y; 
         }
         else if (_hero.Get_CurrentWeaponPack() != null)
         {
@@ -125,56 +138,32 @@ public partial class CamArm : MonoBehaviour
             speed = 1.5f * deltaTime;
             jsDeg = _hero.transform.rotation.eulerAngles.y;
         }
-        //_jsVecMoveSpeed = Mathf.Lerp(_jsVecMoveSpeed,speed)
         Vector3 jsVec = Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*dist;
-        //_jsVecMoveRatio = Mathf.Clamp01(_jsVecMoveRatio + (moveCam ? camMoveSpeed : -camMoveSpeed));
         _jsVec = Vector3.MoveTowards(_jsVec, jsVec, speed);
 
         Vector3 pos = transform.position;
         Vector3 finalVec = target.position + addVec + _jsVec;
         finalVec = Vector3.Lerp(pos,finalVec ,moveSpeed*deltaTime);
         _finalDirectingVec = Vector3.Lerp(pos, finalVec, _zoomAttackVecFinalRatio);
-        Vector3 centerVec = target.position + addVec + Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*0.75f;
+        Vector3 centerVec = target.position + addVec+ Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*0.75f;
         transform.position = Vector3.Lerp(centerVec,_finalDirectingVec,_zoomAttackVecFinalRatio);
     }
-    public void Tween_CamBossVec(bool activateBossVec)
+    private void MoveCam_Boss(float deltaTime)
     {
-        float height = 1.25f;
-        if (activateBossVec)
-        {
-            t_cambossvec = Tween.Custom(0, height,0.75f, onValueChange: value =>
-                { _camBossVec = new Vector3(0, value, 0); } ,ease: Ease.InOutCirc,startDelay:0.5f);
-        }
-        else
-        {
-            t_cambossvec = Tween.Custom(height, 0,0.75f, onValueChange: value =>
-                { _camBossVec = new Vector3(0, value, 0); } ,ease: Ease.InOutCirc,startDelay:0.5f);
-        }
-    }
-    public void Tween_CamAttackVec(bool activateAttackVec)
-    {
-        if (activateAttackVec == attackVecActivating) return;
-        float distance = 1.25f;
-        float distanceRatio = Vector3.Distance(Quaternion.Euler(0, _hero.Get_LookF(), 0) * Vector3.forward, 
-            transform.position - target.position) / distance;
-        if (activateAttackVec)
-        {
-            attackVecActivating = true;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, distance,1.5f*distanceRatio, 
-                onValueChange: value => _camAttackVecDist = value,ease: Ease.InOutSine);
-        }
-        else
-        {
-            attackVecActivating = false;
-            t_cambossvec = Tween.Custom(_camAttackVecDist, 0,1.5f*distanceRatio, 
-                onValueChange: value => _camAttackVecDist = value,ease: Ease.InOutSine);
-        }
+        Transform bossT = Monster_Boss.instance.transform;
+        Transform heroT = _hero.transform;
+
+        Vector3 heroPos = heroT.position;
+        float dist = (bossT.position - heroPos).magnitude;
+        Vector3 distVec = (bossT.position - heroPos).normalized;
+        Vector3 targetPos = heroPos + distVec*Mathf.Clamp(1.5f,0,dist) + Vector3.up;
+        
+        transform.position = Vector3.Lerp(transform.position,targetPos,deltaTime*moveSpeed);
     }
     public void Set_FollowTarget(bool follow)
     {
         followTarget = follow;
     }
-    
     //연출
     public void Tween_GameReady()
     {
@@ -337,11 +326,12 @@ public partial class CamArm : MonoBehaviour
     public void Tween_ShakeNormal_Hero()
     {
         Tween_Speedline(0.075f,0.125f,0.5f,new Color(1,0,0,10.0f/255.0f),0.375f);
-        Tween_Zoom(0.075f,0.125f,0.5f,0,orthographicSize-0.25f);
+        //Tween_Zoom(0.075f,0.125f,0.5f,0,orthographicSize-0.25f);
         Tween_Vignette(0.075f,0.125f,0.5f,vignette_HitColor,vignette_NormalColor);
-        Tween_Stop(0.05f,0.4f,Ease.OutQuad);
+        Tween_Stop(0.05f,0.3f,Ease.OutQuad);
         Tween_Shake(0.3f,25,GameManager.V3_One * 0.25f,Ease.OutSine);
         Tween_Chromatic(0.035f,1.5f,Ease.OutCirc);
+        Tween_Radial(0.05f,0.05f,0.25f,0.05f);
     }
 
     public void Tween_ShakeDeath_Hero()
@@ -398,14 +388,16 @@ public partial class CamArm : MonoBehaviour
     [Button]
     public void Tween_Impact()
     {
-        Tween_Stop(0.05f,1.0f,Ease.InExpo);
-        Tween_Shake(1.0f,80,GameManager.V3_One * 0.3f,Ease.OutExpo);
-        Tween_Zoom(0.15f,0.75f,1.0f,0,orthographicSize-0.45f);
-        Tween_Radial(0.05f,0.05f,0.25f,0.1f);
+        Tween_Stop(0.05f,1.0f,Ease.OutCubic);
+        Tween_Shake(0.5f,45,GameManager.V3_One * 0.375f,Ease.OutCubic);
+        Tween_Zoom(0.15f,0.05f,1.0f,0,orthographicSize-0.75f);
+        Tween_Radial(0.05f,0.05f,0.25f,0.05f);
         Tween_Chromatic(0.02f,1.5f,Ease.OutCirc);
+        Tween_Vignette(0.05f,0.5f,0.5f,Color.white*0.0625f, vignette_NormalColor); 
+        Tween_Speedline(0.05f,0.5f,0.35f,new Color(1,1,1,25.0f/255.0f),0.675f);
         
-        Tween_Bloom(0.15f,0.25f,0.5f,1.25f);
-        Tween_Speedline(0.15f,0.75f,0.5f,new Color(1,1,1,50.0f/255.0f),0.675f);
+        //Tween_Bloom(0.15f,0.25f,0.5f,1.25f);
+        //Tween_Speedline(0.15f,0.25f,0.5f,new Color(1,1,1,50.0f/255.0f),0.675f);
     }
     //싱글 이펙트. 복합에서 호출한다.
     public void Tween_Radial(float begin,float delay,float fin,float intensity)

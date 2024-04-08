@@ -29,6 +29,7 @@ public class HeroAnim_Dismount : HeroAnim_Base
         {
             isFinished = true;
             _hero._spawned = true;
+            Debug.Log("Dismount");
             Set_Locomotion(animator);
         }
     }
