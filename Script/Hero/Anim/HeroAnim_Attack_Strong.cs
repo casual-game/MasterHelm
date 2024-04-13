@@ -57,6 +57,13 @@ public class HeroAnim_Attack_Strong : HeroAnim_Base
             cleanFinished = true;
             return;
         }
+        //활 필터링
+        if (_hero.Get_IsShootTiming())
+        {
+            Set_Shoot(animator);
+            cleanFinished = true;
+            return;
+        }
         //강공격으로 캔슬할 경우 처리
         if (!IsNotAvailable(animator,stateInfo) && GameManager.DelayCheck_Attack() < _heroData.preinput_attack 
                                                 && _hero.Get_Charged() && !GameManager.BTN_Attack)

@@ -8,7 +8,7 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
     private int pattern = 0;
     private float startDeg,endDeg;
     private AnimationCurve rotateCurve = AnimationCurve.EaseInOut(0,0,1,1);
-    private float rotateLimitNormalizedTime = 0.15f;
+    private float rotateLimitNormalizedTime;
     //사이드 구르기
     private Monster mtarget;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -28,6 +28,7 @@ public class HeroAnim_Roll_Normal : HeroAnim_Base
         _hero.Sound_Footstep();
         _hero.Sound_Voice_Short();
         SoundManager.Play(_hero.sound_footstep_roll_begin);
+        rotateLimitNormalizedTime = 0.1f;
     }
 
     public override void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -167,7 +167,7 @@ public class UI_IngameResult : MonoBehaviour
         cgFailedTitle.gameObject.SetActive(false);
         //기타 효과들
         float playSpeed = 0.75f;
-        Frame_Activate(Color.black,Ease.InOutBack,playSpeed,-10,true,0.0f);
+        Frame_Activate(Color.black,Ease.InOutBack,playSpeed,-14,true,0.0f);
         Button_Activate(true,false,false,playSpeed);
         Deco_Activate(playSpeed);
         float duration = 0.375f;
@@ -175,7 +175,7 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UICompositionDirecting(true,duration/playSpeed,Ease.InOutCirc);
         //CamArm.instance.Tween_UIChromatic(true,0.01f,duration);
         CamArm.instance.Tween_UILensDirt(3.0f,duration);
-        CamArm.instance.Tween_UISpeedline(true, duration,0.3f);
+        //CamArm.instance.Tween_UISpeedline(true, duration,0.3f);
         Score_Sequence();
         
         SoundManager.Play(SoundContainer_Ingame.instance.sound_page_open,0.375f);
@@ -195,7 +195,7 @@ public class UI_IngameResult : MonoBehaviour
         CamArm.instance.Tween_UICompositionDirecting(false,0.25f,Ease.InOutCirc);
         //CamArm.instance.Tween_UIChromatic(false,0.00f,0.5f);
         CamArm.instance.Tween_UILensDirt(0.0f,0.5f);
-        CamArm.instance.Tween_UISpeedline(false, 0.5f);
+        //CamArm.instance.Tween_UISpeedline(false, 0.5f);
         
         BgmManager.instance.BgmLowpass(false);
         SoundManager.Play(SoundContainer_Ingame.instance.sound_page_close);
@@ -515,7 +515,7 @@ public class UI_IngameResult : MonoBehaviour
                 if (success) piStarImpact3.Play();
                 CamArm.instance.Tween_Shake(0.35f, 30, Vector3.one * 0.125f, Ease.OutSine);
                 CamArm.instance.Tween_Chromatic(0.03f,0.5f,Ease.OutSine);
-                CamArm.instance.Tween_Bloom(0.10f,0.0f,0.5f,5.0f,0.75f);
+                CamArm.instance.Tween_Bloom(0.10f,0.0f,0.5f,5.0f,0.35f);
                 CamArm.instance.Tween_Radial(0.25f,0.25f,1.25f,0.15f);
                 Dragon.instance.pFinish_Fin.Play();
                 
@@ -643,7 +643,6 @@ public class UI_IngameResult : MonoBehaviour
         
     }
     #endregion
-    
     #region 서브 엘리먼트
     private void Frame_Activate(Color imgBGColor,Ease ease = Ease.InOutCubic,
         float playSpeed=1.0f,int zoomStrength=1,bool useStop = true,float stopScale = 0.0f)

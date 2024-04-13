@@ -65,7 +65,9 @@ public partial class GameManager: MonoBehaviour
         s_alphaoutlineblend = "_AlphaOutlineBlend",
         s_death = "Death",
         s_movex = "MoveX",
-        s_movey = "MoveY";
+        s_movey = "MoveY",
+        s_dissolveamount = "_DissolveAmount",
+        s_dissolvemap = "_DissolveMap";
     //적 애니메이션 
     public static string
         s_deathflip = "Death_Flip",

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MalbersAnimations;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -26,7 +27,8 @@ public partial class Hero : MonoBehaviour
     {
         Locomotion = 0,
         Attack_Normal = 1,
-        Attack_Strong = 2
+        Attack_Strong = 2,
+        Attack_Shoot = 3
     }
     public PlayerAttackMotionData CurrentAttackMotionData
     {
@@ -48,6 +50,11 @@ public partial class Hero : MonoBehaviour
     {
         return Time.unscaledTime - _actionBeginTime < heroData.dash_roll_delay
                          && Time.unscaledTime - _rolledTime > heroData.roll_delay;
+    }
+
+    public bool Get_IsShootTiming()
+    {
+        return Time.unscaledTime - GameManager.ShootPressedTime < heroData.preinput_attack;
     }
 
     public Transform Get_RollLookT()
@@ -74,11 +81,8 @@ public partial class Hero : MonoBehaviour
     //Core
     public void Core_PreInput()
     {
-        
-        if (GameManager.DelayCheck_Attack() < heroData.preinput_attack)
-        {
-            Core_NormalAttack();
-        }
+        if (Get_IsShootTiming()) Core_Shoot();
+        else if (GameManager.DelayCheck_Attack() < heroData.preinput_attack) Core_NormalAttack();
         else
         {
             if(GameManager.BTN_Attack && p_charge_begin.isPlaying) _animator.SetBool(GameManager.s_charge_normal,true);
@@ -211,6 +215,16 @@ public partial class Hero : MonoBehaviour
         }
         Effect_Hit_Strong();
         return true;
+    }
+
+    public void Core_Shoot()
+    {
+        if (HeroMoveState == MoveState.Locomotion)
+        {
+            Deactivate_CustomMaterial();
+            _animator.SetInteger(GameManager.s_state_type, (int)AnimationState.Attack_Shoot);
+            _animator.SetTrigger(GameManager.s_state_change);
+        }
     }
 
     private void Core_Cancel()

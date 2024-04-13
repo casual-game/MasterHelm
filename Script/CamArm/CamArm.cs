@@ -106,7 +106,7 @@ public partial class CamArm : MonoBehaviour
             speed = 5.0f * deltaTime;
             jsDeg = _hero.transform.rotation.eulerAngles.y; 
         }
-        else if (_hero.Get_CurrentWeaponPack() != null)
+        else if (_hero.Get_CurrentWeaponPack() != null || _hero.Equipment_UsingBow())
         {
             dist = 1.75f;
             speed = 3.5f * deltaTime;
@@ -142,7 +142,8 @@ public partial class CamArm : MonoBehaviour
         _jsVec = Vector3.MoveTowards(_jsVec, jsVec, speed);
 
         Vector3 pos = transform.position;
-        Vector3 finalVec = target.position + addVec + _jsVec;
+        Vector3 finalVec = target.position + addVec + _jsVec + 
+                           (finished? new Vector3(-0.1f,-0.35f,0.0f) : Vector3.zero);
         finalVec = Vector3.Lerp(pos,finalVec ,moveSpeed*deltaTime);
         _finalDirectingVec = Vector3.Lerp(pos, finalVec, _zoomAttackVecFinalRatio);
         Vector3 centerVec = target.position + addVec+ Quaternion.Euler(0, jsDeg, 0) * Vector3.forward*0.75f;
@@ -279,6 +280,11 @@ public partial class CamArm : MonoBehaviour
     }
     
     //복합 이펙트. 중복 불가
+    public void Tween_ShakeShoot()
+    {
+        Tween_Shake(0.35f,25,GameManager.V3_One * 0.15f,Ease.OutCubic);
+        Tween_Radial(0.05f,0.05f,0.1f,0.05f);
+    }
     public void Tween_ShakeStrong()
     {
         Tween_Stop(0.05f,0.6f,Ease.InSine);
@@ -641,7 +647,8 @@ public partial class CamArm : MonoBehaviour
             {
                 float begin = 0.25f, delay = 0.25f, fin = 1.0f;
                 Tween_Radial(begin, delay, fin, 0.15f);
-                Tween_Bloom(begin, delay, fin, 10.0f);
+                Tween_Bloom(begin, delay, fin, 10.0f,0.35f);
+                Tween_UIChromatic(true,0.005f,0.15f);
             });
         }
         else

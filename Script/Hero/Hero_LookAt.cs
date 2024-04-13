@@ -11,6 +11,7 @@ public partial class Hero : MonoBehaviour
     {
         GameManager.Instance.E_BTN_Attack_Begin.AddListener(E_BTN_Attack_Pressed);
         GameManager.Instance.E_BTN_Attack_Fin.AddListener(E_BTN_Attack_Released);
+        GameManager.Instance.E_BTN_Shoot_Begin.AddListener(E_BTN_Shoot_Pressed);
         _lookAtIK = GetComponent<LookAtIK>();
         Transform lookRootT = transform.Find("LookAt");
         _lookDisplayT = lookRootT.Find("LookDisplay");
@@ -45,7 +46,7 @@ public partial class Hero : MonoBehaviour
     {
         if (!_spawned) return;
         _btnAttack = true;
-        bool canChargeMotion = HeroMoveState is MoveState.Locomotion or MoveState.Roll;
+        bool canChargeMotion = HeroMoveState == MoveState.Locomotion;
         if (canChargeMotion)
         {
             SoundManager.Play(SoundContainer_Ingame.instance.sound_friction_cloth);
@@ -192,7 +193,10 @@ public partial class Hero : MonoBehaviour
         GameManager.Instance.E_LateUpdate.RemoveListener(E_BTN_Attack_PressedUpdate);
         GameManager.Instance.E_LateUpdate.RemoveListener(E_BTN_Attack_ReleasedUpdate);
     }
-    
+    private void E_BTN_Shoot_Pressed()
+    {
+        Core_Shoot();
+    }
     //Getter
     public bool Get_Charged()
     {

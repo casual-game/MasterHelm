@@ -24,13 +24,11 @@ public partial class Monster : MonoBehaviour
         _outlinable = GetComponent<Outlinable>();
         _highlightEffect = GetComponent<HighlightEffect>();
         _animator = GetComponent<Animator>();
-        print("ASDASERD");
         _animator.runtimeAnimatorController = animatorOverrideController;
         _outlineTarget = _outlinable.OutlineTargets[0];
         _dissolveRatio = 1.0f;
         
-        AdvancedDissolveProperties.Cutout.Standard.
-            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
         _outlineTarget.CutoutThreshold = 1;
         
         //장비 설정
@@ -98,7 +96,7 @@ public partial class Monster : MonoBehaviour
     public async UniTaskVoid Spawn(Vector3 relativePos,Quaternion rot)
     {
         _agent.enabled = true;
-        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
+        _outlineTarget.CutoutTextureName = GameManager.s_dissolvemap;
         _isReady = false;
         gameObject.SetActive(true);
         _animator.Rebind();
@@ -115,21 +113,19 @@ public partial class Monster : MonoBehaviour
         {
             _dissolveRatio -= Time.deltaTime*dissolveSpeed;
             float ratio = Mathf.Clamp01(_dissolveRatio);
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
         _outlineTarget.CutoutTextureName = GameManager.s_basemap;
         _outlineTarget.CutoutThreshold = 0.5f;
-        AdvancedDissolveProperties.Cutout.Standard.
-            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
+        _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,0);
         _shadow.localScale = _shadowScale;
     }
     public async UniTaskVoid Despawn()
     {
-        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
+        _outlineTarget.CutoutTextureName = GameManager.s_dissolvemap;
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
         _isAlive = false;
@@ -144,14 +140,12 @@ public partial class Monster : MonoBehaviour
         {
             _dissolveRatio += Time.deltaTime*dissolveSpeed;
             float ratio = Mathf.Clamp01(_dissolveRatio);
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             _shadow.localScale = _shadowScale*(1 - ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
-        AdvancedDissolveProperties.Cutout.Standard.
-            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
         _outlineTarget.CutoutThreshold = 1;
         _shadow.localScale = GameManager.V3_Zero;
 
@@ -167,7 +161,7 @@ public partial class Monster : MonoBehaviour
     public void DespawnEmmediately()
     {
         _agent.enabled = false;
-        _outlineTarget.CutoutTextureName = GameManager.s_advanceddissolvecutoutstandardmap1;
+        _outlineTarget.CutoutTextureName = GameManager.s_dissolvemap;
         _outlineTarget.CutoutThreshold = 0.0f;
         _isReady = false;
         _isAlive = false;
@@ -175,8 +169,7 @@ public partial class Monster : MonoBehaviour
         DeactivateUI();
         Equipment_Unequip();
         p_spawn.Play();
-        AdvancedDissolveProperties.Cutout.Standard.
-            UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+        _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
         _outlineTarget.CutoutThreshold = 1;
         _shadow.localScale = GameManager.V3_Zero;
         seq_ui.Complete();

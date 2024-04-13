@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using AmazingAssets.AdvancedDissolve;
 using Cysharp.Threading.Tasks;
 using EPOOutline;
 using Sirenix.OdinInspector;
@@ -12,28 +10,26 @@ using UnityEngine;
 
 public class Prefab_Prop : MonoBehaviour
 {
-    public List<Renderer> renderers = new List<Renderer>();
     private AnimationCurve _curve = AnimationCurve.EaseInOut(0,0,1,1);
     private float _currentActivateRatio, _targetActivateRatio;
     private bool _targetActivation;
-    private Material _material;
+    protected Material _material;
     private float _activateSpeed = 2.0f, _deactivateSpeed = 1.25f;
     private float _activateRatio = 0;
-    private OutlineTarget _outlineTarget;
+    protected OutlineTarget _outlineTarget;
     private Outlinable _outlinable;
     private Transform _attachT,_detachT,_nullFolder;
     private Transform _attachCopyT, _detachCopyT;//장착,장착해제 시 사용할 loaclData 저장되어있는 T. 각자의 Setting에서 설정해주어야 한다.
     private bool _canKeep = false;
-    private TrailEffect[] _trails;
-    private ParticleSystem _p_spawn;
-    public List<Collider> _interact_currentTargets,_interact_interactedTargets,_interact_savedTargets;
+    protected TrailEffect[] _trails;
+    protected ParticleSystem _p_spawn;
+    protected List<Collider> _interact_currentTargets,_interact_interactedTargets,_interact_savedTargets;
     private bool _isHero;
     private int _syncInt = 0,_syncedInt=0;
     private Monster _monster;
     private bool skipCurrentInteraction = false;
-
-    private Dictionary<Prop, TrailData> propDatas;
-    private List<Collider> collDatas;
+    protected Dictionary<Prop, TrailData> propDatas;
+    protected List<Collider> collDatas;
     //외부 사용 가능 함수
     public void SetTrail(bool active)
     {
@@ -178,13 +174,16 @@ public class Prefab_Prop : MonoBehaviour
         }
     }
     //내부 전용 함수
-    private void Setting()
+    protected virtual void Setting()
     {
-        _material = GetComponent<MeshRenderer>().material;
-        _outlineTarget = new OutlineTarget(GetComponent<Renderer>());
-        _outlineTarget.CutoutTextureName = "_AdvancedDissolveCutoutStandardMap1";
+        Renderer meshrenderer = GetComponentInChildren<MeshRenderer>();
+        if (meshrenderer == null) meshrenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+        _material = meshrenderer.material;
+        _outlineTarget = new OutlineTarget(meshrenderer);
+        _outlineTarget.CutoutTextureName = GameManager.s_dissolvemap;
         _trails = GetComponents<TrailEffect>();
         _p_spawn = GetComponentInChildren<ParticleSystem>();
+        _interact_currentTargets = new List<Collider>(14);
         _interact_savedTargets = new List<Collider>(14);
         _interact_interactedTargets = new List<Collider>(14);
         foreach (var trail in _trails)
@@ -277,17 +276,15 @@ public class Prefab_Prop : MonoBehaviour
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
             _outlineTarget.CutoutThreshold = ratio;
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
 
         if (_targetActivation)
         {
             _activateRatio = 1;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,0);
             _outlineTarget.CutoutThreshold = 0;
         }
     }
@@ -300,8 +297,7 @@ public class Prefab_Prop : MonoBehaviour
         {
             _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
             float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
@@ -309,8 +305,7 @@ public class Prefab_Prop : MonoBehaviour
         if (!_targetActivation)
         {
             _activateRatio = 0;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
             _outlineTarget.CutoutThreshold = 1;
 
             gameObject.SetActive(false);
@@ -326,8 +321,7 @@ public class Prefab_Prop : MonoBehaviour
         if (_targetActivation)
         {
             _activateRatio = 0;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
             _outlineTarget.CutoutThreshold = 1;
             CopyTransform(_attachT,_attachCopyT);
         }
@@ -336,16 +330,14 @@ public class Prefab_Prop : MonoBehaviour
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
         if (_targetActivation)
         {
             _activateRatio = 1;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,0);
             _outlineTarget.CutoutThreshold = 0;
         }
     }
@@ -359,8 +351,7 @@ public class Prefab_Prop : MonoBehaviour
         {
             _activateRatio -= Time.unscaledDeltaTime*_deactivateSpeed;
             float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
@@ -368,8 +359,7 @@ public class Prefab_Prop : MonoBehaviour
         if (!_targetActivation)
         {
             _activateRatio = 0;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,1);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,1);
             _outlineTarget.CutoutThreshold = 1;
             CopyTransform(_detachT,_detachCopyT);
         }
@@ -378,16 +368,14 @@ public class Prefab_Prop : MonoBehaviour
         {
             _activateRatio += Time.unscaledDeltaTime*_activateSpeed;
             float ratio = 1-_curve.Evaluate(Mathf.Clamp01(_activateRatio));
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,ratio);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,ratio);
             _outlineTarget.CutoutThreshold = ratio;
             await UniTask.Yield(this.GetCancellationTokenOnDestroy());
         }
         if (!_targetActivation)
         {
             _activateRatio = 1;
-            AdvancedDissolveProperties.Cutout.Standard.
-                UpdateLocalProperty(_material,AdvancedDissolveProperties.Cutout.Standard.Property.Clip,0);
+            _outlineTarget.renderer.material.SetFloat(GameManager.s_dissolveamount,0);
             _outlineTarget.CutoutThreshold = 0;
         }
     }

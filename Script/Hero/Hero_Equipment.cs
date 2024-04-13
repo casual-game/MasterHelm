@@ -52,6 +52,9 @@ public partial class Hero : MonoBehaviour
         }
         shield = Instantiate(shield);
         shield.Setting_Hero(_outlinable,true,t_shield,t_back);
+        prefabBow = Instantiate(data_bow.bow);
+        prefabBow.Setting_Hero(_outlinable,false,t_hand_l,GameManager.Folder_Hero);
+        _usingBow = false;
         void AddWeaponPack(Data_WeaponPack weaponPack,Transform detachT,bool canKeep)
         {
             Prefab_Prop l = weaponPack.wepaon_L == null? null : Instantiate(weaponPack.wepaon_L);
@@ -95,16 +98,18 @@ public partial class Hero : MonoBehaviour
     //Public
     [FoldoutGroup("Equipment")] public Data_WeaponPack weaponPack_Normal,weaponPack_StrongL,weaponPack_StrongR;
     [FoldoutGroup("Equipment")] public Prefab_Prop shield;
+    [FoldoutGroup("Equipment")] public Data_Bow data_bow;
     [FoldoutGroup("Equipment")] public Transform t_hand_l, t_hand_r, t_shield,t_back;
     
     //Private
+    [HideInInspector] public Prefab_Prop_Bow prefabBow;
     private int leftEnterIndex, rightEnterIndex;
     private Dictionary<Data_WeaponPack, (Prefab_Prop weaponL, Prefab_Prop weaponR, bool useShield)> weapondata;
     private Data_WeaponPack _currentWeaponPack = null,_lastWeaponPack = null;
     private RangeSensor _sensor;
     private TrailData _currentTrailData;
     private List<ParticleData> _attackParticles = new List<ParticleData>();
-
+    private bool _usingBow = false;
     
     //Getter
     public Data_WeaponPack Get_LastWeaponPack()
@@ -181,7 +186,6 @@ public partial class Hero : MonoBehaviour
                 current.weaponL.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
                 current.weaponL.Attach();
             }
-
             if (current.weaponR != null)
             {
                 current.weaponR.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
@@ -193,6 +197,22 @@ public partial class Hero : MonoBehaviour
         shield.Set_UpdateSpeed(activateSpeed,deactivateSpeed);
         if(useShield) shield.Attach();
         else shield.Detach(useDeactivateParticle);
+    }
+    public bool Equipment_UsingBow()
+    {
+        return _usingBow;
+    }
+    public void Equipment_Bow_Activate()
+    {
+        _usingBow = true;
+        prefabBow.Attach();
+        Equipment_Equip(null);
+    }
+    public void Equipment_Bow_Deactivate(Data_WeaponPack weaponPack)
+    {
+        _usingBow = false;
+        prefabBow.Detach(true);
+        Equipment_Equip(null);
     }
     public void Equipment_UpdateTrail(Data_WeaponPack weaponPack,bool weaponL,bool weaponR,bool shield)
     {

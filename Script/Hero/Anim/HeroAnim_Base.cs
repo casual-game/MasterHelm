@@ -113,6 +113,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Locomotion);
         animator.SetTrigger(GameManager.s_state_change);
         _hero.Equipment_Equip(null);
+        _hero.Equipment_Bow_Deactivate(null);
         _hero.Set_AttackIndex(-1);
         isFinished = true;
     }
@@ -181,39 +182,41 @@ public class HeroAnim_Base : StateMachineBehaviour
             }
         }
         //탭
-        else if(isFirst || lookT == null)
-        {
-            //활성화된 적 중 가장 가까운 적
-            int? index = null;
-            float dist = 6.5f;
+        else if(isFirst || lookT == null) Set_LookAuto(ref lookT,ref lookF);
+    }
+    protected void Set_LookAuto(ref Transform lookT, ref float lookF,float dist = 6.5f)
+    {
+        Transform myT = _hero.transform;
+        Vector3 myPos = myT.position;
+        
+        //활성화된 적 중 가장 가까운 적
+        int? index = null;
             
-            for (int i = 0; i < Monster.Monsters.Count; i++)
+        for (int i = 0; i < Monster.Monsters.Count; i++)
+        {
+            if(!Monster.Monsters[i].Get_IsAlive()) continue;
+            float monsterDist = (myPos - Monster.Monsters[i].transform.position).sqrMagnitude;
+            if (monsterDist < dist*dist)
             {
-                if(!Monster.Monsters[i].Get_IsAlive()) continue;
-                float monsterDist = (myPos - Monster.Monsters[i].transform.position).sqrMagnitude;
-                if (monsterDist < dist*dist)
-                {
-                    dist = monsterDist;
-                    index = i;
-                }
-            }
-            //활성화된 적 있을 때
-            if (index.HasValue)
-            {
-                lookT = Monster.Monsters[index.Value].transform;
-                Vector3 lookVec = lookT.position - myPos;
-                lookVec.y = 0;
-                lookF = Quaternion.LookRotation(lookVec).eulerAngles.y;
-            }
-            //횔성화된 적 없으면 그냥 현 각도
-            else 
-            {
-                lookT = null;
-                lookF = _hero.transform.rotation.eulerAngles.y;
+                dist = monsterDist;
+                index = i;
             }
         }
+        //활성화된 적 있을 때
+        if (index.HasValue)
+        {
+            lookT = Monster.Monsters[index.Value].transform;
+            Vector3 lookVec = lookT.position - myPos;
+            lookVec.y = 0;
+            lookF = Quaternion.LookRotation(lookVec).eulerAngles.y;
+        }
+        //횔성화된 적 없으면 그냥 현 각도
+        else 
+        {
+            lookT = null;
+            lookF = _hero.transform.rotation.eulerAngles.y;
+        }
     }
-
     protected void Set_Cancel(Animator animator)
     {
         _hero.Deactivate_CustomMaterial();
@@ -226,6 +229,7 @@ public class HeroAnim_Base : StateMachineBehaviour
         _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongL,false,false,false);
         _hero.Equipment_UpdateTrail(_hero.weaponPack_StrongR,false,false,false);
         _hero.Equipment_Equip(null);
+        _hero.Equipment_Bow_Deactivate(null);
         _hero.Equipment_CancelEffect();
     }
     protected void Set_Roll(Animator animator)
@@ -283,5 +287,14 @@ public class HeroAnim_Base : StateMachineBehaviour
         }
         */
     }
-    
+
+    protected void Set_Shoot(Animator animator)
+    {
+        Set_Cancel(animator);
+        isFinished = true;
+        _hero.Set_HeroMoveState(Hero.MoveState.Shoot);
+        _hero.Deactivate_CustomMaterial();
+        animator.SetInteger(GameManager.s_state_type, (int)Hero.AnimationState.Attack_Shoot);
+        animator.SetTrigger(GameManager.s_state_change);
+    }
 }

@@ -40,7 +40,7 @@ public partial class Hero : MonoBehaviour
         }
         void AddPropRenderer(Prefab_Prop prop)
         {
-            MeshRenderer renderer = prop.GetComponent<MeshRenderer>();
+            MeshRenderer renderer = prop.GetComponentInChildren<MeshRenderer>();
             renderers.Add(renderer);
         }
     }
@@ -137,7 +137,8 @@ public partial class Hero : MonoBehaviour
             SoundManager.Play(_currentTrailData.customParticle_Sound);
         Transform t = transform;
         if(_currentTrailData.customParticle_Particle != null) 
-            ParticleManager.Play(_currentTrailData.customParticle_Particle,t.position,t.rotation);
+            ParticleManager.Play(_currentTrailData.customParticle_Particle,
+                t.position + _currentTrailData.customParticle_Particle.addPos ,t.rotation);
         switch (_currentTrailData.customParticle_ShakeRatio)
         {
             default:

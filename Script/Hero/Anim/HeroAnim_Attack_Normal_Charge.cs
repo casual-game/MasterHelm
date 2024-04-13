@@ -27,6 +27,13 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
             cleanFinished = true;
             return;
         }
+        //활 필터링
+        if (_hero.Get_IsShootTiming())
+        {
+            Set_Shoot(animator);
+            cleanFinished = true;
+            return;
+        }
         //트렌지션 끝나고 한번 실행
         if (!_realEntered)
         {
@@ -48,7 +55,7 @@ public class HeroAnim_Attack_Normal_Charge : HeroAnim_Base
             _hero.Equipment_Equip(_hero.weaponPack_Normal);
         }
         //공격 입력이 확인되면 다음 모션으로 이동 //기본 공격
-        if (GameManager.DelayCheck_Attack() < _heroData.preinput_attack && !_hero.Get_Charged())
+        if (GameManager.DelayCheck_Attack() < _heroData.preinput_attack && !_hero.Get_Charged() && !GameManager.BTN_Attack)
         {
             animator.SetTrigger(GameManager.s_transition);
             TrySet_ManualTargeting();

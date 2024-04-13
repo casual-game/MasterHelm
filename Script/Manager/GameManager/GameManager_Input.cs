@@ -6,12 +6,13 @@ using UnityEngine.InputSystem;
 
 public partial class GameManager : MonoBehaviour
 {
-    public static Vector2 JS_Attack = Vector2.zero,JS_Move = Vector2.zero,JS_Action = Vector2.zero;
-    public static bool BTN_Attack = false,BTN_Action,Bool_Move,Bool_Attack;
-    public static float AttackReleasedTime = -100;
+    public static Vector2 JS_Attack = Vector2.zero,JS_Move = Vector2.zero;
+    public static bool BTN_Attack = false,BTN_Action,Bool_Move,Bool_Attack,BTN_Shoot;
+    public static float AttackReleasedTime = -100, ShootPressedTime = -100;
     
     [HideInInspector] public UnityEvent E_LateUpdate;
-    [HideInInspector] public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin;
+    [HideInInspector] public UnityEvent E_BTN_Action_Begin,E_BTN_Action_Fin,E_BTN_Attack_Begin,E_BTN_Attack_Fin
+        ,E_BTN_Shoot_Begin,E_BTN_Shoot_Fin;
     
     public void Input_JS_Move(InputAction.CallbackContext inputValue)
     {
@@ -55,10 +56,6 @@ public partial class GameManager : MonoBehaviour
     {
         AttackReleasedTime = -100;
     }
-    public void Input_JS_Action(InputAction.CallbackContext inputValue)
-    {
-        if (inputValue.performed && BTN_Action) JS_Action = inputValue.ReadValue<Vector2>();
-    }
     public void Input_BTN_Attack(InputAction.CallbackContext inputValue)
     {
         if (inputValue.started)
@@ -80,14 +77,27 @@ public partial class GameManager : MonoBehaviour
         if (inputValue.started)
         {
             BTN_Action = true;
-            JS_Action = Vector2.zero;
             E_BTN_Action_Begin?.Invoke();
         }
         else if (inputValue.canceled)
         {
             BTN_Action = false;
-            JS_Action = Vector2.zero;
             E_BTN_Action_Fin?.Invoke();
+        }
+    }
+
+    public void Input_BTN_Shoot(InputAction.CallbackContext inputValue)
+    {
+        if (inputValue.started)
+        {
+            BTN_Shoot = true;
+            ShootPressedTime = Time.unscaledTime;
+            E_BTN_Shoot_Begin?.Invoke();
+        }
+        else if (inputValue.canceled)
+        {
+            BTN_Shoot = false;
+            E_BTN_Shoot_Fin?.Invoke();
         }
     }
     //디버그
