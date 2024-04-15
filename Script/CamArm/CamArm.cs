@@ -108,7 +108,7 @@ public partial class CamArm : MonoBehaviour
         }
         else if (_hero.Get_CurrentWeaponPack() != null || _hero.Equipment_UsingBow())
         {
-            dist = 1.75f;
+            dist = 2.0f;
             speed = 3.5f * deltaTime;
             jsDeg = _hero.transform.rotation.eulerAngles.y;
         }
@@ -287,24 +287,26 @@ public partial class CamArm : MonoBehaviour
     }
     public void Tween_ShakeStrong()
     {
-        Tween_Stop(0.05f,0.6f,Ease.InSine);
+        Tween_Stop(0.05f,0.5f,Ease.InExpo);
+        Tween_Chromatic(0.01f,1.5f,Ease.OutCirc);
+        //Tween_Radial(0.05f,0.05f,0.25f,0.025f);
+        Tween_Zoom(0.15f,0.25f,1.0f,0,orthographicSize-1.25f);
         Tween_ShakeStrong_Core();
     }
     public void Tween_ShakeStrong_Core()
     {
         Tween_Shake(0.5f,45,GameManager.V3_One * 0.375f,Ease.OutCubic);
-        Tween_Zoom(0.15f,0.05f,1.0f,0,orthographicSize-0.75f);
-        Tween_Radial(0.05f,0.05f,0.5f,0.1f);
-        Tween_Chromatic(0.02f,1.5f,Ease.OutCirc);
     }
     public void Tween_ShakeNormal()
     {
-        Tween_Stop(0.05f,0.3f,Ease.OutCubic);
+        Tween_Stop(0.05f,0.125f,Ease.InExpo);
+        Tween_Chromatic(0.01f,1.5f,Ease.OutCirc);
+        Tween_Radial(0.05f,0.05f,0.25f,0.025f);
         Tween_ShakeNormal_Core();
     }
     public void Tween_ShakeNormal_Core()
     {
-        Tween_Shake(0.3f,25,GameManager.V3_One * 0.275f,Ease.Linear);
+        Tween_Shake(0.3f,25,GameManager.V3_One * 0.25f,Ease.OutSine);
     }
     public void Tween_ShakeSmooth()
     {
@@ -331,19 +333,18 @@ public partial class CamArm : MonoBehaviour
     }
     public void Tween_ShakeNormal_Hero()
     {
-        Tween_Speedline(0.075f,0.125f,0.5f,new Color(1,0,0,10.0f/255.0f),0.375f);
-        //Tween_Zoom(0.075f,0.125f,0.5f,0,orthographicSize-0.25f);
-        Tween_Vignette(0.075f,0.125f,0.5f,vignette_HitColor,vignette_NormalColor);
-        Tween_Stop(0.05f,0.3f,Ease.OutQuad);
+        Tween_Speedline(0.075f,0.125f,0.5f,new Color(1,0,0,5.0f/255.0f),0.375f);
+        Tween_Vignette(0.075f,0.125f,0.5f,vignette_HitColor,vignette_NormalColor*0.75f);
+        Tween_Stop(0.05f,0.2f,Ease.InExpo);
         Tween_Shake(0.3f,25,GameManager.V3_One * 0.25f,Ease.OutSine);
-        Tween_Chromatic(0.035f,1.5f,Ease.OutCirc);
-        Tween_Radial(0.05f,0.05f,0.25f,0.05f);
+        Tween_Chromatic(0.01f,1.5f,Ease.OutCirc);
+        Tween_Radial(0.05f,0.05f,0.25f,0.025f);
     }
 
     public void Tween_ShakeDeath_Hero()
     {
         float begin = 0.1f, delay = 0.5f, fin = 2.0f;
-        GameManager.Instance.Shockwave(transform.position + Vector3.up*3,1.0f,0.2f,0,Ease.OutSine);
+        GameManager.Instance.Shockwave(transform.position + Vector3.up*3);
         Tween_Vignette(0.15f,0.375f,0.5f,vignette_HitColor,vignette_NormalColor);
         Tween_Stop(0.05f,begin + delay,Ease.InQuad);
         Tween_Shake(begin + delay,Mathf.RoundToInt((begin + delay)*80),GameManager.V3_One * 0.35f,Ease.OutSine);

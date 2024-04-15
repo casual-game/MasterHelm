@@ -10,7 +10,7 @@ public class ParticleManager : MonoBehaviour
     public List<ParticleGroup> particleGroups = new List<ParticleGroup>();
 
     [TitleGroup("필수 파티클")]
-    public ParticleData pd_sparkle, pd_break, pd_smoke, pd_blood_normal, pd_blood_strong, pd_blood_combo;
+    public ParticleData pd_sparkle, pd_break, pd_smoke, pd_blood_enemy,pd_blood_hero,pd_impactwave,pd_impactboom;
     
     private Dictionary<ParticleData, ParticleGroup> ingameData = new Dictionary<ParticleData, ParticleGroup>();
     public void Setting()
@@ -21,6 +21,15 @@ public class ParticleManager : MonoBehaviour
             ingameData.Add(group.particleData, group);
         }
         instance = this;
+    }
+    public static void Play(ParticleData particleData,Vector3 position,Quaternion rotation, Vector3 scale)
+    {
+        if (!instance.ingameData.ContainsKey(particleData))
+        {
+            Debug.Log(particleData.name + "가 없습니다.");
+            return;
+        }
+        instance.ingameData[particleData].Play(position,rotation,scale);
     }
     public static void Play(ParticleData particleData,Vector3 position,Quaternion rotation,float scale = 1)
     {
@@ -117,6 +126,14 @@ public class ParticleGroup
     [HideInInspector] public List<ParticleSystem> particleSystems = new List<ParticleSystem>();
     [HideInInspector] public int particleIndex = 0;
 
+    public void Play(Vector3 position, Quaternion rotation, Vector3 scale)
+    {
+        particleIndex = (particleIndex + 1) % particleSystems.Count;
+        var t = particleSystems[particleIndex].transform;
+        t.SetPositionAndRotation(position,rotation);
+        t.localScale = scale;
+        particleSystems[particleIndex].Play();
+    }
     public void Play(Vector3 position,Quaternion rotation,float scale = 1)
     {
         particleIndex = (particleIndex + 1) % particleSystems.Count;

@@ -24,13 +24,15 @@ public partial class Monster_Boss : Monster
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     private Material[] ms_groggy;
     //Core
-    public override bool AI_Hit(Transform prop,TrailData trailData)
+    public override bool AI_Pattern_Hit(Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time <  HitStrongDelay + _hitStrongTime) return false;
         Equipment_UpdateTrail(false,false,false);
         _highlightEffect.HitFX();
         //현 상태에 따른 히트 타입 설정
         AttackType attackType = trailData.attackType;
+        Vector3 hitVec = Hero.instance.transform.position - transform.position;
+        hitVec.y = 0;
         Core_Damage(trailData.GetDamage());
         switch (interactionState)
         {
@@ -38,57 +40,57 @@ public partial class Monster_Boss : Monster
             default:
                 if (attackType == AttackType.Normal)
                 {
-                    Effect_Normal();
+                    Effect_Normal(hitVec);
                 }
                 else
                 {
                     Set_HitState(HitState.Ground);
-                    Effect_Strong();
+                    Effect_Strong(hitVec);
                 }
                 break;
             case BossInteractionState.AttackReady:
-                Effect_Weak();
+                Effect_Weak(hitVec);
                 break;
             case BossInteractionState.CanCounter:
                 if (attackType == AttackType.Normal)
                 {
-                    Effect_Normal();
+                    Effect_Normal(hitVec);
                 }
                 else
                 {
                     Set_HitState(HitState.Ground);
-                    Effect_Strong_Counter();
+                    Effect_Strong_Counter(hitVec);
                 }
                 break;
             case BossInteractionState.Groggy:
                 if (attackType == AttackType.Normal)
                 {
-                    Effect_Normal();
+                    Effect_Normal(hitVec);
                 }
                 else
                 {
                     Set_HitState(HitState.Ground);
-                    Effect_Strong_Groggy();
+                    Effect_Strong_Groggy(hitVec);
                 }
                 break;
         }
         
         return true;
-        void Effect_Normal()
+        void Effect_Normal(Vector3 hitVec)
         {
             if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
             if (!Get_IsAlive())
             {
-                Effect_Strong();
+                Effect_Strong(hitVec);
                 return;
             }
             CamArm.instance.Tween_ShakeNormal();
-            Effect_Hit_Strong(false,GameManager.Q_Identity);
+            Effect_Hit_Strong(hitVec);
             Punch_Down(1.5f);
             GameManager.Instance.ComboText_Norm(transform.position);
         }
-        void Effect_Strong_Groggy()
+        void Effect_Strong_Groggy(Vector3 hitVec)
         {
             if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
@@ -96,11 +98,11 @@ public partial class Monster_Boss : Monster
             Vector3 pos = transform.position;
             CamArm.instance.Tween_ShakeStrong();
             GameManager.Instance.Shockwave(pos);
-            Effect_Hit_Strong(true,GameManager.Q_Identity);
+            Effect_Hit_Strong(hitVec);
             Punch_Down(1.0f);
             GameManager.Instance.ComboText_Norm(transform.position);
         }
-        void Effect_Strong_Counter()
+        void Effect_Strong_Counter(Vector3 hitVec)
         {
             _hitStrongTime = Time.time;
             
@@ -108,7 +110,7 @@ public partial class Monster_Boss : Monster
             CamArm.instance.Tween_Impact();
             
             
-            Effect_Hit_Counter();
+            Effect_Hit_Counter(hitVec);
             Hero.Blink(0.5f);
             Punch_Down(1.0f);
             Core_InteractionState(BossInteractionState.Groggy);
@@ -125,14 +127,14 @@ public partial class Monster_Boss : Monster
             transform.rotation = Quaternion.LookRotation(lookVec);
             GameManager.Instance.ComboText_Counter(transform.position);
         }
-        void Effect_Strong()
+        void Effect_Strong(Vector3 hitVec)
         {
             _hitStrongTime = Time.time;
             
             Vector3 pos = transform.position;
             CamArm.instance.Tween_ShakeStrong();
             GameManager.Instance.Shockwave(pos);
-            Effect_Hit_Strong(true,GameManager.Q_Identity);
+            Effect_Hit_Strong(hitVec);
             Punch_Down(1.0f);
                 
             _animBase.isFinished = true;
@@ -147,17 +149,17 @@ public partial class Monster_Boss : Monster
             transform.rotation = Quaternion.LookRotation(lookVec);
             GameManager.Instance.ComboText_Norm(transform.position);
         }
-        void Effect_Weak()
+        void Effect_Weak(Vector3 hitVec)
         {
             if(!Get_IsAlive()) _animator.SetTrigger(GameManager.s_state_change);
             _hitStrongTime = Time.time;
             if (!Get_IsAlive())
             {
-                Effect_Strong();
+                Effect_Strong(hitVec);
                 return;
             }
             Punch_Down(1.5f);
-            Effect_Hit_Normal();
+            Effect_Hit_Normal(hitVec);
             GameManager.Instance.ComboText_Norm(transform.position);
         }
     }

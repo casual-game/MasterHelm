@@ -297,7 +297,7 @@ public class Dragon : MonoBehaviour
         float dur = 0.2f;
         _seq.Group(Tween.Delay(dur, ()=>
         {
-            GameManager.Instance.Shockwave(transform.position,0.75f);
+            GameManager.Instance.Shockwave(transform.position);
             pFinish_Fin.Play();
             SoundManager.Play(Hero.instance.sound_spawn);
             SoundManager.Play(SoundContainer_Ingame.instance.sound_groundsmash);

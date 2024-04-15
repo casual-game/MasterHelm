@@ -285,7 +285,7 @@ public partial class Hero : MonoBehaviour
         foreach (var signal in _sensor.GetSignals())
         {
             signal.Object.TryGetComponent<Monster>(out var monster);
-            if(monster.AI_Hit(t,_currentTrailData)) collided = true;
+            if(monster.AI_Pattern_Hit(t,_currentTrailData)) collided = true;
         }
 
         if (collided)

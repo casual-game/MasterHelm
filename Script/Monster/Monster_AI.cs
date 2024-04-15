@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,7 +22,7 @@ public partial class Monster : MonoBehaviour
         AddPattern(monsterInfo.Pattern_5,5);
         AddPattern(monsterInfo.Pattern_6,6);
         AddPattern(monsterInfo.Pattern_7,7);
-        GameManager.Instance.E_Debug1_Begin.AddListener(AI_Pattern);
+        GameManager.Instance.E_Debug1_Begin.AddListener(AI_Pattern_Attack);
         void AddPattern(MonsterPattern pattern,int index)
         {
             if (pattern.usePattern)
@@ -43,6 +46,7 @@ public partial class Monster : MonoBehaviour
 
     private MonsterPattern _currentMonsterPattern;
     //Public,Static
+    private static float _calculateTerm = 0.25f;
     public enum MoveState
     {
         Idle = 0,Pattern=1,Hit=2
@@ -72,6 +76,11 @@ public partial class Monster : MonoBehaviour
     {
         return _currentMonsterPattern;
     }
+
+    public NavMeshAgent Get_Agent()
+    {
+        return _agent;
+    }
     //Set
     public void Set_HitState(HitState hitState)
     {
@@ -87,13 +96,19 @@ public partial class Monster : MonoBehaviour
     {
         _clipLength = length;
     }
-    //AI
+    //AI_Base
+    private void AI_Base_Cancel()
+    {
+        cancellationTokenSourcePattern.Cancel();
+        _agent.isStopped = true;
+    }
+    //AI_Pattern
     public string patternName = "TripleSwing";
-    [Button]
-    public void AI_Pattern()
+    private CancellationTokenSource cancellationTokenSourcePattern = new CancellationTokenSource();
+    public void AI_Pattern_Attack()
     {
         if (_animator.GetBool(GameManager.s_hit) || _animator.GetBool(GameManager.s_force)) return;
-        
+        AI_Base_Cancel();
         var p = _patterns[patternName];
         p.pattern.Pointer_Reset();
         _animator.SetTrigger(GameManager.s_state_change);
@@ -102,40 +117,41 @@ public partial class Monster : MonoBehaviour
         _animator.SetInteger(GameManager.s_125ms,p.pattern.Pointer_GetData_TransitionDuration());
         _currentMonsterPattern = p.pattern;
     }
-
-    
-    private Vector3 _movePos;
-    private bool _moveStrafe;
     [Button]
-    public void AI_Move(bool strafe,Vector3 pos)
+    public void AI_Pattern_FollowPlayer()
     {
-        if (!AI_CanAction())
+        AI_Base_Cancel();
+        if (cancellationTokenSourcePattern != null) cancellationTokenSourcePattern.Dispose();
+        cancellationTokenSourcePattern = new CancellationTokenSource();
+        UT_AI_Pattern_FollowPlayer().Forget();
+    }
+    private async UniTaskVoid UT_AI_Pattern_FollowPlayer()
+    {
+        //초기 설정
+        _agent.isStopped = false;
+        float distance = 2.0f;
+        _agent.stoppingDistance = distance;
+        _agent.angularSpeed = 720;
+        _agent.acceleration = 20.0f;
+        _agent.speed = 2.0f;
+        //이동
+        while ((Hero.instance.transform.position-transform.position).sqrMagnitude > (distance*distance + 0.2f))
         {
-            #if UNITY_EDITOR
-            print("아직 행동 불가합니다.");
-            #endif
-            return;
+            if (cancellationTokenSourcePattern.IsCancellationRequested) break;
+            _agent.SetDestination(Hero.instance.transform.position);
+            await UniTask.Delay(TimeSpan.FromSeconds(_calculateTerm),cancellationToken: cancellationTokenSourcePattern.Token);
         }
+        //도착 후 설정
+        _agent.isStopped = true;
         
-        _moveStrafe = strafe;
-        _movePos = pos;
-        _animator.SetTrigger(GameManager.s_state_change);
-        _animator.SetInteger(GameManager.s_state_type,2);
+        print("도착했어요!");
     }
-
-    public (Vector3 movePos,bool moveStrafe) AI_GetMoveData()
+    public virtual bool AI_Pattern_Hit(Transform prop,TrailData trailData)
     {
-        return (_movePos,_moveStrafe);
-    }
-    public virtual bool AI_Hit(Transform prop,TrailData trailData)
-    {
+        AI_Base_Cancel();
         return false;
     }
-    /// <summary>
-    /// 이동,패턴 등의 새로운 액션을 할 수 있는 상태인지 확인.
-    /// </summary>
-    public virtual bool AI_CanAction()
-    {
-        return Get_MonsterMoveState() == MoveState.Idle;
-    }
+    
+    
+    
 }

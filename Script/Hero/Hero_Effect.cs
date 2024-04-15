@@ -175,24 +175,26 @@ public partial class Hero : MonoBehaviour
         Transform t = transform;
         ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + t.forward*fwd + Vector3.up*0.1f,t.rotation,1);
     }
-    public void Effect_Hit_Normal()
+    public void Effect_Hit_Normal(Vector3 hitVec)
     {
         Tween_Blink_Hit(1.75f);
         var t = transform;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
+        Vector3 thisPos = t.position;
+        Vector3 pos = thisPos + hitVec * 0.375f + Vector3.up*1.25f;
+        Quaternion rot = Quaternion.LookRotation(-hitVec);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_hero,pos,rot, 1.2f);
+        if(!_superarmor && Get_HeroMoveState() != MoveState.Roll) GameManager.Instance.DamagedText_Norm(thisPos);
     }
-    public void Effect_Hit_Strong()
+    public void Effect_Hit_Strong(Vector3 hitVec)
     {
         Tween_Blink_Hit(1.0f);
         var t = transform;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
-        ParticleManager.Play(ParticleManager.instance.pd_blood_strong,t.position + Vector3.up*0.75f,t.rotation);
-    }
-    public void Effect_Hit_SuperArmor()
-    {
-        var t = transform;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,t.position + Vector3.up*0.75f,t.rotation);
-        ParticleManager.Play(ParticleManager.instance.pd_blood_strong,t.position + Vector3.up*0.75f,t.rotation);
+        Vector3 thisPos = t.position;
+        Vector3 pos = thisPos + hitVec * 0.375f + Vector3.up*1.25f;
+        Quaternion rot = Quaternion.LookRotation(-hitVec);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_hero,pos,rot, 1.2f);
+        ParticleManager.Play(ParticleManager.instance.pd_impactwave,pos,rot, 1.5f);
+        if(!_superarmor && Get_HeroMoveState() != MoveState.Roll) GameManager.Instance.DamagedText_Norm(thisPos);
     }
     //애니메이션 이벤트
     public void FallDown()

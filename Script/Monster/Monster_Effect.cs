@@ -72,33 +72,36 @@ public partial class Monster : MonoBehaviour
         ParticleManager.Play(ParticleManager.instance.pd_smoke,t.position + Vector3.up*0.1f,t.rotation,particleScale);
         Punch_Up(0.75f);
     }
-    public void Effect_Hit_Normal()
+    public void Effect_Hit_Normal(Vector3 hitVec)
     {
-        Effect_Blink(monsterInfo.colorHit, 0.5f);
-        
-        
-        Transform t = transform;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,
-            t.position + Vector3.up * 1.25f, t.rotation, particleScale);
-    }
-    public void Effect_Hit_Strong(bool isCombo,Quaternion rot)
-    {
+        hitVec = hitVec.normalized;
         Effect_Blink(monsterInfo.colorHit, 0.5f);
 
-        Vector3 pos = transform.position + Vector3.up*1.25f;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
-        if(!isCombo) ParticleManager.Play(ParticleManager.instance.pd_blood_strong,pos,rot, particleScale);
-        else ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
+        Vector3 pos = transform.position + hitVec * 0.375f + Vector3.up*1.25f;
+        Quaternion rot = Quaternion.LookRotation(-hitVec);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_enemy,pos,rot, particleScale);
+        ParticleManager.Play(ParticleManager.instance.pd_impactwave,pos,rot, new Vector3(1.25f,1.25f,3.5f));
     }
-    public void Effect_Hit_Counter()
+    public void Effect_Hit_Strong(Vector3 hitVec)
     {
+        hitVec = hitVec.normalized;
+        Effect_Blink(monsterInfo.colorHit, 0.5f);
+
+        Vector3 thisPos = transform.position;
+        Vector3 pos = thisPos + hitVec * 0.375f + Vector3.up*1.25f;
+        Vector3 pos2 = thisPos;
+        Quaternion rot = Quaternion.LookRotation(-hitVec);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_enemy,pos,rot, particleScale);
+        ParticleManager.Play(ParticleManager.instance.pd_impactwave,pos,rot, new Vector3(1.25f,1.25f,3.5f));
+    }
+    public void Effect_Hit_Counter(Vector3 hitVec)
+    {
+        hitVec = hitVec.normalized;
         Effect_Blink(Color.white, 0.5f);
         
-        var t = transform;
-        Vector3 pos = t.position + Vector3.up*0.75f;
-        Quaternion rot = t.rotation;
-        ParticleManager.Play(ParticleManager.instance.pd_blood_normal,pos,rot, particleScale);
-        ParticleManager.Play(ParticleManager.instance.pd_blood_combo,pos,rot, particleScale);
+        Vector3 pos = transform.position + hitVec * 0.375f + Vector3.up*1.25f;
+        Quaternion rot = Quaternion.LookRotation(-hitVec);
+        ParticleManager.Play(ParticleManager.instance.pd_blood_enemy,pos,rot, particleScale);
     }
 
     private void Effect_ChangeColor(Color color,float duration)

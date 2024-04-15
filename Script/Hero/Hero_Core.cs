@@ -119,8 +119,10 @@ public partial class Hero : MonoBehaviour
         }
         else Core_NormalAttack();
     }
-    public bool Core_Hit_Normal(Vector3 hitPoint)
+    public bool Core_Hit_Normal(TrailData_Monster trailData, Vector3 hitPoint)
     {
+        
+        
         if (Time.time < _hitStrongTime + HitStrongDelay|| !_spawned) return false;
         //감속시킨다.
         _speedRatio *=0.35f;
@@ -138,7 +140,8 @@ public partial class Hero : MonoBehaviour
         _animator.SetFloat(GameManager.s_hit_rot,degDiff);
         _animator.SetTrigger(GameManager.s_hit_additive);
         Tween_Punch_Down_Compact(1.5f);
-        Effect_Hit_Normal();
+        if(Get_HeroMoveState() == MoveState.Roll) Effect_Hit_Normal(targetHitVec);
+        else Effect_Hit_Strong(targetHitVec);
         CamArm.instance.Tween_ShakeNormal_Hero();
         return true;
     }
@@ -148,10 +151,12 @@ public partial class Hero : MonoBehaviour
         //구르기, 슈퍼아머 처리.
         if (_superarmor || HeroMoveState == MoveState.Roll)
         {
-            float dmg = Random.Range(trailData.damage.x, trailData.damage.y + 1);
+            Vector3 tempHitVec = hitPoint-transform.position;
+            tempHitVec.y = 0;
+            float dmg = trailData.GetDamage();
             frameMain.HP_Damage(Mathf.RoundToInt(dmg*heroData.RollDamageRatio));
             Tween_Punch_Down(1.5f);
-            Effect_Hit_SuperArmor();
+            Effect_Hit_Normal(tempHitVec);
             CamArm.instance.Tween_ShakeSuperArmor();
             return true;
         }
@@ -180,11 +185,12 @@ public partial class Hero : MonoBehaviour
         _animator.SetBool(GameManager.s_hit,true);
         _animator.SetTrigger(GameManager.s_state_change);
         //히트 처리
-        if (trailData.attackType == AttackType.Normal)
+        Vector3 targetHitVec = hitPoint-transform.position;
+        targetHitVec.y = 0;
+        if (trailData.attackType is AttackType.Normal or AttackType.Weak)
         {
             //상대적 벡터 계산
-            Vector3 targetHitVec = hitPoint-transform.position;
-            targetHitVec.y = 0;
+            
             Vector3 myLookVec = transform.forward;
             float targetHitDeg = Mathf.Atan2(targetHitVec.z, targetHitVec.x)*Mathf.Rad2Deg;
             float myLookDeg = Mathf.Atan2(myLookVec.z, myLookVec.x) * Mathf.Rad2Deg;
@@ -203,9 +209,7 @@ public partial class Hero : MonoBehaviour
         else
         {
             //회전
-            Vector3 lookVec = hitPoint - transform.position;
-            lookVec.y = 0;
-            transform.rotation = Quaternion.LookRotation(lookVec);
+            transform.rotation = Quaternion.LookRotation(targetHitVec);
             //각종 처리
             _animator.SetInteger(GameManager.s_hit_type,(int)trailData.attackType);
             Tween_Punch_Down(1.1f);
@@ -213,7 +217,7 @@ public partial class Hero : MonoBehaviour
             SoundManager.Play(sound_voice_hit_strong);
             SoundManager.Play(SoundContainer_Ingame.instance.sound_hit_smash);
         }
-        Effect_Hit_Strong();
+        Effect_Hit_Strong(targetHitVec);
         return true;
     }
 

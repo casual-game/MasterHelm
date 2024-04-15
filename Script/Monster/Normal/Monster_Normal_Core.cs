@@ -15,10 +15,11 @@ public partial class Monster_Normal : Monster
     private float _hitStrongTime = -100; //히트는 HeroMovement 간격으로 호출 가능하다. 마지막 호출 시간 저장.
     
     //Setter
-    public override bool AI_Hit(Transform prop,TrailData trailData)
+    public override bool AI_Pattern_Hit(Transform prop,TrailData trailData)
     {
         if (!Get_IsAlive() || !Get_IsReady() || Time.time < _hitStrongTime + HitStrongDelay 
             || _hitState == HitState.Recovery || _hitState == HitState.Smash) return false;
+        base.AI_Pattern_Hit(prop, trailData);
         int damage = trailData.GetDamage();
         Set_MonsterMoveState(MoveState.Hit);
         Equipment_UpdateTrail(false,false,false);
@@ -52,7 +53,8 @@ public partial class Monster_Normal : Monster
         //데미지,애니메이터,파티클,연출
         Core_Damage(damage);
         Quaternion effectRot = prop.rotation * Quaternion.Euler(0, Random.Range(-10,10), 0);
-        Effect_Hit_Strong(isBigHit,effectRot);
+        if(isBigHit) Effect_Hit_Strong(lookVec);
+        else Effect_Hit_Normal(lookVec);
         if (!Get_IsAlive())
         {
             GameManager.Instance.ComboText_Kill(currentPos);
@@ -60,7 +62,7 @@ public partial class Monster_Normal : Monster
             _animator.SetBool(GameManager.s_death,true);
             _animator.SetInteger(GameManager.s_hit_type,trailData.attackType == AttackType.Smash?0:1);
             CamArm.instance.Tween_ShakeStrong();
-            GameManager.Instance.Shockwave(transform.position,1.0f);
+            GameManager.Instance.Shockwave(transform.position);
             Despawn().Forget();
             Voice_Death();
         }
@@ -72,7 +74,7 @@ public partial class Monster_Normal : Monster
             _animator.SetBool(GameManager.s_hit,true);
             _animator.SetInteger(GameManager.s_hit_type,(int)trailData.attackType);
             CamArm.instance.Tween_ShakeStrong();
-            GameManager.Instance.Shockwave(transform.position,1.0f);
+            GameManager.Instance.Shockwave(transform.position);
             Voice_Hit(true);
         }
         else

@@ -26,13 +26,13 @@ public partial class GameManager : MonoBehaviour
             .Append(mat_shockwave.DOFloat(1, s_radius, 4.5f).SetEase(Ease.OutExpo).SetUpdate(true));
         */
     }
-    public void Shockwave(Vector3 pos,float duration = 1.25f,float waveSize = 0.125f,float saturation =0,Ease ease = Ease.Linear,float delay=0)
+    [Button]
+    public void Shockwave(Vector3 pos)
     {
         t_shockwave.Stop();
         mat_shockwave.SetFloat(s_radius, 0.225f);
-        mat_shockwave.SetFloat(s_wavesize, waveSize);
-        mat_shockwave.SetFloat(s_saturation, saturation);
+        mat_shockwave.SetFloat(s_wavesize, 0.12f);
         mat_shockwave.SetVector(s_position, CamArm.instance.mainCam.WorldToScreenPoint(pos));
-        t_shockwave = Tween.MaterialProperty(mat_shockwave,properyID ,1.0f, duration,useUnscaledTime:true,ease:ease,startDelay:delay);
+        t_shockwave = Tween.MaterialProperty(mat_shockwave,properyID ,0.7f, 1.5f,useUnscaledTime:true,ease:Ease.OutExpo);
     }
 }

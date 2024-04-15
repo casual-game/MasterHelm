@@ -60,4 +60,5 @@ public partial class Monster_Normal : Monster
         pos.y = t_UI_Y.position.y + ui_Height;
         t_UIRoot.SetPositionAndRotation(pos,CamArm.instance.mainCam.transform.rotation);
     }
+    
 }
